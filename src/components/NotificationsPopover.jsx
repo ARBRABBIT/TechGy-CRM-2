@@ -1,17 +1,20 @@
 import React, { useState, useRef, useEffect } from 'react';
 import {
-  Bell,
-  AlertTriangle,
-  CheckCircle2,
-  UserPlus,
-  Calendar,
-  FileText,
-  TrendingUp,
-  X,
-  CheckCheck,
-  Trash2,
-  ExternalLink
-} from 'lucide-react';
+  LuBell,
+  LuTriangleAlert,
+  LuCircleCheck,
+  LuUserPlus,
+  LuCalendar,
+  LuFileText,
+  LuTrendingUp,
+  LuX,
+  LuCheckCheck,
+  LuTrash2,
+  LuExternalLink
+} from 'react-icons/lu';
+import gsap from 'gsap';
+
+const TABS = ['All', 'Unread', 'Overdue', 'Updates'];
 
 export default function NotificationsPopover({
   isOpen,
@@ -24,6 +27,8 @@ export default function NotificationsPopover({
 }) {
   const [activeTab, setActiveTab] = useState('All');
   const popoverRef = useRef(null);
+  const listRef = useRef(null);
+  const isInitialMount = useRef(true);
 
   // Close when clicking outside
   useEffect(() => {
@@ -37,6 +42,29 @@ export default function NotificationsPopover({
     }
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [isOpen, onClose]);
+
+  // Animate items smoothly when switching tabs or opening
+  useEffect(() => {
+    if (!isOpen || !listRef.current) return;
+
+    const items = listRef.current.querySelectorAll('.notification-item, .notifications-empty-state');
+    if (items.length > 0) {
+      gsap.killTweensOf(items);
+      gsap.fromTo(
+        items,
+        { opacity: 0, y: 8, scale: 0.985 },
+        {
+          opacity: 1,
+          y: 0,
+          scale: 1,
+          duration: 0.26,
+          stagger: 0.035,
+          ease: 'power2.out',
+          clearProps: 'all'
+        }
+      );
+    }
+  }, [activeTab, isOpen]);
 
   if (!isOpen) return null;
 
@@ -52,92 +80,98 @@ export default function NotificationsPopover({
   const getCategoryIcon = (category) => {
     switch (category) {
       case 'Overdue':
-        return <AlertTriangle size={16} style={{ color: '#DC2626' }} />;
+        return <LuTriangleAlert size={16} />;
       case 'Opportunity':
-        return <TrendingUp size={16} style={{ color: '#059669' }} />;
+        return <LuTrendingUp size={16} />;
       case 'Lead':
-        return <UserPlus size={16} style={{ color: '#063669' }} />;
+        return <LuUserPlus size={16} />;
       case 'Activity':
-        return <Calendar size={16} style={{ color: '#D97706' }} />;
+        return <LuCalendar size={16} />;
       case 'Proposal':
-        return <FileText size={16} style={{ color: '#2563EB' }} />;
+        return <LuFileText size={16} />;
       default:
-        return <CheckCircle2 size={16} style={{ color: '#063669' }} />;
+        return <LuCircleCheck size={16} />;
     }
   };
 
-  const getCategoryBg = (category) => {
+  const getCategoryClass = (category) => {
     switch (category) {
-      case 'Overdue': return '#FEE2E2';
-      case 'Opportunity': return '#D1FAE5';
-      case 'Lead': return '#E0E6EE';
-      case 'Activity': return '#FEF3C7';
-      case 'Proposal': return '#DBEAFE';
-      default: return '#F1F5F9';
+      case 'Overdue': return 'overdue';
+      case 'Opportunity': return 'opportunity';
+      case 'Lead': return 'lead';
+      case 'Activity': return 'activity';
+      case 'Proposal': return 'proposal';
+      default: return 'default';
     }
   };
 
   return (
-    <div className="notifications-dropdown" ref={popoverRef}>
+    <div className="notifications-dropdown apple-popover" ref={popoverRef}>
       {/* Header */}
       <div className="notifications-header">
         <div className="notifications-title">
-          <Bell size={18} />
+          <LuBell size={17} className="notifications-bell-icon" />
           <span>Notifications</span>
           {unreadCount > 0 && (
-            <span style={{
-              backgroundColor: '#063669',
-              color: '#FFFFFF',
-              fontSize: '0.7rem',
-              fontWeight: 700,
-              padding: '0.15rem 0.55rem',
-              borderRadius: '9999px'
-            }}>
+            <span className="apple-notification-badge">
               {unreadCount} new
             </span>
           )}
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+        <div className="notifications-header-actions">
           {unreadCount > 0 && (
             <button
+              type="button"
               onClick={onMarkAllAsRead}
-              className="btn-secondary"
-              style={{ fontSize: '0.7rem', padding: '0.25rem 0.65rem' }}
-              title="Mark all as read"
+              className="apple-pill-action-btn"
+              title="Mark all notifications as read"
             >
-              <CheckCheck size={13} />
+              <LuCheckCheck size={13} />
               <span>Mark Read</span>
             </button>
           )}
           <button
+            type="button"
             onClick={onClose}
-            style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#557396', padding: '0.2rem' }}
+            className="apple-circle-close-btn"
+            aria-label="Close notifications"
           >
-            <X size={18} />
+            <LuX size={15} />
           </button>
         </div>
       </div>
 
-      {/* Filter Tabs */}
-      <div className="notifications-tabs">
-        {['All', 'Unread', 'Overdue', 'Updates'].map(tab => (
+      {/* Apple Segmented Filter Tabs with Smooth Sliding Pill */}
+      <div className="apple-segmented-bar notifications-segmented-bar">
+        <div
+          className="segmented-active-pill"
+          style={{
+            width: `calc((100% - 6px) / ${TABS.length})`,
+            left: `calc(3px + ${Math.max(0, TABS.indexOf(activeTab))} * ((100% - 6px) / ${TABS.length}))`
+          }}
+        />
+        {TABS.map(tab => (
           <button
             key={tab}
-            className={`notifications-tab-btn ${activeTab === tab ? 'active' : ''}`}
+            type="button"
+            className={`segmented-tab ${activeTab === tab ? 'active' : ''}`}
             onClick={() => setActiveTab(tab)}
           >
             {tab}
-            {tab === 'Unread' && unreadCount > 0 && ` (${unreadCount})`}
+            {tab === 'Unread' && unreadCount > 0 ? ` (${unreadCount})` : ''}
           </button>
         ))}
       </div>
 
       {/* Notification List */}
-      <div className="notifications-list">
+      <div className="notifications-list" ref={listRef}>
         {filteredNotifications.length === 0 ? (
-          <div style={{ padding: '2rem 1.5rem', textAlign: 'center', color: '#557396', fontSize: '0.85rem' }}>
-            <CheckCircle2 size={32} style={{ color: '#CBD5E1', marginBottom: '0.5rem', display: 'block', margin: '0 auto 0.5rem' }} />
-            No notifications in "{activeTab}" category.
+          <div className="notifications-empty-state">
+            <div className="notifications-empty-icon">
+              <LuCircleCheck size={28} />
+            </div>
+            <p className="notifications-empty-title">All caught up</p>
+            <p className="notifications-empty-desc">No notifications in "{activeTab}"</p>
           </div>
         ) : (
           filteredNotifications.map(item => (
@@ -149,22 +183,19 @@ export default function NotificationsPopover({
                 if (onNotificationClick) onNotificationClick(item);
               }}
             >
-              <div
-                className="notification-icon-wrap"
-                style={{ backgroundColor: getCategoryBg(item.category) }}
-              >
+              <div className={`notification-icon-wrap ${getCategoryClass(item.category)}`}>
                 {getCategoryIcon(item.category)}
               </div>
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.15rem' }}>
-                  <span style={{ fontSize: '0.825rem', fontWeight: item.isRead ? 600 : 700, color: '#063669' }}>
+              <div className="notification-content-wrap">
+                <div className="notification-meta-row">
+                  <span className="notification-item-title">
                     {item.title}
                   </span>
-                  <span style={{ fontSize: '0.7rem', color: '#64748B', whiteSpace: 'nowrap', marginLeft: '0.5rem' }}>
+                  <span className="notification-item-time">
                     {item.timestamp}
                   </span>
                 </div>
-                <div style={{ fontSize: '0.775rem', color: '#334155', lineHeight: 1.4 }}>
+                <div className="notification-item-message">
                   {item.message}
                 </div>
               </div>
@@ -178,29 +209,13 @@ export default function NotificationsPopover({
 
       {/* Footer */}
       {notifications.length > 0 && (
-        <div style={{
-          padding: '0.6rem 1.25rem',
-          borderTop: '1px solid #F1F5F9',
-          backgroundColor: '#F8FAFC',
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center'
-        }}>
+        <div className="notifications-footer">
           <button
+            type="button"
             onClick={onClearAll}
-            style={{
-              background: 'none',
-              border: 'none',
-              color: '#64748B',
-              fontSize: '0.725rem',
-              fontWeight: 600,
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.35rem'
-            }}
+            className="notifications-clear-btn"
           >
-            <Trash2 size={12} />
+            <LuTrash2 size={12} />
             <span>Clear all notifications</span>
           </button>
         </div>

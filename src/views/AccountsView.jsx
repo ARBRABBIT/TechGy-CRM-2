@@ -1,5 +1,5 @@
 import React from 'react';
-import { Building2, Globe, MapPin, Users, FileText, ChevronRight } from 'lucide-react';
+import { LuBuilding2, LuGlobe, LuMapPin, LuUsers, LuFileText, LuChevronRight } from 'react-icons/lu';
 import { isDateInFilter } from '../utils/dateUtils';
 
 export default function AccountsView({
@@ -37,7 +37,7 @@ export default function AccountsView({
             >
               Dashboard
             </span>
-            <ChevronRight size={14} />
+            <LuChevronRight size={14} />
             <span style={{ color: '#063669', fontWeight: 700 }}>
               Company Accounts
             </span>
@@ -56,7 +56,7 @@ export default function AccountsView({
             <div>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.75rem' }}>
                 <div className="kpi-icon-wrap" style={{ background: '#063669', color: 'white' }}>
-                  <Building2 size={20} />
+                  <LuBuilding2 size={20} />
                 </div>
                 <span className="counter-badge tasks">
                   Est. {acc.estimatedAccountValue}
@@ -72,10 +72,10 @@ export default function AccountsView({
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem', fontSize: '0.8rem', color: '#063669', marginBottom: '1rem' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
-                  <Globe size={14} style={{ color: '#557396' }} /> {acc.website}
+                  <LuGlobe size={14} style={{ color: '#557396' }} /> {acc.website}
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
-                  <MapPin size={14} style={{ color: '#557396' }} /> {acc.location}
+                  <LuMapPin size={14} style={{ color: '#557396' }} /> {acc.location}
                 </div>
               </div>
             </div>
@@ -90,7 +90,7 @@ export default function AccountsView({
                   onSelectAccount(acc);
                 }}
               >
-                Inspect Account <ChevronRight size={12} />
+                Inspect Account <LuChevronRight size={12} />
               </button>
             </div>
           </div>

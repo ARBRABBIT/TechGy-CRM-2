@@ -1,22 +1,22 @@
 import React, { useState, useEffect } from 'react';
 import {
-  ChevronRight,
-  Home,
-  ArrowLeft,
-  User,
-  Building2,
-  Phone,
-  Mail,
-  Clock,
-  AlertTriangle,
-  FileText,
-  TrendingUp,
-  Plus,
-  CheckCircle2,
-  Send,
-  MessageSquare,
-  DollarSign
-} from 'lucide-react';
+  LuChevronRight,
+  LuHouse,
+  LuArrowLeft,
+  LuUser,
+  LuBuilding2,
+  LuPhone,
+  LuMail,
+  LuClock,
+  LuTriangleAlert,
+  LuFileText,
+  LuTrendingUp,
+  LuPlus,
+  LuCircleCheck,
+  LuSend,
+  LuMessageSquare,
+  LuDollarSign
+} from 'react-icons/lu';
 
 export default function LeadDetailView({
   lead,
@@ -65,7 +65,7 @@ export default function LeadDetailView({
               >
                 Contacts Directory
               </span>
-              <ChevronRight size={14} />
+              <LuChevronRight size={14} />
               <span style={{ color: '#063669', fontWeight: 700 }}>
                 {lead.leadName} ({lead.company})
               </span>
@@ -79,7 +79,7 @@ export default function LeadDetailView({
               >
                 Dashboard
               </span>
-              <ChevronRight size={14} />
+              <LuChevronRight size={14} />
               <span style={{ color: '#063669', fontWeight: 700 }}>
                 {lead.leadName} ({lead.company})
               </span>
@@ -93,7 +93,7 @@ export default function LeadDetailView({
               >
                 Activities & Engagement Timeline
               </span>
-              <ChevronRight size={14} />
+              <LuChevronRight size={14} />
               <span style={{ color: '#063669', fontWeight: 700 }}>
                 {lead.leadName} ({lead.company})
               </span>
@@ -103,37 +103,39 @@ export default function LeadDetailView({
               <span
                 onClick={onNavigateToProposals || onBack}
                 style={{ cursor: 'pointer', color: '#063669', fontWeight: 600 }}
-                title="Return to Proposals & Commercial Worth"
+                title="Return to Proposals Directory"
               >
-                Proposals & Commercial Worth
+                Proposals Directory
               </span>
-              <ChevronRight size={14} />
+              <LuChevronRight size={14} />
               <span style={{ color: '#063669', fontWeight: 700 }}>
                 {lead.leadName} ({lead.company})
               </span>
             </>
-          ) : (
+          ) : navigationSource === 'accounts' ? (
             <>
-              {fromDashboard && (
-                <>
-                  <span
-                    onClick={onNavigateHome}
-                    style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.3rem', color: '#063669' }}
-                    title="Go to Dashboard"
-                  >
-                    Dashboard
-                  </span>
-                  <ChevronRight size={14} />
-                </>
-              )}
               <span
                 onClick={onBack}
-                style={{ cursor: 'pointer', color: '#063669' }}
-                title="Return to Leads Directory & Sales Pipeline"
+                style={{ cursor: 'pointer', color: '#063669', fontWeight: 600 }}
+                title="Return to Account Record"
               >
-                Leads Directory & Sales Pipeline
+                {lead.company}
               </span>
-              <ChevronRight size={14} />
+              <LuChevronRight size={14} />
+              <span style={{ color: '#063669', fontWeight: 700 }}>
+                {lead.leadName}
+              </span>
+            </>
+          ) : (
+            <>
+              <span
+                onClick={onBack}
+                style={{ cursor: 'pointer', color: '#063669', fontWeight: 600 }}
+                title="Return to Leads Directory"
+              >
+                Leads Directory
+              </span>
+              <LuChevronRight size={14} />
               <span style={{ color: '#063669', fontWeight: 700 }}>
                 {lead.leadName} ({lead.company})
               </span>
@@ -143,36 +145,56 @@ export default function LeadDetailView({
       </div>
 
       {/* 2. Top Summary Header Card */}
-      <div className="section-card" style={{ marginBottom: '1.25rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem', padding: '1.25rem 1.5rem' }}>
-        <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.35rem' }}>
-            <h2 style={{ fontSize: '1.4rem', margin: 0, color: '#063669', fontWeight: 700 }}>{lead.leadName}</h2>
-            <span className={`status-chip ${lead.status.toLowerCase()}`} style={{ fontSize: '0.8rem' }}>
-              {lead.status}
+      <div className="section-card" style={{ marginBottom: '1.25rem', padding: '1.25rem 1.5rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.35rem' }}>
+          {lead.isOverdue && (
+            <span className="overdue-badge-pill" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem', backgroundColor: '#063669', color: '#FFFFFF', padding: '0.2rem 0.55rem', borderRadius: '6px', fontSize: '0.725rem', fontWeight: 700 }}>
+              <LuTriangleAlert size={12} /> OVERDUE FOLLOW-UP
             </span>
-            {lead.isOverdue && (
-              <span className="status-chip overdue" style={{ fontSize: '0.75rem' }}>
-                <AlertTriangle size={12} /> OVERDUE FOLLOW-UP
-              </span>
-            )}
-          </div>
-          <p style={{ margin: 0, color: '#557396', fontSize: '0.875rem' }}>
-            {lead.designation} at <strong style={{ color: '#063669', textDecoration: 'underline', cursor: 'pointer' }} onClick={() => onNavigateToAccount(lead.company)}>{lead.company}</strong> • Owner: {lead.leadOwner}
-          </p>
+          )}
+        </div>
+        <h1 style={{ fontSize: '1.65rem', fontWeight: 800, color: '#063669', margin: '0 0 0.35rem 0', letterSpacing: '-0.02em' }}>
+          {lead.leadName}
+        </h1>
+        <div style={{ fontSize: '0.95rem', color: '#557396' }}>
+          {lead.designation} at{' '}
+          <button
+            type="button"
+            onClick={() => onNavigateToAccount && onNavigateToAccount(lead.company)}
+            style={{ background: 'none', border: 'none', padding: 0, font: 'inherit', fontWeight: 700, color: '#063669', cursor: 'pointer', textDecoration: 'underline' }}
+            title={`Open ${lead.company} account dossier`}
+          >
+            {lead.company}
+          </button>
         </div>
 
-        <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', gap: '0.65rem', alignItems: 'center', marginTop: '1.25rem' }}>
           <button
             className="btn-primary"
-            onClick={() => onQuickAction('convertOpportunity', lead)}
+            style={{ padding: '0.45rem 0.95rem', fontSize: '0.85rem' }}
+            onClick={() => onQuickAction && onQuickAction('convertOpportunity', lead)}
+            title="Convert this lead to a pipeline opportunity"
           >
-            <TrendingUp size={16} /> Convert to Opportunity
+            <LuTrendingUp size={16} /> Convert to Opportunity
+          </button>
+        </div>
+
+        {/* Quick Action Ribbon */}
+        <div style={{ display: 'flex', gap: '0.5rem', marginTop: '1.25rem', flexWrap: 'wrap' }}>
+          <button className="btn-secondary" style={{ fontSize: '0.8rem', padding: '0.35rem 0.75rem' }} onClick={() => onQuickAction && onQuickAction('call', lead)}>
+            <LuPhone size={15} /> Log Call
+          </button>
+          <button className="btn-secondary" style={{ fontSize: '0.8rem', padding: '0.35rem 0.75rem' }} onClick={() => onQuickAction && onQuickAction('email', lead)}>
+            <LuMail size={15} /> Send Email
+          </button>
+          <button className="btn-secondary" style={{ fontSize: '0.8rem', padding: '0.35rem 0.75rem' }} onClick={() => onQuickAction && onQuickAction('sms', lead)}>
+            <LuMessageSquare size={15} /> WhatsApp
           </button>
         </div>
       </div>
 
       {/* 3. Main Content Grid */}
-      <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '1rem' }}>
+      <div className="lead-detail-main-grid">
         {/* Left Column - Main Details */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
 
@@ -180,40 +202,9 @@ export default function LeadDetailView({
           <div className="section-card" style={{ marginBottom: 0 }}>
             <div className="section-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <h3 className="section-title">Lead Contact Information</h3>
-              <div style={{ display: 'flex', gap: '0.4rem', alignItems: 'center' }}>
-                <button
-                  className="icon-button"
-                  title="Log Phone Call"
-                  aria-label="Log Phone Call"
-                  onClick={() => onQuickAction('call', lead)}
-                  style={{ width: '32px', height: '32px', borderRadius: '50%', background: '#FFFFFF', border: '1px solid #E0E6EE', color: '#063669', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', boxShadow: '0 2px 6px rgba(6, 54, 105, 0.05)' }}
-                >
-                  <Phone size={15} />
-                </button>
-
-                <button
-                  className="icon-button"
-                  title="Log Email Sent"
-                  aria-label="Log Email Sent"
-                  onClick={() => onQuickAction('email', lead)}
-                  style={{ width: '32px', height: '32px', borderRadius: '50%', background: '#FFFFFF', border: '1px solid #E0E6EE', color: '#063669', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', boxShadow: '0 2px 6px rgba(6, 54, 105, 0.05)' }}
-                >
-                  <Mail size={15} />
-                </button>
-
-                <button
-                  className="icon-button"
-                  title="Log WhatsApp / SMS"
-                  aria-label="Log WhatsApp / SMS"
-                  onClick={() => onQuickAction('sms', lead)}
-                  style={{ width: '32px', height: '32px', borderRadius: '50%', background: '#FFFFFF', border: '1px solid #E0E6EE', color: '#063669', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', boxShadow: '0 2px 6px rgba(6, 54, 105, 0.05)' }}
-                >
-                  <MessageSquare size={15} />
-                </button>
-              </div>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.25rem' }}>
+            <div className="detail-fields-grid">
               <div className="drawer-field-group">
                 <div className="field-label">Full Name</div>
                 <div className="field-value" style={{ fontWeight: 700, color: '#063669' }}>{lead.leadName}</div>
@@ -244,26 +235,23 @@ export default function LeadDetailView({
 
               <div className="drawer-field-group">
                 <div className="field-label">Phone Number</div>
-                <div className="field-value" style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                  <Phone size={14} style={{ color: '#557396' }} /> {lead.phoneNumber}
+                <div className="field-value" style={{ fontWeight: 600 }}>
+                  <LuPhone size={14} style={{ color: '#557396' }} /> {lead.phoneNumber}
                 </div>
               </div>
-
               <div className="drawer-field-group">
-                <div className="field-label">Email Address</div>
-                <div className="field-value" style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                  <Mail size={14} style={{ color: '#557396' }} /> {lead.emailId}
+                <div className="field-label">Email ID</div>
+                <div className="field-value" style={{ fontWeight: 600 }}>
+                  <LuMail size={14} style={{ color: '#557396' }} /> {lead.emailId}
                 </div>
               </div>
-
               <div className="drawer-field-group">
                 <div className="field-label">Next Scheduled Follow-up</div>
-                <div className="field-value" style={{ color: lead.isOverdue ? '#063669' : '#063669', fontWeight: 700 }}>
-                  <Clock size={14} style={{ display: 'inline', marginRight: 4 }} />
+                <div className="field-value" style={{ color: '#063669', fontWeight: 700 }}>
+                  <LuClock size={14} style={{ display: 'inline', marginRight: 4 }} />
                   {lead.nextFollowup}
                 </div>
               </div>
-
               <div className="drawer-field-group">
                 <div className="field-label">Assigned Owner</div>
                 <div className="field-value" style={{ fontWeight: 600 }}>{lead.leadOwner}</div>
@@ -280,7 +268,7 @@ export default function LeadDetailView({
                 style={{ fontSize: '0.8rem', padding: '0.45rem 1.1rem', borderRadius: '20px', display: 'flex', alignItems: 'center', gap: '0.4rem', fontWeight: 600 }}
                 onClick={() => onQuickAction('addNote', lead)}
               >
-                <Plus size={15} /> Add Note
+                <LuPlus size={15} /> Add Note
               </button>
             </div>
 

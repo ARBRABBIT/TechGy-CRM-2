@@ -1,20 +1,20 @@
 import React, { useState, useMemo } from 'react';
 import { 
-  Search, 
-  List, 
-  LayoutGrid, 
-  Filter, 
-  Plus, 
-  Phone, 
-  Mail, 
-  MessageSquare, 
-  ChevronLeft, 
-  ChevronRight,
-  X,
-  CheckCircle2,
-  GripVertical,
-  MoveRight
-} from 'lucide-react';
+  LuSearch, 
+  LuList, 
+  LuLayoutGrid, 
+  LuFilter, 
+  LuPlus, 
+  LuPhone, 
+  LuMail, 
+  LuMessageSquare, 
+  LuChevronLeft, 
+  LuChevronRight,
+  LuX,
+  LuCircleCheck,
+  LuGripVertical,
+  LuMoveRight
+} from 'react-icons/lu';
 import { isDateInFilter } from '../utils/dateUtils';
 
 export default function OpportunitiesView({ 
@@ -154,7 +154,7 @@ export default function OpportunitiesView({
             
             {/* Search Accounts / Opportunities Input Box */}
             <div style={{ position: 'relative', width: '220px' }}>
-              <Search size={15} color="#64748B" style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)' }} />
+              <LuSearch size={15} color="#64748B" style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)' }} />
               <input
                 type="text"
                 placeholder="Search Accounts..."
@@ -180,7 +180,7 @@ export default function OpportunitiesView({
                   title="Clear search"
                   aria-label="Clear search"
                 >
-                  <X size={13} />
+                  <LuX size={13} />
                 </button>
               )}
             </div>
@@ -205,7 +205,7 @@ export default function OpportunitiesView({
                   transition: 'all 0.2s ease'
                 }}
               >
-                <List size={15} />
+                <LuList size={15} />
                 List
               </button>
               <button
@@ -226,7 +226,7 @@ export default function OpportunitiesView({
                   transition: 'all 0.2s ease'
                 }}
               >
-                <LayoutGrid size={15} />
+                <LuLayoutGrid size={15} />
                 Kanban
               </button>
             </div>
@@ -249,10 +249,10 @@ export default function OpportunitiesView({
                 transition: 'all 0.2s ease'
               }}
             >
-              <Filter size={15} />
+              <LuFilter size={15} />
               Apply Filters
               {(selectedStage !== 'All' || selectedOwner !== 'All') && (
-                <span style={{ background: '#063669', color: '#FFFFFF', borderRadius: '50%', width: '16px', height: '16px', fontSize: '0.65rem', display: 'flex', alignItems: 'center', justifyCenter: 'center', marginLeft: '4px' }}>
+                <span style={{ background: '#063669', color: '#FFFFFF', borderRadius: '50%', width: '16px', height: '16px', fontSize: '0.65rem', display: 'flex', alignItems: 'center', justifyContent: 'center', marginLeft: '4px' }}>
                   !
                 </span>
               )}
@@ -283,7 +283,7 @@ export default function OpportunitiesView({
                 transition: 'all 0.2s ease'
               }}
             >
-              <Plus size={16} />
+              <LuPlus size={16} />
               New Opportunity
             </button>
           </div>
@@ -478,7 +478,7 @@ export default function OpportunitiesView({
                               onMouseEnter={(e) => e.currentTarget.style.color = '#063669'}
                               onMouseLeave={(e) => e.currentTarget.style.color = '#64748B'}
                             >
-                              <Phone size={15} />
+                              <LuPhone size={15} />
                             </button>
                             <button
                               title={`Email ${opp.accountName}`}
@@ -487,7 +487,7 @@ export default function OpportunitiesView({
                               onMouseEnter={(e) => e.currentTarget.style.color = '#063669'}
                               onMouseLeave={(e) => e.currentTarget.style.color = '#64748B'}
                             >
-                              <Mail size={15} />
+                              <LuMail size={15} />
                             </button>
                             <button
                               title={`Add Note for ${opp.opportunityName}`}
@@ -496,7 +496,7 @@ export default function OpportunitiesView({
                               onMouseEnter={(e) => e.currentTarget.style.color = '#063669'}
                               onMouseLeave={(e) => e.currentTarget.style.color = '#64748B'}
                             >
-                              <MessageSquare size={15} />
+                              <LuMessageSquare size={15} />
                             </button>
                           </div>
                         </td>
@@ -636,7 +636,7 @@ export default function OpportunitiesView({
                               >
                                 {opp.opportunityName}
                               </div>
-                              <GripVertical size={16} color="#94A3B8" style={{ cursor: 'grab', flexShrink: 0, marginTop: '2px' }} />
+                              <LuGripVertical size={16} color="#94A3B8" style={{ cursor: 'grab', flexShrink: 0, marginTop: '2px' }} />
                             </div>
 
                             {/* Account Name */}
@@ -754,7 +754,7 @@ export default function OpportunitiesView({
                   transition: 'all 0.15s ease'
                 }}
               >
-                <ChevronLeft size={14} />
+                <LuChevronLeft size={14} />
                 Previous
               </button>
 
@@ -805,7 +805,7 @@ export default function OpportunitiesView({
                 }}
               >
                 Next
-                <ChevronRight size={14} />
+                <LuChevronRight size={14} />
               </button>
             </div>
 

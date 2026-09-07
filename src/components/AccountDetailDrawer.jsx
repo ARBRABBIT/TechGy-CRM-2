@@ -1,17 +1,17 @@
 import React, { useState } from 'react';
 import { 
-  X, 
-  Building2, 
-  Globe, 
-  MapPin, 
-  Users, 
-  Calendar, 
-  TrendingUp, 
-  FileText, 
-  Clock,
-  Phone,
-  Mail
-} from 'lucide-react';
+  LuX, 
+  LuBuilding2, 
+  LuGlobe, 
+  LuMapPin, 
+  LuUsers, 
+  LuCalendar, 
+  LuTrendingUp, 
+  LuFileText, 
+  LuClock,
+  LuPhone,
+  LuMail
+} from 'react-icons/lu';
 
 export default function AccountDetailDrawer({ 
   account, 
@@ -54,7 +54,7 @@ export default function AccountDetailDrawer({
             </div>
           </div>
           <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#557396' }}>
-            <X size={20} />
+            <LuX size={20} />
           </button>
         </div>
 
@@ -137,7 +137,7 @@ export default function AccountDetailDrawer({
                   {accountActivities.map(act => (
                     <div key={act.id} className="timeline-item">
                       <div className="timeline-icon">
-                        <Clock size={12} />
+                        <LuClock size={12} />
                       </div>
                       <div className="timeline-card">
                         <div style={{ fontWeight: 700, fontSize: '0.85rem' }}>{act.type} • {act.date}</div>

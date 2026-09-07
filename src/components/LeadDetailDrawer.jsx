@@ -1,18 +1,18 @@
 import React from 'react';
 import { 
-  X, 
-  Phone, 
-  Mail, 
-  MessageSquare, 
-  Calendar, 
-  FileText, 
-  ArrowRightLeft, 
-  Building2, 
-  Clock, 
-  User, 
-  CheckCircle,
-  AlertTriangle 
-} from 'lucide-react';
+  LuX, 
+  LuPhone, 
+  LuMail, 
+  LuMessageSquare, 
+  LuCalendar, 
+  LuFileText, 
+  LuArrowRightLeft, 
+  LuBuilding2, 
+  LuClock, 
+  LuUser, 
+  LuCircleCheck,
+  LuTriangleAlert 
+} from 'react-icons/lu';
 
 export default function LeadDetailDrawer({ lead, onClose, onQuickAction }) {
   if (!lead) return null;
@@ -39,7 +39,7 @@ export default function LeadDetailDrawer({ lead, onClose, onQuickAction }) {
             </div>
           </div>
           <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#557396' }}>
-            <X size={20} />
+            <LuX size={20} />
           </button>
         </div>
 
@@ -50,22 +50,22 @@ export default function LeadDetailDrawer({ lead, onClose, onQuickAction }) {
             <div className="field-label">Quick Actions</div>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.5rem', marginTop: '0.5rem' }}>
               <button className="btn-secondary" style={{ fontSize: '0.775rem', justifyContent: 'center' }} onClick={() => onQuickAction('call', lead)}>
-                <Phone size={14} /> Log Call
+                <LuPhone size={14} /> Log Call
               </button>
               <button className="btn-secondary" style={{ fontSize: '0.775rem', justifyContent: 'center' }} onClick={() => onQuickAction('email', lead)}>
-                <Mail size={14} /> Send Email
+                <LuMail size={14} /> Send Email
               </button>
               <button className="btn-secondary" style={{ fontSize: '0.775rem', justifyContent: 'center' }} onClick={() => onQuickAction('sms', lead)}>
-                <MessageSquare size={14} /> WhatsApp
+                <LuMessageSquare size={14} /> WhatsApp
               </button>
               <button className="btn-secondary" style={{ fontSize: '0.775rem', justifyContent: 'center' }} onClick={() => onQuickAction('addNote', lead)}>
-                <FileText size={14} /> Add Note
+                <LuFileText size={14} /> Add Note
               </button>
               <button className="btn-secondary" style={{ fontSize: '0.775rem', justifyContent: 'center' }} onClick={() => onQuickAction('scheduleFollowup', lead)}>
-                <Calendar size={14} /> Follow-up
+                <LuCalendar size={14} /> Follow-up
               </button>
               <button className="btn-primary" style={{ fontSize: '0.75rem', justifyContent: 'center', padding: '0.4rem 0.2rem' }} onClick={() => onQuickAction('convertOpportunity', lead)}>
-                <ArrowRightLeft size={13} /> Opportunity
+                <LuArrowRightLeft size={13} /> Opportunity
               </button>
             </div>
           </div>
@@ -116,7 +116,7 @@ export default function LeadDetailDrawer({ lead, onClose, onQuickAction }) {
               <div className="drawer-field-group">
                 <div className="field-label">Next Follow-up</div>
                 <div className="field-value" style={{ color: lead.isOverdue ? '#063669' : '#063669', fontWeight: 700 }}>
-                  <Clock size={12} style={{ display: 'inline', marginRight: 4 }} />
+                  <LuClock size={12} style={{ display: 'inline', marginRight: 4 }} />
                   {lead.nextFollowup}
                 </div>
               </div>

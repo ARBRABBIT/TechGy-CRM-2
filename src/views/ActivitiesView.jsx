@@ -1,5 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { Phone, Mail, MessageSquare, Clock, Calendar, ChevronRight, CalendarX } from 'lucide-react';
+import {
+  LuPhone,
+  LuMail,
+  LuMessageSquare,
+  LuClock,
+  LuCalendar,
+  LuChevronRight,
+  LuCalendarX
+} from 'react-icons/lu';
 import { isDateInFilter } from '../utils/dateUtils';
 
 export default function ActivitiesView({
@@ -41,12 +49,12 @@ export default function ActivitiesView({
 
   const getIcon = (type) => {
     switch (type) {
-      case 'Call': return <Phone size={14} />;
-      case 'Email': return <Mail size={14} />;
-      case 'SMS / WhatsApp': return <MessageSquare size={14} />;
-      case 'Follow-up': return <Clock size={14} />;
-      case 'Meeting': return <Calendar size={14} />;
-      default: return <Clock size={14} />;
+      case 'Call': return <LuPhone size={14} />;
+      case 'Email': return <LuMail size={14} />;
+      case 'SMS / WhatsApp': return <LuMessageSquare size={14} />;
+      case 'Follow-up': return <LuClock size={14} />;
+      case 'Meeting': return <LuCalendar size={14} />;
+      default: return <LuClock size={14} />;
     }
   };
 
@@ -71,7 +79,7 @@ export default function ActivitiesView({
             >
               Dashboard
             </span>
-            <ChevronRight size={14} />
+            <LuChevronRight size={14} />
             <span style={{ color: '#063669', fontWeight: 700 }}>
               Activities & Engagement Timeline
             </span>
@@ -118,7 +126,7 @@ export default function ActivitiesView({
                   marginBottom: '0.25rem'
                 }}
               >
-                <CalendarX size={26} color="#063669" />
+                <LuCalendarX size={26} color="#063669" />
               </div>
               <div style={{ fontSize: '1.05rem', fontWeight: 700, color: '#063669' }}>
                 No Activity Logs Found

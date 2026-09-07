@@ -1,17 +1,17 @@
 import React, { useState, useRef, useEffect } from 'react';
 import {
-  Search,
-  Bell,
-  Menu,
-  Plus,
-  Users,
-  Building2,
-  TrendingUp,
-  FileText,
-  Contact,
-  Calendar,
-  X
-} from 'lucide-react';
+  LuSearch,
+  LuBell,
+  LuMenu,
+  LuPlus,
+  LuUsers,
+  LuBuilding2,
+  LuTrendingUp,
+  LuFileText,
+  LuContact,
+  LuCalendar,
+  LuX
+} from 'react-icons/lu';
 import { INITIAL_OWNERS, INITIAL_DATE_FILTERS } from '../data/mockData';
 import NotificationsPopover from './NotificationsPopover';
 import CustomDateSelector from './CustomDateSelector';
@@ -116,7 +116,7 @@ export default function GlobalHeader({
           onClick={() => setMobileOpen(true)}
           aria-label="Toggle navigation"
         >
-          <Menu size={22} />
+          <LuMenu size={22} />
         </button>
 
         <h1 className="page-title">{getModuleTitle()}</h1>
@@ -125,7 +125,7 @@ export default function GlobalHeader({
       <div className="header-right">
         {/* Universal Search Container with Live Results */}
         <div className="search-box" ref={searchContainerRef}>
-          <Search className="search-icon" />
+          <LuSearch className="search-icon" />
           <input
             type="text"
             className="search-input"
@@ -153,7 +153,7 @@ export default function GlobalHeader({
                 alignItems: 'center'
               }}
             >
-              <X size={14} />
+              <LuX size={14} />
             </button>
           )}
 
@@ -175,7 +175,7 @@ export default function GlobalHeader({
                   {matchedLeads.length > 0 && (
                     <div>
                       <div className="search-category-title">
-                        <Users size={12} style={{ display: 'inline', marginRight: 4 }} /> Leads ({matchedLeads.length})
+                        <LuUsers size={12} style={{ display: 'inline', marginRight: 4 }} /> Leads ({matchedLeads.length})
                       </div>
                       {matchedLeads.slice(0, 3).map((lead) => (
                         <div key={lead.id} className="search-result-item" onClick={() => handleItemClick('lead', lead)}>
@@ -193,7 +193,7 @@ export default function GlobalHeader({
                   {matchedAccounts.length > 0 && (
                     <div>
                       <div className="search-category-title">
-                        <Building2 size={12} style={{ display: 'inline', marginRight: 4 }} /> Accounts ({matchedAccounts.length})
+                        <LuBuilding2 size={12} style={{ display: 'inline', marginRight: 4 }} /> Accounts ({matchedAccounts.length})
                       </div>
                       {matchedAccounts.slice(0, 3).map((acc) => (
                         <div key={acc.id} className="search-result-item" onClick={() => handleItemClick('account', acc)}>
@@ -211,7 +211,7 @@ export default function GlobalHeader({
                   {matchedOpps.length > 0 && (
                     <div>
                       <div className="search-category-title">
-                        <TrendingUp size={12} style={{ display: 'inline', marginRight: 4 }} /> Opportunities ({matchedOpps.length})
+                        <LuTrendingUp size={12} style={{ display: 'inline', marginRight: 4 }} /> Opportunities ({matchedOpps.length})
                       </div>
                       {matchedOpps.slice(0, 3).map((opp) => (
                         <div key={opp.id} className="search-result-item" onClick={() => handleItemClick('opportunity', opp)}>
@@ -229,7 +229,7 @@ export default function GlobalHeader({
                   {matchedProposals.length > 0 && (
                     <div>
                       <div className="search-category-title">
-                        <FileText size={12} style={{ display: 'inline', marginRight: 4 }} /> Proposals ({matchedProposals.length})
+                        <LuFileText size={12} style={{ display: 'inline', marginRight: 4 }} /> Proposals ({matchedProposals.length})
                       </div>
                       {matchedProposals.slice(0, 3).map((prop) => (
                         <div key={prop.id} className="search-result-item" onClick={() => handleItemClick('proposal', prop)}>
@@ -247,7 +247,7 @@ export default function GlobalHeader({
                   {matchedContacts.length > 0 && (
                     <div>
                       <div className="search-category-title">
-                        <Contact size={12} style={{ display: 'inline', marginRight: 4 }} /> Contacts ({matchedContacts.length})
+                        <LuContact size={12} style={{ display: 'inline', marginRight: 4 }} /> Contacts ({matchedContacts.length})
                       </div>
                       {matchedContacts.slice(0, 3).map((con) => (
                         <div key={con.id} className="search-result-item" onClick={() => handleItemClick('contact', con)}>
@@ -265,7 +265,7 @@ export default function GlobalHeader({
                   {matchedActivities.length > 0 && (
                     <div>
                       <div className="search-category-title">
-                        <Calendar size={12} style={{ display: 'inline', marginRight: 4 }} /> Activities ({matchedActivities.length})
+                        <LuCalendar size={12} style={{ display: 'inline', marginRight: 4 }} /> Activities ({matchedActivities.length})
                       </div>
                       {matchedActivities.slice(0, 3).map((act) => (
                         <div key={act.id} className="search-result-item" onClick={() => handleItemClick('activity', act)}>
@@ -310,7 +310,7 @@ export default function GlobalHeader({
           onClick={() => onOpenCreateModal()}
           title="Common Action: Create New Record"
         >
-          <Plus size={16} />
+          <LuPlus size={16} />
           <span>Create New</span>
         </button>
 
@@ -321,7 +321,7 @@ export default function GlobalHeader({
             title="Notifications"
             onClick={() => setIsNotificationOpen(!isNotificationOpen)}
           >
-            <Bell size={18} />
+            <LuBell size={18} />
             {notifications.filter(n => !n.isRead).length > 0 && (
               <span className="notification-badge">
                 {notifications.filter(n => !n.isRead).length}

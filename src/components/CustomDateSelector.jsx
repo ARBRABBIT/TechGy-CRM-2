@@ -1,5 +1,13 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { ChevronDown, ChevronLeft, ChevronRight, Calendar as CalendarIcon, Check, X, RotateCcw } from 'lucide-react';
+import {
+  LuChevronDown,
+  LuChevronLeft,
+  LuChevronRight,
+  LuCalendar as CalendarIcon,
+  LuCheck,
+  LuX,
+  LuRotateCcw
+} from 'react-icons/lu';
 import { getFilterLabel } from '../utils/dateUtils';
 
 const PRESET_OPTIONS = [
@@ -237,7 +245,7 @@ export default function CustomDateSelector({ selectedDateFilter, setSelectedDate
       >
         <CalendarIcon size={14} className="date-icon" />
         <span className="date-label">{currentLabel}</span>
-        <ChevronDown size={14} className={`chevron-icon ${isOpen ? 'rotated' : ''}`} />
+        <LuChevronDown size={14} className={`chevron-icon ${isOpen ? 'rotated' : ''}`} />
       </button>
 
       {isOpen && (
@@ -274,7 +282,7 @@ export default function CustomDateSelector({ selectedDateFilter, setSelectedDate
                       onClick={() => handleSelectPreset(preset)}
                     >
                       <span>{preset}</span>
-                      {isSelected && <Check size={14} />}
+                      {isSelected && <LuCheck size={14} />}
                     </button>
                   );
                 })}
@@ -304,10 +312,10 @@ export default function CustomDateSelector({ selectedDateFilter, setSelectedDate
                 </span>
                 <div className="nav-actions">
                   <button type="button" className="nav-btn" onClick={handlePrevMonth} title="Previous Month">
-                    <ChevronLeft size={16} />
+                    <LuChevronLeft size={16} />
                   </button>
                   <button type="button" className="nav-btn" onClick={handleNextMonth} title="Next Month">
-                    <ChevronRight size={16} />
+                    <LuChevronRight size={16} />
                   </button>
                 </div>
               </div>
@@ -357,7 +365,7 @@ export default function CustomDateSelector({ selectedDateFilter, setSelectedDate
                   className="apple-btn-secondary"
                   onClick={handleReset}
                 >
-                  <RotateCcw size={12} />
+                  <LuRotateCcw size={12} />
                   Reset
                 </button>
                 <button

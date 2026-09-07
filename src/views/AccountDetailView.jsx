@@ -1,20 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import {
-  Home,
-  ChevronRight,
-  ArrowLeft,
-  Building2,
-  Globe,
-  MapPin,
-  Users,
-  TrendingUp,
-  FileText,
-  Plus,
-  Phone,
-  Mail,
-  Clock,
-  IndianRupee
-} from 'lucide-react';
+  LuHouse,
+  LuChevronRight,
+  LuArrowLeft,
+  LuBuilding2,
+  LuGlobe,
+  LuMapPin,
+  LuUsers,
+  LuTrendingUp,
+  LuFileText,
+  LuPlus,
+  LuPhone,
+  LuMail,
+  LuClock,
+  LuIndianRupee
+} from 'react-icons/lu';
 
 export default function AccountDetailView({
   account,
@@ -101,7 +101,7 @@ export default function AccountDetailView({
               >
                 Contacts Directory
               </span>
-              <ChevronRight size={14} />
+              <LuChevronRight size={14} />
               <span style={{ color: '#063669', fontWeight: 700 }}>
                 {account.companyName}
               </span>
@@ -115,7 +115,7 @@ export default function AccountDetailView({
               >
                 Dashboard
               </span>
-              <ChevronRight size={14} />
+              <LuChevronRight size={14} />
               <span style={{ color: '#063669', fontWeight: 700 }}>
                 {account.companyName}
               </span>
@@ -129,7 +129,7 @@ export default function AccountDetailView({
               >
                 Activities & Engagement Timeline
               </span>
-              <ChevronRight size={14} />
+              <LuChevronRight size={14} />
               <span style={{ color: '#063669', fontWeight: 700 }}>
                 {account.companyName}
               </span>
@@ -143,7 +143,7 @@ export default function AccountDetailView({
               >
                 Proposals & Commercial Worth
               </span>
-              <ChevronRight size={14} />
+              <LuChevronRight size={14} />
               <span style={{ color: '#063669', fontWeight: 700 }}>
                 {account.companyName}
               </span>
@@ -157,7 +157,7 @@ export default function AccountDetailView({
               >
                 Opportunities Pipeline
               </span>
-              <ChevronRight size={14} />
+              <LuChevronRight size={14} />
               <span style={{ color: '#063669', fontWeight: 700 }}>
                 {account.companyName}
               </span>
@@ -171,7 +171,7 @@ export default function AccountDetailView({
               >
                 Leads Directory & Sales Pipeline
               </span>
-              <ChevronRight size={14} />
+              <LuChevronRight size={14} />
               <span style={{ color: '#063669', fontWeight: 700 }}>
                 {account.companyName}
               </span>
@@ -187,7 +187,7 @@ export default function AccountDetailView({
                   >
                     Dashboard
                   </span>
-                  <ChevronRight size={14} />
+                  <LuChevronRight size={14} />
                 </>
               )}
               <span
@@ -197,7 +197,7 @@ export default function AccountDetailView({
               >
                 Company Accounts
               </span>
-              <ChevronRight size={14} />
+              <LuChevronRight size={14} />
               <span style={{ color: '#063669', fontWeight: 700 }}>
                 {account.companyName}
               </span>
@@ -225,7 +225,7 @@ export default function AccountDetailView({
             className="btn-primary"
             onClick={() => onOpenCreateModal('createLead')}
           >
-            <Plus size={16} /> Add Lead to Account
+            <LuPlus size={16} /> Add Lead to Account
           </button>
         </div>
       </div>
@@ -235,7 +235,7 @@ export default function AccountDetailView({
         <div className="kpi-card">
           <div className="kpi-header">
             <span className="kpi-title">Linked Leads</span>
-            <div className="kpi-icon-wrap"><Users size={18} /></div>
+            <div className="kpi-icon-wrap"><LuUsers size={18} /></div>
           </div>
           <div className="kpi-value">{accountLeads.length}</div>
           <div className="kpi-subtext">Active prospects</div>
@@ -244,7 +244,7 @@ export default function AccountDetailView({
         <div className="kpi-card">
           <div className="kpi-header">
             <span className="kpi-title">Opportunities</span>
-            <div className="kpi-icon-wrap"><TrendingUp size={18} /></div>
+            <div className="kpi-icon-wrap"><LuTrendingUp size={18} /></div>
           </div>
           <div className="kpi-value">{accountOpps.length}</div>
           <div className="kpi-subtext">Pipeline deals</div>
@@ -253,7 +253,7 @@ export default function AccountDetailView({
         <div className="kpi-card">
           <div className="kpi-header">
             <span className="kpi-title">Proposals</span>
-            <div className="kpi-icon-wrap"><FileText size={18} /></div>
+            <div className="kpi-icon-wrap"><LuFileText size={18} /></div>
           </div>
           <div className="kpi-value">{accountProposals.length}</div>
           <div className="kpi-subtext">Commercial offers</div>
@@ -293,14 +293,14 @@ export default function AccountDetailView({
             <div className="drawer-field-group">
               <div className="field-label">Website</div>
               <div className="field-value" style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                <Globe size={14} style={{ color: '#557396' }} /> {account.website}
+                <LuGlobe size={14} style={{ color: '#557396' }} /> {account.website}
               </div>
             </div>
 
             <div className="drawer-field-group">
               <div className="field-label">Location / Headquarters</div>
               <div className="field-value" style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                <MapPin size={14} style={{ color: '#557396' }} /> {account.location}
+                <LuMapPin size={14} style={{ color: '#557396' }} /> {account.location}
               </div>
             </div>
           </div>
@@ -352,7 +352,7 @@ export default function AccountDetailView({
                         <td>{l.nextFollowup}</td>
                         <td>
                           <button className="btn-secondary" style={{ padding: '0.2rem 0.5rem', fontSize: '0.725rem' }}>
-                            Inspect <ChevronRight size={12} />
+                            Inspect <LuChevronRight size={12} />
                           </button>
                         </td>
                       </tr>

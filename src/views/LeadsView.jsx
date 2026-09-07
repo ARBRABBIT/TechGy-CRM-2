@@ -1,19 +1,20 @@
 import React, { useState, useEffect, useRef } from 'react';
 import {
-  Users,
-  Search,
-  Filter,
-  Plus,
-  Building2,
-  Phone,
-  Mail,
-  Clock,
-  AlertTriangle,
-  ChevronRight,
-  ArrowLeft
-} from 'lucide-react';
+  LuUsers,
+  LuSearch,
+  LuFilter,
+  LuPlus,
+  LuBuilding2,
+  LuPhone,
+  LuMail,
+  LuClock,
+  LuTriangleAlert,
+  LuChevronRight,
+  LuArrowLeft
+} from 'react-icons/lu';
 import { LEAD_SOURCES, INITIAL_OWNERS } from '../data/mockData';
 import { isDateInFilter } from '../utils/dateUtils';
+import { animateStaggerEntrance } from '../utils/animations';
 
 export default function LeadsView({
   leads = [],
@@ -139,7 +140,7 @@ export default function LeadsView({
             >
               Dashboard
             </span>
-            <ChevronRight size={14} />
+            <LuChevronRight size={14} />
             <span style={{ color: '#063669', fontWeight: 700 }}>
               Leads Directory & Sales Pipeline
             </span>
@@ -153,7 +154,7 @@ export default function LeadsView({
 
           {/* Search Box */}
           <div className="search-box" style={{ width: '240px' }}>
-            <Search className="search-icon" />
+            <LuSearch className="search-icon" />
             <input
               type="text"
               className="search-input"
@@ -209,7 +210,7 @@ export default function LeadsView({
               style={overdueOnly ? { background: '#063669', color: 'white', borderColor: '#063669' } : {}}
               onClick={() => setOverdueOnly(!overdueOnly)}
             >
-              <AlertTriangle size={14} /> Overdue Only ({leads.filter(l => l.isOverdue).length})
+              <LuTriangleAlert size={14} /> Overdue Only ({leads.filter(l => l.isOverdue).length})
             </button>
 
             {/* Reset Filters */}
@@ -282,7 +283,7 @@ export default function LeadsView({
             onClick={() => onOpenCreateModal('createLead')}
             style={{ padding: '0.35rem 0.75rem', fontSize: '0.8rem' }}
           >
-            <Plus size={15} /> Create Lead
+            <LuPlus size={15} /> Create Lead
           </button>
         </div>
 
@@ -356,7 +357,7 @@ export default function LeadsView({
                       <td>{lead.leadOwner}</td>
                       <td>
                         <span style={{ color: lead.isOverdue ? '#063669' : '#063669', fontWeight: 600 }}>
-                          <Clock size={12} style={{ display: 'inline', marginRight: 4 }} />
+                          <LuClock size={12} style={{ display: 'inline', marginRight: 4 }} />
                           {lead.nextFollowup}
                         </span>
                       </td>
@@ -369,7 +370,7 @@ export default function LeadsView({
                             onSelectLead(lead);
                           }}
                         >
-                          Inspect <ChevronRight size={12} />
+                          Inspect <LuChevronRight size={12} />
                         </button>
                       </td>
                     </tr>

@@ -1,5 +1,11 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, ChevronDown, RotateCcw } from 'lucide-react';
+import {
+  LuChevronLeft,
+  LuChevronRight,
+  LuCalendar as CalendarIcon,
+  LuChevronDown,
+  LuRotateCcw
+} from 'react-icons/lu';
 
 const WEEKDAYS = ['SU', 'MO', 'TU', 'WE', 'TH', 'FR', 'SA'];
 const MONTH_NAMES = [
@@ -165,7 +171,7 @@ export default function FormDateSelector({
             {value ? formatReadableDate(value) : placeholder}
           </span>
         </div>
-        <ChevronDown
+        <LuChevronDown
           size={15}
           style={{
             color: '#063669',
@@ -189,7 +195,7 @@ export default function FormDateSelector({
                 onClick={handlePrevMonth}
                 title="Previous Month"
               >
-                <ChevronLeft size={16} />
+                <LuChevronLeft size={16} />
               </button>
               <button
                 type="button"
@@ -197,7 +203,7 @@ export default function FormDateSelector({
                 onClick={handleNextMonth}
                 title="Next Month"
               >
-                <ChevronRight size={16} />
+                <LuChevronRight size={16} />
               </button>
             </div>
           </div>
@@ -246,7 +252,7 @@ export default function FormDateSelector({
               className="apple-btn-secondary"
               onClick={handleSetToday}
             >
-              <RotateCcw size={12} />
+              <LuRotateCcw size={12} />
               Today
             </button>
             <button

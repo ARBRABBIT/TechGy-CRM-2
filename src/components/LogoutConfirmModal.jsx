@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { LogOut, X, AlertTriangle } from 'lucide-react';
+import { LuLogOut, LuX, LuTriangleAlert } from 'react-icons/lu';
 
 export default function LogoutConfirmModal({
   isOpen,
@@ -67,13 +67,13 @@ export default function LogoutConfirmModal({
               title="Close dialog"
               aria-label="Close dialog"
             >
-              <X size={18} />
+              <LuX size={18} />
             </button>
 
             {/* Icon Header */}
             <div className="logout-modal-icon-wrap">
               <div className="logout-modal-icon-inner">
-                <LogOut size={26} />
+                <LuLogOut size={26} />
               </div>
             </div>
 
@@ -111,7 +111,7 @@ export default function LogoutConfirmModal({
                 className="logout-btn-confirm"
                 onClick={onConfirm}
               >
-                <LogOut size={16} />
+                <LuLogOut size={16} />
                 <span>Yes, Log Out</span>
               </button>
             </div>

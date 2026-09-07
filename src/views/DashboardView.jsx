@@ -1,17 +1,17 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
-  IndianRupee,
-  TrendingUp,
-  Users,
-  Building2,
-  AlertTriangle,
-  CheckSquare,
-  Clock,
-  ArrowUpRight,
-  Filter,
-  PieChart as PieIcon,
-  ChevronRight
-} from 'lucide-react';
+  LuIndianRupee,
+  LuTrendingUp,
+  LuUsers,
+  LuBuilding2,
+  LuTriangleAlert,
+  LuSquareCheck,
+  LuClock,
+  LuArrowUpRight,
+  LuFilter,
+  LuChartPie as PieIcon,
+  LuChevronRight
+} from 'react-icons/lu';
 import {
   ResponsiveContainer,
   LineChart,
@@ -26,6 +26,7 @@ import {
 } from 'recharts';
 import { REVENUE_DATA, INITIAL_OWNERS, INITIAL_DATE_FILTERS } from '../data/mockData';
 import { isDateInFilter, getFilterLabel } from '../utils/dateUtils';
+import { animateStaggerEntrance } from '../utils/animations';
 
 export default function DashboardView({
   leads = [],
@@ -39,10 +40,17 @@ export default function DashboardView({
   onSelectLead
 }) {
   const [revenueToggle, setRevenueToggle] = useState('Monthly');
+  const dashboardRef = useRef(null);
 
   // Dedicated Marketing Card Filter States (As mandated in PDF: "filters by date and owner")
   const [marketingDateFilter, setMarketingDateFilter] = useState(selectedDateFilter);
   const [marketingOwnerFilter, setMarketingOwnerFilter] = useState(selectedOwnerFilter);
+
+  useEffect(() => {
+    if (dashboardRef.current) {
+      animateStaggerEntrance(dashboardRef.current.querySelectorAll('.kpi-card, .counter-card, .chart-card'), 0.05);
+    }
+  }, [selectedDateFilter, selectedOwnerFilter]);
 
   // Sync global header date filter changes directly to revenue chart toggle & card states!
   useEffect(() => {
@@ -150,7 +158,7 @@ export default function DashboardView({
   const marketingTotalLeads = leadsForMarketing.length;
 
   return (
-    <div className="dashboard-view">
+    <div className="dashboard-view" ref={dashboardRef}>
       {/* Top 3 Revenue KPI Cards */}
       <div className="revenue-grid">
         <div
@@ -161,12 +169,12 @@ export default function DashboardView({
           <div className="kpi-header">
             <span className="kpi-title">Monthly Revenue</span>
             <div className="kpi-icon-wrap">
-              <IndianRupee size={18} />
+              <LuIndianRupee size={18} />
             </div>
           </div>
           <div className="kpi-value">{REVENUE_DATA.Monthly.revenue}</div>
           <div className="kpi-subtext">
-            <span className="badge-success"><ArrowUpRight size={14} /> +12.4%</span> vs last month
+            <span className="badge-success"><LuArrowUpRight size={14} /> +12.4%</span> vs last month
           </div>
         </div>
 
@@ -178,12 +186,12 @@ export default function DashboardView({
           <div className="kpi-header">
             <span className="kpi-title">Quarterly Revenue</span>
             <div className="kpi-icon-wrap">
-              <TrendingUp size={18} />
+              <LuTrendingUp size={18} />
             </div>
           </div>
           <div className="kpi-value">{REVENUE_DATA.Quarterly.revenue}</div>
           <div className="kpi-subtext">
-            <span className="badge-success"><ArrowUpRight size={14} /> +8.2%</span> vs Q2 target
+            <span className="badge-success"><LuArrowUpRight size={14} /> +8.2%</span> vs Q2 target
           </div>
         </div>
 
@@ -195,7 +203,7 @@ export default function DashboardView({
           <div className="kpi-header">
             <span className="kpi-title">FY Revenue</span>
             <div className="kpi-icon-wrap">
-              <IndianRupee size={18} />
+              <LuIndianRupee size={18} />
             </div>
           </div>
           <div className="kpi-value">{REVENUE_DATA.FY.revenue}</div>
@@ -465,7 +473,7 @@ export default function DashboardView({
             title="Navigate to All Leads"
           >
             <span>View All Leads</span>
-            <ChevronRight size={16} style={{ strokeWidth: 2.5 }} />
+            <LuChevronRight size={16} style={{ strokeWidth: 2.5 }} />
           </button>
         </div>
 
@@ -499,7 +507,7 @@ export default function DashboardView({
                       alignItems: 'center',
                       gap: '0.25rem'
                     }}>
-                      <Clock size={13} /> {item.nextFollowup}
+                      <LuClock size={13} /> {item.nextFollowup}
                     </span>
                   </td>
                   <td>

@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import { X, Plus, Edit2, UserPlus, CheckSquare, FileText, Calendar, Trash2 } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { LuX } from 'react-icons/lu';
+import { animateModalEnter } from '../utils/animations';
 import { INITIAL_OWNERS, LEAD_SOURCES } from '../data/mockData';
 import FormDateSelector from './FormDateSelector';
 
@@ -34,9 +35,15 @@ export default function CommonActionsModal({ isOpen, onClose, onSave, initialTyp
     closeDate: '2026-09-28'
   });
 
+  const overlayRef = useRef(null);
+  const cardRef = useRef(null);
+
   useEffect(() => {
     if (isOpen) {
       setActionType(initialType);
+      if (cardRef.current) {
+        animateModalEnter(cardRef.current, overlayRef.current);
+      }
     }
   }, [initialType, isOpen]);
 
@@ -49,14 +56,14 @@ export default function CommonActionsModal({ isOpen, onClose, onSave, initialTyp
   };
 
   return (
-    <div className="modal-overlay" onClick={onClose}>
-      <div className="modal-card" onClick={(e) => e.stopPropagation()}>
+    <div className="modal-overlay" ref={overlayRef} onClick={onClose}>
+      <div className="modal-card" ref={cardRef} onClick={(e) => e.stopPropagation()}>
         <div className="modal-header">
           <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: '#063669' }}>
             Common Action Workspace
           </h3>
           <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#557396' }}>
-            <X size={20} />
+            <LuX size={20} />
           </button>
         </div>
 

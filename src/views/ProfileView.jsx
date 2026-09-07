@@ -1,26 +1,26 @@
 import React, { useState } from 'react';
 import {
-  User,
-  Mail,
-  Phone,
-  MapPin,
-  Building2,
-  TrendingUp,
-  Award,
-  Shield,
-  Bell,
-  Lock,
-  CheckCircle2,
-  Edit3,
-  Save,
-  ArrowLeft,
-  Briefcase,
-  Users,
-  Target,
-  FileText,
-  ChevronRight,
-  LogOut
-} from 'lucide-react';
+  LuUser,
+  LuMail,
+  LuPhone,
+  LuMapPin,
+  LuBuilding2,
+  LuTrendingUp,
+  LuAward,
+  LuShield,
+  LuBell,
+  LuLock,
+  LuCircleCheck,
+  LuPencil,
+  LuSave,
+  LuArrowLeft,
+  LuBriefcase,
+  LuUsers,
+  LuTarget,
+  LuFileText,
+  LuChevronRight,
+  LuLogOut
+} from 'react-icons/lu';
 
 export default function ProfileView({
   onBack,
@@ -79,7 +79,7 @@ export default function ProfileView({
           >
             Dashboard
           </span>
-          <ChevronRight size={14} />
+          <LuChevronRight size={14} />
           <span style={{ color: '#063669', fontWeight: 700 }}>
             User Profile & Settings
           </span>
@@ -105,7 +105,7 @@ export default function ProfileView({
             }}
             title="Sign out of TechGy Link"
           >
-            <LogOut size={16} />
+            <LuLogOut size={16} />
             <span>Log Out</span>
           </button>
         )}
@@ -181,13 +181,13 @@ export default function ProfileView({
               </p>
               <div style={{ display: 'flex', alignItems: 'center', gap: '1.15rem', marginTop: '0.6rem', fontSize: '0.8rem', color: '#E0E6EE', flexWrap: 'wrap' }}>
                 <span style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
-                  <Mail size={14} /> {profileData.email}
+                  <LuMail size={14} /> {profileData.email}
                 </span>
                 <span style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
-                  <Phone size={14} /> {profileData.phone}
+                  <LuPhone size={14} /> {profileData.phone}
                 </span>
                 <span style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
-                  <MapPin size={14} /> {profileData.location}
+                  <LuMapPin size={14} /> {profileData.location}
                 </span>
               </div>
             </div>
@@ -217,25 +217,25 @@ export default function ProfileView({
           className={`toggle-btn ${activeTab === 'details' ? 'active' : ''}`}
           onClick={() => setActiveTab('details')}
         >
-          <User size={14} style={{ marginRight: 4, display: 'inline' }} /> Personal Info
+          <LuUser size={14} style={{ marginRight: 4, display: 'inline' }} /> Personal Info
         </button>
         <button
           className={`toggle-btn ${activeTab === 'performance' ? 'active' : ''}`}
           onClick={() => setActiveTab('performance')}
         >
-          <TrendingUp size={14} style={{ marginRight: 4, display: 'inline' }} /> Performance & Targets
+          <LuTrendingUp size={14} style={{ marginRight: 4, display: 'inline' }} /> Performance & Targets
         </button>
         <button
           className={`toggle-btn ${activeTab === 'portfolio' ? 'active' : ''}`}
           onClick={() => setActiveTab('portfolio')}
         >
-          <Briefcase size={14} style={{ marginRight: 4, display: 'inline' }} /> Managed Portfolio ({myAccounts.length})
+          <LuBriefcase size={14} style={{ marginRight: 4, display: 'inline' }} /> Managed Portfolio ({myAccounts.length})
         </button>
         <button
           className={`toggle-btn ${activeTab === 'security' ? 'active' : ''}`}
           onClick={() => setActiveTab('security')}
         >
-          <Shield size={14} style={{ marginRight: 4, display: 'inline' }} /> Preferences & Security
+          <LuShield size={14} style={{ marginRight: 4, display: 'inline' }} /> Preferences & Security
         </button>
       </div>
 
@@ -243,7 +243,7 @@ export default function ProfileView({
       {savedSuccess && (
         <div className="toast-banner" style={{ width: 'fit-content', minWidth: '300px', animation: 'toastActionSlideIn 0.35s ease' }}>
           <div className="toast-icon-wrap" style={{ width: '32px', height: '32px', minWidth: '32px' }}>
-            <CheckCircle2 size={16} />
+            <LuCircleCheck size={16} />
           </div>
           <div className="toast-content">
             <div className="toast-title" style={{ fontSize: '0.85rem' }}>Profile settings saved successfully!</div>
@@ -333,7 +333,7 @@ export default function ProfileView({
 
             <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '0.5rem' }}>
               <button type="submit" className="btn-primary">
-                <Save size={16} />
+                <LuSave size={16} />
                 <span>Save Profile Changes</span>
               </button>
             </div>
@@ -518,7 +518,7 @@ export default function ProfileView({
                     cursor: 'pointer'
                   }}
                 >
-                  <LogOut size={16} />
+                  <LuLogOut size={16} />
                   <span>Log Out Now</span>
                 </button>
               </div>

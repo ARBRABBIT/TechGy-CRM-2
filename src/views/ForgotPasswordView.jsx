@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { User, EyeOff, ShieldCheck, CheckCircle2 } from 'lucide-react';
+import { LuUser, LuEyeOff, LuShieldCheck, LuCircleCheck } from 'react-icons/lu';
 
 export default function ForgotPasswordView({ onBackToLogin }) {
   const [resetEmail, setResetEmail] = useState('');
@@ -45,7 +45,7 @@ export default function ForgotPasswordView({ onBackToLogin }) {
               <div className="form-group">
                 <label className="form-label">Enter registered mail</label>
                 <div className="input-with-icon">
-                  <User size={18} className="input-icon-left" />
+                  <LuUser size={18} className="input-icon-left" />
                   <input
                     type="email"
                     className="login-input"
@@ -55,7 +55,7 @@ export default function ForgotPasswordView({ onBackToLogin }) {
                     required
                   />
                   <div className="toggle-password-btn" style={{ pointerEvents: 'none' }}>
-                    <EyeOff size={18} />
+                    <LuEyeOff size={18} />
                   </div>
                 </div>
               </div>
@@ -89,7 +89,7 @@ export default function ForgotPasswordView({ onBackToLogin }) {
 
               {/* Security Encrypted Footer Badge */}
               <div className="security-notice-footer">
-                <ShieldCheck size={18} className="shield-icon" />
+                <LuShieldCheck size={18} className="shield-icon" />
                 <span>Secured by TechGy Link. End-to-end encrypted connection.</span>
               </div>
             </form>
@@ -97,7 +97,7 @@ export default function ForgotPasswordView({ onBackToLogin }) {
         ) : (
           <div className="login-card-box">
             <div className="forgot-success-badge" style={{ marginBottom: '16px' }}>
-              <CheckCircle2 size={44} color="#16A34A" />
+              <LuCircleCheck size={44} color="#16A34A" />
             </div>
             <h1 className="login-title">Temporary Password Sent!</h1>
             <p className="login-subtitle">
@@ -123,7 +123,7 @@ export default function ForgotPasswordView({ onBackToLogin }) {
             </div>
 
             <div className="security-notice-footer">
-              <ShieldCheck size={18} className="shield-icon" />
+              <LuShieldCheck size={18} className="shield-icon" />
               <span>Secured by TechGy Link. End-to-end encrypted connection.</span>
             </div>
           </div>

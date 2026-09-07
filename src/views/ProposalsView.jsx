@@ -1,5 +1,5 @@
 import React from 'react';
-import { FileText, CheckCircle2 } from 'lucide-react';
+import { LuFileText, LuCircleCheck } from 'react-icons/lu';
 import { isDateInFilter } from '../utils/dateUtils';
 
 export default function ProposalsView({ proposals = [], searchQuery = '', selectedDateFilter = 'This Month', onSelectAccount }) {

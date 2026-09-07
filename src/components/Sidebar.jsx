@@ -1,25 +1,26 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
-  LayoutDashboard,
-  Users,
-  Building2,
-  TrendingUp,
-  Calendar,
-  FileText,
-  Contact,
-  ShieldCheck,
-  PanelLeft,
-  X
-} from 'lucide-react';
+  LuLayoutDashboard,
+  LuUsers,
+  LuBuilding2,
+  LuTrendingUp,
+  LuCalendar,
+  LuFileText,
+  LuContact,
+  LuShieldCheck,
+  LuPanelLeft,
+  LuX
+} from 'react-icons/lu';
+import { animateDrawerEnter } from '../utils/animations';
 
 const MODULES = [
-  { id: 'dashboard', title: 'Dashboard', icon: LayoutDashboard, badge: null },
-  { id: 'leads', title: 'Leads', icon: Users, badge: { text: '7 Alert', type: 'alert' } },
-  { id: 'accounts', title: 'Accounts', icon: Building2, badge: null },
-  { id: 'opportunities', title: 'Opportunities', icon: TrendingUp, badge: null },
-  { id: 'activities', title: 'Activities', icon: Calendar, badge: { text: '14 Tasks', type: 'tasks' } },
-  { id: 'proposals', title: 'Proposals', icon: FileText, badge: null },
-  { id: 'contacts', title: 'Contacts', icon: Contact, badge: null }
+  { id: 'dashboard', title: 'Dashboard', icon: LuLayoutDashboard, badge: null },
+  { id: 'leads', title: 'Leads', icon: LuUsers, badge: { text: '7 Alert', type: 'alert' } },
+  { id: 'accounts', title: 'Accounts', icon: LuBuilding2, badge: null },
+  { id: 'opportunities', title: 'Opportunities', icon: LuTrendingUp, badge: null },
+  { id: 'activities', title: 'Activities', icon: LuCalendar, badge: { text: '14 Tasks', type: 'tasks' } },
+  { id: 'proposals', title: 'Proposals', icon: LuFileText, badge: null },
+  { id: 'contacts', title: 'Contacts', icon: LuContact, badge: null }
 ];
 
 export default function Sidebar({
@@ -34,15 +35,33 @@ export default function Sidebar({
   const [hoverAfterIcons, setHoverAfterIcons] = useState(false);
   const [hoverHeader, setHoverHeader] = useState(false);
   const showToggleIcon = isCollapsed && (hoverHeader || hoverAfterIcons);
+  const sidebarRef = useRef(null);
+  const backdropRef = useRef(null);
+
+  useEffect(() => {
+    if (mobileOpen && sidebarRef.current) {
+      animateDrawerEnter(sidebarRef.current, backdropRef.current);
+    }
+  }, [mobileOpen]);
 
   return (
-    <aside 
-      className={`sidebar ${isCollapsed ? 'collapsed' : ''} ${mobileOpen ? 'mobile-open' : ''}`}
-      onMouseLeave={() => {
-        setHoverAfterIcons(false);
-        setHoverHeader(false);
-      }}
-    >
+    <>
+      {mobileOpen && (
+        <div
+          ref={backdropRef}
+          className="sidebar-backdrop active"
+          onClick={() => setMobileOpen(false)}
+          aria-hidden="true"
+        />
+      )}
+      <aside 
+        ref={sidebarRef}
+        className={`sidebar ${isCollapsed ? 'collapsed' : ''} ${mobileOpen ? 'mobile-open' : ''}`}
+        onMouseLeave={() => {
+          setHoverAfterIcons(false);
+          setHoverHeader(false);
+        }}
+      >
       {/* Sidebar Header */}
       <div className="sidebar-header">
         {isCollapsed ? (
@@ -74,7 +93,7 @@ export default function Sidebar({
               title="Expand Sidebar"
               aria-label="Expand Sidebar"
             >
-              <PanelLeft size={21} />
+              <LuPanelLeft size={21} />
             </button>
           </div>
         ) : (
@@ -104,7 +123,7 @@ export default function Sidebar({
               title="Collapse Sidebar"
               aria-label="Collapse Sidebar"
             >
-              <PanelLeft size={21} />
+              <LuPanelLeft size={21} />
             </button>
           </div>
         )}
@@ -116,7 +135,7 @@ export default function Sidebar({
             style={{ background: 'none', border: 'none', color: '#063669', cursor: 'pointer', padding: '0.25rem' }}
             title="Close Sidebar"
           >
-            <X size={20} />
+            <LuX size={20} />
           </button>
         )}
       </div>
@@ -244,6 +263,7 @@ export default function Sidebar({
           </div>
         </div>
       )}
-    </aside>
+      </aside>
+    </>
   );
 }

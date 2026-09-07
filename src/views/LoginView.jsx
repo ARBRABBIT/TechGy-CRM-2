@@ -1,5 +1,12 @@
 import React, { useState } from 'react';
-import { User, Lock, Eye, EyeOff, ShieldCheck, CheckCircle2 } from 'lucide-react';
+import {
+  LuUser,
+  LuLock,
+  LuEye,
+  LuEyeOff,
+  LuShieldCheck,
+  LuCircleCheck
+} from 'react-icons/lu';
 
 const ROLES = [
   { id: 'admin', title: 'Sales Admin', email: 'admin@techgy.com', desc: 'Secure access for authorized Sales Admin. Please authenticate to continue.' },
@@ -85,7 +92,7 @@ export default function LoginView({ onLoginSuccess, initialMode = 'login' }) {
                 <div className="form-group">
                   <label className="form-label">Enter registered mail</label>
                   <div className="input-with-icon">
-                    <User size={18} className="input-icon-left" />
+                    <LuUser size={18} className="input-icon-left" />
                     <input
                       type="email"
                       className="login-input"
@@ -95,7 +102,7 @@ export default function LoginView({ onLoginSuccess, initialMode = 'login' }) {
                       required
                     />
                     <div className="toggle-password-btn" style={{ pointerEvents: 'none' }}>
-                      <EyeOff size={18} />
+                      <LuEyeOff size={18} />
                     </div>
                   </div>
                 </div>
@@ -130,7 +137,7 @@ export default function LoginView({ onLoginSuccess, initialMode = 'login' }) {
 
                 {/* Security Encrypted Footer Badge */}
                 <div className="security-notice-footer">
-                  <ShieldCheck size={18} className="shield-icon" />
+                  <LuShieldCheck size={18} className="shield-icon" />
                   <span>Secured by TechGy Link. End-to-end encrypted connection.</span>
                 </div>
               </form>
@@ -139,7 +146,7 @@ export default function LoginView({ onLoginSuccess, initialMode = 'login' }) {
             /* Forgot Password Success State */
             <div className="login-card-box">
               <div className="forgot-success-badge">
-                <CheckCircle2 size={36} color="#16A34A" />
+                <LuCircleCheck size={36} color="#16A34A" />
               </div>
               <h1 className="login-title">Temporary Password Sent!</h1>
               <p className="login-subtitle">
@@ -168,7 +175,7 @@ export default function LoginView({ onLoginSuccess, initialMode = 'login' }) {
               </div>
 
               <div className="security-notice-footer">
-                <ShieldCheck size={18} className="shield-icon" />
+                <LuShieldCheck size={18} className="shield-icon" />
                 <span>Secured by TechGy Link. End-to-end encrypted connection.</span>
               </div>
             </div>
@@ -184,11 +191,11 @@ export default function LoginView({ onLoginSuccess, initialMode = 'login' }) {
               <div className="form-group">
                 <label className="form-label">Login ID</label>
                 <div className="input-with-icon">
-                  <User size={18} className="input-icon-left" />
+                  <LuUser size={18} className="input-icon-left" />
                   <input
                     type="text"
                     className="login-input"
-                    placeholder="Enter your assigned ID"
+                    placeholder="Enter your registered login ID"
                     value={loginId}
                     onChange={(e) => setLoginId(e.target.value)}
                     required
@@ -200,11 +207,11 @@ export default function LoginView({ onLoginSuccess, initialMode = 'login' }) {
               <div className="form-group">
                 <label className="form-label">Password</label>
                 <div className="input-with-icon">
-                  <Lock size={18} className="input-icon-left" />
+                  <LuLock size={18} className="input-icon-left" />
                   <input
                     type={showPassword ? 'text' : 'password'}
                     className="login-input"
-                    placeholder="Enter Password"
+                    placeholder="Enter your secret password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     required
@@ -213,9 +220,9 @@ export default function LoginView({ onLoginSuccess, initialMode = 'login' }) {
                     type="button"
                     className="toggle-password-btn"
                     onClick={() => setShowPassword(!showPassword)}
-                    title={showPassword ? 'Hide password' : 'Show password'}
+                    aria-label={showPassword ? 'Hide password' : 'Show password'}
                   >
-                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                    {showPassword ? <LuEyeOff size={18} /> : <LuEye size={18} />}
                   </button>
                 </div>
               </div>
@@ -250,7 +257,7 @@ export default function LoginView({ onLoginSuccess, initialMode = 'login' }) {
 
               {/* Security Encrypted Footer Badge */}
               <div className="security-notice-footer">
-                <ShieldCheck size={18} className="shield-icon" />
+                <LuShieldCheck size={18} className="shield-icon" />
                 <span>Secured by TechGy Link. End-to-end encrypted connection.</span>
               </div>
             </form>

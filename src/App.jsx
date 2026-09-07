@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { animateViewTransition } from './utils/animations';
 import Sidebar from './components/Sidebar';
 import GlobalHeader from './components/GlobalHeader';
 import CommonActionsModal from './components/CommonActionsModal';
@@ -30,7 +31,7 @@ import {
   INITIAL_CONTACTS,
   INITIAL_NOTIFICATIONS
 } from './data/mockData';
-import { CheckCircle2, Bell, X } from 'lucide-react';
+import { LuCircleCheck, LuBell, LuX } from 'react-icons/lu';
 
 export default function App() {
   // Authentication State (Default to logged in on refresh; support ?view=forgot or ?view=login)
@@ -400,7 +401,7 @@ export default function App() {
     }
   };
 
-  // Generate unique view key to trigger smooth CSS page transition keyframes on every page change
+  // Generate unique view key to trigger smooth CSS/GSAP page transition on every page change
   const currentViewKey = isProfileActive
     ? 'profile'
     : selectedLead
@@ -408,6 +409,13 @@ export default function App() {
     : selectedAccount
     ? `account-${selectedAccount.id}`
     : activeModule;
+
+  const contentRef = useRef(null);
+  useEffect(() => {
+    if (contentRef.current) {
+      animateViewTransition(contentRef.current);
+    }
+  }, [currentViewKey]);
 
   // Unauthenticated view screen
   if (!isAuthenticated) {
@@ -469,8 +477,8 @@ export default function App() {
           onLogout={handleRequestLogout}
         />
 
-        {/* 3. Main Page Content with Keyed Dynamic Transition */}
-        <main className="content-body" key={currentViewKey}>
+        {/* 3. Main Page Content with GSAP Transition */}
+        <main className="content-body" key={currentViewKey} ref={contentRef}>
           {/* User Profile View */}
           {isProfileActive ? (
             <ProfileView
@@ -840,7 +848,7 @@ export default function App() {
               whileHover={{ y: -3, transition: { duration: 0.15 } }}
             >
               <div className="toast-icon-wrap">
-                <CheckCircle2 size={18} />
+                <LuCircleCheck size={18} />
               </div>
               <div className="toast-content">
                 {typeof toastMessage === 'object' ? (
@@ -861,7 +869,7 @@ export default function App() {
                 title="Dismiss"
                 aria-label="Dismiss notification"
               >
-                <X size={15} />
+                <LuX size={15} />
               </button>
               <div className="toast-progress-bar" />
             </motion.div>
