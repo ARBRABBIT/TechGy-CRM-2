@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { User, Lock, Eye, EyeOff, ShieldCheck, ArrowRight, CheckCircle2, KeyRound } from 'lucide-react';
+import { User, Lock, Eye, EyeOff, ShieldCheck, CheckCircle2 } from 'lucide-react';
 
 const ROLES = [
   { id: 'admin', title: 'Sales Admin', email: 'admin@techgy.com', desc: 'Secure access for authorized Sales Admin. Please authenticate to continue.' },
@@ -7,39 +7,51 @@ const ROLES = [
   { id: 'manager', title: 'Sales Manager', email: 'manager@techgy.com', desc: 'Executive dashboard, team activity tracking, and commercial pipeline access.' }
 ];
 
-export default function LoginView({ onLoginSuccess }) {
+export default function LoginView({ onLoginSuccess, initialMode = 'login' }) {
+  // Support URL view param (?view=forgot or ?view=login) or fallback to initialMode
+  const [viewMode, setViewMode] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const param = new URLSearchParams(window.location.search).get('view');
+      if (param === 'login') return 'login';
+      if (param === 'forgot') return 'forgot';
+    }
+    return initialMode;
+  });
+
   const [selectedRoleId, setSelectedRoleId] = useState('admin');
   const [loginId, setLoginId] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [showForgotModal, setShowForgotModal] = useState(false);
   const [resetEmailSent, setResetEmailSent] = useState(false);
   const [resetEmail, setResetEmail] = useState('');
 
   const currentRole = ROLES.find(r => r.id === selectedRoleId) || ROLES[0];
 
-  const handleRoleSwitch = (role) => {
-    setSelectedRoleId(role.id);
-    setLoginId(role.email);
-  };
 
-  const handleSubmit = (e) => {
+  const handleLoginSubmit = (e) => {
     e.preventDefault();
     setIsSubmitting(true);
     setTimeout(() => {
       setIsSubmitting(false);
-      onLoginSuccess({
-        role: currentRole.title,
-        email: loginId,
-        name: currentRole.id === 'admin' ? 'System Administrator' : (currentRole.id === 'rep' ? 'Rajesh Sharma' : 'Priya Patel')
-      });
+      if (onLoginSuccess) {
+        onLoginSuccess({
+          role: currentRole.title,
+          email: loginId || currentRole.email,
+          name: currentRole.id === 'admin' ? 'System Administrator' : (currentRole.id === 'rep' ? 'Rajesh Sharma' : 'Priya Patel')
+        });
+      }
     }, 600);
   };
 
   const handleForgotSubmit = (e) => {
     e.preventDefault();
-    setResetEmailSent(true);
+    if (!resetEmail) return;
+    setIsSubmitting(true);
+    setTimeout(() => {
+      setIsSubmitting(false);
+      setResetEmailSent(true);
+    }, 600);
   };
 
   return (
@@ -52,155 +64,199 @@ export default function LoginView({ onLoginSuccess }) {
         <img src="/logo.svg" alt="TechGy Bigger Logo Graphic" />
       </div>
 
-      {/* Top Header Logo */}
+      {/* Top Header Logo positioned at top-right */}
       <header className="login-header">
         <div className="brand-logo-container">
           <img src="/main-logo.png" alt="TechGy Link Logo" className="techgy-logo-img" />
         </div>
       </header>
 
-      {/* Main Login Card Area */}
+      {/* Main Content Area */}
       <main className="login-content-container">
-        <div className="login-card-box">
-          <h1 className="login-title">{currentRole.title}</h1>
-          <p className="login-subtitle">{currentRole.desc}</p>
+        {viewMode === 'forgot' ? (
+          /* ================= Forgot Password View ================= */
+          !resetEmailSent ? (
+            <div className="login-card-box">
+              <h1 className="login-title">Forgot your password?</h1>
+              <p className="login-subtitle">Enter your registered mail to receive a temporary password</p>
 
-          <form onSubmit={handleSubmit} className="login-form">
-            {/* Login ID Input */}
-            <div className="form-group">
-              <label className="form-label">Login ID</label>
-              <div className="input-with-icon">
-                <User size={18} className="input-icon-left" />
-                <input
-                  type="text"
-                  className="login-input"
-                  placeholder="Enter your assigned ID"
-                  value={loginId}
-                  onChange={(e) => setLoginId(e.target.value)}
-                  required
-                />
-              </div>
-            </div>
+              <form onSubmit={handleForgotSubmit} className="login-form">
+                {/* Registered Email Input */}
+                <div className="form-group">
+                  <label className="form-label">Enter registered mail</label>
+                  <div className="input-with-icon">
+                    <User size={18} className="input-icon-left" />
+                    <input
+                      type="email"
+                      className="login-input"
+                      placeholder="Enter your register mail here"
+                      value={resetEmail}
+                      onChange={(e) => setResetEmail(e.target.value)}
+                      required
+                    />
+                    <div className="toggle-password-btn" style={{ pointerEvents: 'none' }}>
+                      <EyeOff size={18} />
+                    </div>
+                  </div>
+                </div>
 
-            {/* Password Input */}
-            <div className="form-group">
-              <label className="form-label">Password</label>
-              <div className="input-with-icon">
-                <Lock size={18} className="input-icon-left" />
-                <input
-                  type={showPassword ? 'text' : 'password'}
-                  className="login-input"
-                  placeholder="Enter Password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                />
+                {/* Submit Send password Button */}
                 <button
-                  type="button"
-                  className="toggle-password-btn"
-                  onClick={() => setShowPassword(!showPassword)}
-                  title={showPassword ? 'Hide password' : 'Show password'}
+                  type="submit"
+                  className="login-submit-btn"
+                  disabled={isSubmitting}
+                  style={{ marginTop: '32px' }}
                 >
-                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                  {isSubmitting ? (
+                    <span className="btn-loading-text">Sending password...</span>
+                  ) : (
+                    <span>Send password</span>
+                  )}
                 </button>
-              </div>
-            </div>
 
-            {/* Forgot Password Link */}
-            <div className="forgot-password-row">
+                {/* Back to Login Link */}
+                <div className="forgot-back-link-row">
+                  <button
+                    type="button"
+                    className="forgot-link-btn"
+                    onClick={() => {
+                      setViewMode('login');
+                      setResetEmailSent(false);
+                    }}
+                  >
+                    Back to Login
+                  </button>
+                </div>
+
+                {/* Security Encrypted Footer Badge */}
+                <div className="security-notice-footer">
+                  <ShieldCheck size={18} className="shield-icon" />
+                  <span>Secured by TechGy Link. End-to-end encrypted connection.</span>
+                </div>
+              </form>
+            </div>
+          ) : (
+            /* Forgot Password Success State */
+            <div className="login-card-box">
+              <div className="forgot-success-badge">
+                <CheckCircle2 size={36} color="#16A34A" />
+              </div>
+              <h1 className="login-title">Temporary Password Sent!</h1>
+              <p className="login-subtitle">
+                We have dispatched a temporary password to <strong>{resetEmail}</strong>. Please check your inbox to access your account.
+              </p>
+
               <button
                 type="button"
-                className="forgot-link-btn"
+                className="login-submit-btn"
                 onClick={() => {
-                  setResetEmail(loginId);
+                  setViewMode('login');
                   setResetEmailSent(false);
-                  setShowForgotModal(true);
                 }}
               >
-                Forgot Password?
+                Back to Login
               </button>
+
+              <div className="forgot-back-link-row">
+                <button
+                  type="button"
+                  className="forgot-link-btn"
+                  onClick={() => setResetEmailSent(false)}
+                >
+                  Didn't receive email? Send again
+                </button>
+              </div>
+
+              <div className="security-notice-footer">
+                <ShieldCheck size={18} className="shield-icon" />
+                <span>Secured by TechGy Link. End-to-end encrypted connection.</span>
+              </div>
             </div>
+          )
+        ) : (
+          /* ================= Standard Login View ================= */
+          <div className="login-card-box">
+            <h1 className="login-title">{currentRole.title}</h1>
+            <p className="login-subtitle">{currentRole.desc}</p>
 
-            {/* Submit Login Button */}
-            <button
-              type="submit"
-              className="login-submit-btn"
-              disabled={isSubmitting}
-            >
-              {isSubmitting ? (
-                <span className="btn-loading-text">Authenticating...</span>
-              ) : (
-                <>
-                  <span>Login</span>
-                </>
-              )}
-            </button>
-
-            {/* Security Encrypted Footer Badge */}
-            <div className="security-notice-footer">
-              <ShieldCheck size={18} className="shield-icon" />
-              <span>Secured by TechGy Link. End-to-end encrypted connection.</span>
-            </div>
-          </form>
-        </div>
-      </main>
-
-      {/* Forgot Password Modal */}
-      {showForgotModal && (
-        <div className="modal-backdrop-overlay">
-          <div className="forgot-password-modal">
-            <div className="modal-icon-header">
-              <KeyRound size={28} color="#063669" />
-            </div>
-            <h3>Reset Password</h3>
-            <p className="modal-sub">
-              Enter your registered TechGy Link Login ID to receive password reset instructions.
-            </p>
-
-            {!resetEmailSent ? (
-              <form onSubmit={handleForgotSubmit}>
-                <div className="form-group" style={{ marginBottom: '1.25rem' }}>
-                  <label className="form-label">Login ID / Email</label>
+            <form onSubmit={handleLoginSubmit} className="login-form">
+              {/* Login ID Input */}
+              <div className="form-group">
+                <label className="form-label">Login ID</label>
+                <div className="input-with-icon">
+                  <User size={18} className="input-icon-left" />
                   <input
-                    type="email"
+                    type="text"
                     className="login-input"
-                    value={resetEmail}
-                    onChange={(e) => setResetEmail(e.target.value)}
-                    placeholder="name@company.com"
+                    placeholder="Enter your assigned ID"
+                    value={loginId}
+                    onChange={(e) => setLoginId(e.target.value)}
                     required
                   />
                 </div>
-                <div className="modal-actions">
+              </div>
+
+              {/* Password Input */}
+              <div className="form-group">
+                <label className="form-label">Password</label>
+                <div className="input-with-icon">
+                  <Lock size={18} className="input-icon-left" />
+                  <input
+                    type={showPassword ? 'text' : 'password'}
+                    className="login-input"
+                    placeholder="Enter Password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                  />
                   <button
                     type="button"
-                    className="modal-cancel-btn"
-                    onClick={() => setShowForgotModal(false)}
+                    className="toggle-password-btn"
+                    onClick={() => setShowPassword(!showPassword)}
+                    title={showPassword ? 'Hide password' : 'Show password'}
                   >
-                    Cancel
-                  </button>
-                  <button type="submit" className="login-submit-btn">
-                    Send Reset Link
+                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                   </button>
                 </div>
-              </form>
-            ) : (
-              <div className="reset-success-box">
-                <CheckCircle2 size={40} color="#16A34A" />
-                <h4>Reset Link Sent!</h4>
-                <p>We have dispatched verification instructions to <strong>{resetEmail}</strong>.</p>
+              </div>
+
+              {/* Forgot Password Link */}
+              <div className="forgot-password-row">
                 <button
                   type="button"
-                  className="login-submit-btn"
-                  onClick={() => setShowForgotModal(false)}
-                  style={{ marginTop: '1rem' }}
+                  className="forgot-link-btn"
+                  onClick={() => {
+                    setResetEmail(loginId);
+                    setResetEmailSent(false);
+                    setViewMode('forgot');
+                  }}
                 >
-                  Back to Login
+                  Forgot Password?
                 </button>
               </div>
-            )}
+
+              {/* Submit Login Button */}
+              <button
+                type="submit"
+                className="login-submit-btn"
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? (
+                  <span className="btn-loading-text">Authenticating...</span>
+                ) : (
+                  <span>Login</span>
+                )}
+              </button>
+
+              {/* Security Encrypted Footer Badge */}
+              <div className="security-notice-footer">
+                <ShieldCheck size={18} className="shield-icon" />
+                <span>Secured by TechGy Link. End-to-end encrypted connection.</span>
+              </div>
+            </form>
           </div>
-        </div>
-      )}
+        )}
+      </main>
     </div>
   );
 }

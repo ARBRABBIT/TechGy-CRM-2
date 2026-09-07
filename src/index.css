@@ -2510,14 +2510,38 @@ button,
   z-index: 10;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  padding: 60px 0 0 50px;
+  justify-content: flex-end;
+  padding: 60px 60px 0 50px;
+}
+
+.brand-logo-container {
+  display: flex;
+  align-items: center;
+  margin-left: auto;
 }
 
 .techgy-logo-img {
   height: 57px;
   width: auto;
   object-fit: contain;
+}
+
+.forgot-back-link-row {
+  display: flex;
+  justify-content: center;
+  margin-top: 18px;
+  width: 454px;
+}
+
+.forgot-success-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 60px;
+  height: 60px;
+  background: #E8F5E9;
+  border-radius: 50%;
+  margin-bottom: 20px;
 }
 
 .login-content-container {

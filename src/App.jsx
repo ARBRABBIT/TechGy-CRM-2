@@ -33,8 +33,12 @@ import {
 import { CheckCircle2, Bell, X } from 'lucide-react';
 
 export default function App() {
-  // Authentication State (Default to logged in on refresh; persist session)
+  // Authentication State (Default to logged in on refresh; support ?view=forgot or ?view=login)
   const [isAuthenticated, setIsAuthenticated] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const param = new URLSearchParams(window.location.search).get('view');
+      if (param === 'forgot' || param === 'login') return false;
+    }
     const saved = localStorage.getItem('techgy_authenticated');
     return saved !== null ? JSON.parse(saved) : true;
   });
