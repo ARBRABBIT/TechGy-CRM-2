@@ -2,14 +2,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import {
   LuIndianRupee,
   LuTrendingUp,
-  LuUsers,
-  LuBuilding2,
-  LuTriangleAlert,
-  LuSquareCheck,
   LuClock,
   LuArrowUpRight,
-  LuFilter,
-  LuChartPie as PieIcon,
   LuChevronRight
 } from 'react-icons/lu';
 import {
@@ -107,7 +101,7 @@ export default function DashboardView({
   // Filter follow-up action items (Overdue + Today items)
   const followUpActions = filteredLeads
     .filter(l => l.isOverdue || l.dueToday)
-    .sort((a, b) => (a.isOverdue ? -1 : 1));
+    .sort(a => (a.isOverdue ? -1 : 1));
 
   // Y-axis tick formatter for Indian numbers (Lakhs & Crores)
   const formatYAxis = (val) => {

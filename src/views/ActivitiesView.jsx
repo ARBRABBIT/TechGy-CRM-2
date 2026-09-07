@@ -24,7 +24,7 @@ export default function ActivitiesView({
 
   useEffect(() => {
     if (initialTab) {
-      setActiveTab(initialTab);
+      setActiveTab(prev => (prev !== initialTab ? initialTab : prev));
     }
   }, [initialTab]);
 

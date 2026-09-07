@@ -5,7 +5,6 @@ import {
   LuChevronRight,
   LuCalendar as CalendarIcon,
   LuCheck,
-  LuX,
   LuRotateCcw
 } from 'react-icons/lu';
 import { getFilterLabel } from '../utils/dateUtils';
@@ -55,13 +54,19 @@ export default function CustomDateSelector({ selectedDateFilter, setSelectedDate
   const [isOpen, setIsOpen] = useState(false);
   const [activeTab, setActiveTab] = useState('calendar'); // 'presets' | 'calendar'
   
-  // Custom range selection dates
-  const [startDateStr, setStartDateStr] = useState('2026-08-01');
-  const [endDateStr, setEndDateStr] = useState('2026-09-02');
+  // Custom range selection dates (dynamic based on current date)
+  const [startDateStr, setStartDateStr] = useState(() => {
+    const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-01`;
+  });
+  const [endDateStr, setEndDateStr] = useState(() => {
+    const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  });
 
-  // Currently viewed month/year in the interactive calendar (defaults to Aug 2026)
-  const [viewYear, setViewYear] = useState(2026);
-  const [viewMonth, setViewMonth] = useState(7); // 0-indexed: 7 = August
+  // Currently viewed month/year in the interactive calendar
+  const [viewYear, setViewYear] = useState(() => new Date().getFullYear());
+  const [viewMonth, setViewMonth] = useState(() => new Date().getMonth());
 
   // Selection step: 'start' (picking start date next) or 'end' (picking end date next)
   const [pickingMode, setPickingMode] = useState('start');
@@ -70,8 +75,12 @@ export default function CustomDateSelector({ selectedDateFilter, setSelectedDate
   // Sync internal state when selectedDateFilter prop changes
   useEffect(() => {
     if (typeof selectedDateFilter === 'object' && selectedDateFilter !== null) {
-      if (selectedDateFilter.startDate) setStartDateStr(selectedDateFilter.startDate);
-      if (selectedDateFilter.endDate) setEndDateStr(selectedDateFilter.endDate);
+      if (selectedDateFilter.startDate) {
+        setStartDateStr(prev => (prev !== selectedDateFilter.startDate ? selectedDateFilter.startDate : prev));
+      }
+      if (selectedDateFilter.endDate) {
+        setEndDateStr(prev => (prev !== selectedDateFilter.endDate ? selectedDateFilter.endDate : prev));
+      }
     }
   }, [selectedDateFilter]);
 

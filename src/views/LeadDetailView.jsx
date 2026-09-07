@@ -1,21 +1,13 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import {
   LuChevronRight,
-  LuHouse,
-  LuArrowLeft,
-  LuUser,
-  LuBuilding2,
   LuPhone,
   LuMail,
   LuClock,
   LuTriangleAlert,
-  LuFileText,
   LuTrendingUp,
   LuPlus,
-  LuCircleCheck,
-  LuSend,
-  LuMessageSquare,
-  LuDollarSign
+  LuMessageSquare
 } from 'react-icons/lu';
 
 export default function LeadDetailView({
@@ -25,28 +17,11 @@ export default function LeadDetailView({
   onQuickAction,
   onNavigateToAccount,
   navigationSource = 'leads',
-  fromDashboard = false,
   onNavigateToActivities,
   onNavigateToProposals,
   onNavigateToContacts
 }) {
-  const [newNote, setNewNote] = useState('');
-  const [notesList, setNotesList] = useState(
-    lead.notes ? lead.notes.split('\n').filter(Boolean) : ['Initial lead inquiry received via website.']
-  );
-
-  useEffect(() => {
-    if (lead.notes) {
-      setNotesList(lead.notes.split('\n').filter(Boolean));
-    }
-  }, [lead.notes]);
-
-  const handleAddNote = (e) => {
-    e.preventDefault();
-    if (!newNote.trim()) return;
-    setNotesList([...notesList, `• ${newNote.trim()}`]);
-    setNewNote('');
-  };
+  const notesList = lead.notes ? lead.notes.split('\n').filter(Boolean) : ['Initial lead inquiry received via website.'];
 
   const stages = ['New', 'Contacted', 'Qualified', 'Discussion', 'Proposal', 'Negotiation'];
   const currentStageIndex = stages.indexOf(lead.status) !== -1 ? stages.indexOf(lead.status) : 0;
@@ -146,41 +121,45 @@ export default function LeadDetailView({
 
       {/* 2. Top Summary Header Card */}
       <div className="section-card" style={{ marginBottom: '1.25rem', padding: '1.25rem 1.5rem' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.35rem' }}>
-          {lead.isOverdue && (
-            <span className="overdue-badge-pill" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem', backgroundColor: '#063669', color: '#FFFFFF', padding: '0.2rem 0.55rem', borderRadius: '6px', fontSize: '0.725rem', fontWeight: 700 }}>
-              <LuTriangleAlert size={12} /> OVERDUE FOLLOW-UP
-            </span>
-          )}
-        </div>
-        <h1 style={{ fontSize: '1.65rem', fontWeight: 800, color: '#063669', margin: '0 0 0.35rem 0', letterSpacing: '-0.02em' }}>
-          {lead.leadName}
-        </h1>
-        <div style={{ fontSize: '0.95rem', color: '#557396' }}>
-          {lead.designation} at{' '}
-          <button
-            type="button"
-            onClick={() => onNavigateToAccount && onNavigateToAccount(lead.company)}
-            style={{ background: 'none', border: 'none', padding: 0, font: 'inherit', fontWeight: 700, color: '#063669', cursor: 'pointer', textDecoration: 'underline' }}
-            title={`Open ${lead.company} account dossier`}
-          >
-            {lead.company}
-          </button>
-        </div>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem' }}>
+          <div>
+            {lead.isOverdue && (
+              <div style={{ marginBottom: '0.35rem' }}>
+                <span className="overdue-badge-pill" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem', backgroundColor: '#063669', color: '#FFFFFF', padding: '0.2rem 0.55rem', borderRadius: '6px', fontSize: '0.725rem', fontWeight: 700 }}>
+                  <LuTriangleAlert size={12} /> OVERDUE FOLLOW-UP
+                </span>
+              </div>
+            )}
+            <h1 style={{ fontSize: '1.65rem', fontWeight: 800, color: '#063669', margin: '0 0 0.35rem 0', letterSpacing: '-0.02em' }}>
+              {lead.leadName}
+            </h1>
+            <div style={{ fontSize: '0.95rem', color: '#557396' }}>
+              {lead.designation} at{' '}
+              <button
+                type="button"
+                onClick={() => onNavigateToAccount && onNavigateToAccount(lead.company)}
+                style={{ background: 'none', border: 'none', padding: 0, font: 'inherit', fontWeight: 700, color: '#063669', cursor: 'pointer', textDecoration: 'underline' }}
+                title={`Open ${lead.company} account dossier`}
+              >
+                {lead.company}
+              </button>
+            </div>
+          </div>
 
-        <div style={{ display: 'flex', gap: '0.65rem', alignItems: 'center', marginTop: '1.25rem' }}>
-          <button
-            className="btn-primary"
-            style={{ padding: '0.45rem 0.95rem', fontSize: '0.85rem' }}
-            onClick={() => onQuickAction && onQuickAction('convertOpportunity', lead)}
-            title="Convert this lead to a pipeline opportunity"
-          >
-            <LuTrendingUp size={16} /> Convert to Opportunity
-          </button>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
+            <button
+              className="btn-primary"
+              style={{ padding: '0.5rem 1.05rem', fontSize: '0.85rem', display: 'inline-flex', alignItems: 'center', gap: '0.45rem' }}
+              onClick={() => onQuickAction && onQuickAction('convertOpportunity', lead)}
+              title="Convert this lead to a pipeline opportunity"
+            >
+              <LuTrendingUp size={16} /> Convert to Opportunity
+            </button>
+          </div>
         </div>
 
         {/* Quick Action Ribbon */}
-        <div style={{ display: 'flex', gap: '0.5rem', marginTop: '1.25rem', flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', gap: '0.5rem', marginTop: '1.25rem', flexWrap: 'wrap', paddingTop: '1rem', borderTop: '1px solid #F1F5F9' }}>
           <button className="btn-secondary" style={{ fontSize: '0.8rem', padding: '0.35rem 0.75rem' }} onClick={() => onQuickAction && onQuickAction('call', lead)}>
             <LuPhone size={15} /> Log Call
           </button>

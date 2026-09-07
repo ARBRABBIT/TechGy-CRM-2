@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { LuContact, LuSearch, LuBuilding2, LuPhone, LuMail } from 'react-icons/lu';
 import { isDateInFilter } from '../utils/dateUtils';
 
 export default function ContactsView({ contacts = [], onSelectAccount, searchQuery = '', selectedDateFilter = 'This Month' }) {

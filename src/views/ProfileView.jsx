@@ -4,31 +4,18 @@ import {
   LuMail,
   LuPhone,
   LuMapPin,
-  LuBuilding2,
   LuTrendingUp,
-  LuAward,
   LuShield,
-  LuBell,
-  LuLock,
   LuCircleCheck,
-  LuPencil,
   LuSave,
-  LuArrowLeft,
   LuBriefcase,
-  LuUsers,
-  LuTarget,
-  LuFileText,
   LuChevronRight,
   LuLogOut
 } from 'react-icons/lu';
 
 export default function ProfileView({
-  onBack,
   onNavigateHome,
-  leads = [],
   accounts = [],
-  opportunities = [],
-  onSelectLead,
   onSelectAccount,
   onLogout
 }) {
@@ -63,8 +50,6 @@ export default function ProfileView({
     setTimeout(() => setSavedSuccess(false), 3000);
   };
 
-  // Filter records owned by Rajesh Sharma
-  const myLeads = leads.filter(l => l.leadOwner === 'Rajesh Sharma');
   const myAccounts = accounts.filter(a => a.accountOwner === 'Rajesh Sharma');
 
   return (

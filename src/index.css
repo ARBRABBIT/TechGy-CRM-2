@@ -14,10 +14,14 @@
   --text-muted: #557396;
   --primary: #063669;
   --primary-hover: #04264A;
-  --primary-light: #F9F9F9;
-  --alert-red: #063669;
-  --alert-bg: #F9F9F9;
-  --alert-border: #063669;
+  --primary-light: #F0F4F9;
+  --alert-red: #DC2626;
+  --alert-bg: #FEF2F2;
+  --alert-border: #FECACA;
+  --success-green: #059669;
+  --success-bg: #ECFDF5;
+  --warning-amber: #D97706;
+  --warning-bg: #FFFBEB;
   --shadow-sm: 0 2px 8px rgba(6, 54, 105, 0.05);
   --shadow-md: 0 6px 16px rgba(6, 54, 105, 0.07);
   --shadow-lg: 0 12px 24px rgba(6, 54, 105, 0.1);

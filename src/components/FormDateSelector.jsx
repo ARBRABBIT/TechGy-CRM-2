@@ -46,7 +46,7 @@ export default function FormDateSelector({
   const containerRef = useRef(null);
 
   // Parse initial view from value or fallback to current/default
-  const initialDate = parseISOToDate(value) || new Date(2026, 8, 28);
+  const initialDate = parseISOToDate(value) || new Date();
   const [viewYear, setViewYear] = useState(initialDate.getFullYear());
   const [viewMonth, setViewMonth] = useState(initialDate.getMonth());
 
@@ -54,8 +54,8 @@ export default function FormDateSelector({
     if (value) {
       const parsed = parseISOToDate(value);
       if (parsed) {
-        setViewYear(parsed.getFullYear());
-        setViewMonth(parsed.getMonth());
+        setViewYear(prev => (prev !== parsed.getFullYear() ? parsed.getFullYear() : prev));
+        setViewMonth(prev => (prev !== parsed.getMonth() ? parsed.getMonth() : prev));
       }
     }
   }, [value]);
@@ -70,7 +70,9 @@ export default function FormDateSelector({
     if (isOpen) {
       document.addEventListener('mousedown', handleClickOutside);
     }
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
   }, [isOpen]);
 
   const handlePrevMonth = (e) => {
@@ -102,7 +104,7 @@ export default function FormDateSelector({
 
   const handleSetToday = (e) => {
     e.stopPropagation();
-    const today = new Date(2026, 8, 2); // CRM fixed context or current date
+    const today = new Date();
     const iso = formatDateToISO(today);
     setViewYear(today.getFullYear());
     setViewMonth(today.getMonth());
@@ -117,6 +119,7 @@ export default function FormDateSelector({
     const firstDayIndex = new Date(viewYear, viewMonth, 1).getDay();
     const totalDays = new Date(viewYear, viewMonth + 1, 0).getDate();
     const prevMonthTotalDays = new Date(viewYear, viewMonth, 0).getDate();
+    const todayISO = formatDateToISO(new Date());
 
     const cells = [];
 
@@ -132,7 +135,7 @@ export default function FormDateSelector({
     for (let d = 1; d <= totalDays; d++) {
       const iso = formatDateToISO(new Date(viewYear, viewMonth, d));
       const isSelected = value === iso;
-      const isToday = iso === '2026-09-02';
+      const isToday = iso === todayISO;
 
       cells.push({
         type: 'current',

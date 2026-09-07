@@ -9,8 +9,7 @@ import {
   LuTrendingUp,
   LuX,
   LuCheckCheck,
-  LuTrash2,
-  LuExternalLink
+  LuTrash2
 } from 'react-icons/lu';
 import gsap from 'gsap';
 
@@ -28,7 +27,6 @@ export default function NotificationsPopover({
   const [activeTab, setActiveTab] = useState('All');
   const popoverRef = useRef(null);
   const listRef = useRef(null);
-  const isInitialMount = useRef(true);
 
   // Close when clicking outside
   useEffect(() => {

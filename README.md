@@ -1,20 +1,40 @@
-<<<<<<< HEAD
-# TechGy-CRM
-=======
-# React + Vite
+# TechGy Link — Enterprise CRM Workspace
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+TechGy Link is an enterprise CRM platform designed for managing leads, company accounts, sales opportunities, proposals, and customer engagement activities with an Apple-grade, responsive design system.
 
-Currently, two official plugins are available:
+## Key Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- **Executive Dashboard**: Real-time sales KPIs, revenue forecasts, activity tracking, and priority action lists.
+- **Lead Pipeline**: Kanban and list views with stage transitions, custom date filters, and one-click opportunity conversion.
+- **Account Management**: Company dossiers with estimated worth, linked leads, contacts, and activity timelines.
+- **Opportunity & Proposals Tracking**: Pipeline stages, closing probabilities, and commercial documentation tracking.
+- **Interactive Notifications**: Apple-style segmented notifications popover with overdue alerts, unread badges, and toast announcements.
+- **Micro-Interactions**: Smooth GSAP page transitions and Framer Motion spring physics.
 
-## React Compiler
+## Tech Stack
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- **Framework**: Next.js 16 (App Router with Turbopack)
+- **UI & Components**: React 19, React Icons (`react-icons/lu`)
+- **Animation**: GSAP + Framer Motion
+- **Data Visualizations**: Recharts
+- **Linting**: Oxlint
 
-## Expanding the Oxlint configuration
+## Getting Started
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and Oxlint's TypeScript related rules in your project.
->>>>>>> 3001528 (feat: complete TechGy CRM Internal dashboard with dynamic page transitions, notifications, breadcrumbs, framer motion & responsive UI)
+### Development
+```bash
+npm install
+npm run dev
+```
+Open [http://localhost:3000](http://localhost:3000) in your browser.
+
+### Production Build
+```bash
+npm run build
+npm run start
+```
+
+### Linting
+```bash
+npm run lint
+```

@@ -7,7 +7,6 @@ import {
   LuCalendar,
   LuFileText,
   LuContact,
-  LuShieldCheck,
   LuPanelLeft,
   LuX
 } from 'react-icons/lu';

@@ -13,6 +13,13 @@ const STAGE_DEFAULT_PROBABILITIES = {
   'Lost': '0%'
 };
 
+const getTodayStr = () => new Date().toISOString().split('T')[0];
+const getFutureDateStr = (days = 30) => {
+  const d = new Date();
+  d.setDate(d.getDate() + days);
+  return d.toISOString().split('T')[0];
+};
+
 export default function CommonActionsModal({ isOpen, onClose, onSave, initialType = 'createLead' }) {
   const [actionType, setActionType] = useState(initialType);
   const [formData, setFormData] = useState({
@@ -27,12 +34,12 @@ export default function CommonActionsModal({ isOpen, onClose, onSave, initialTyp
     priority: 'Medium',
     notes: '',
     nextAction: '',
-    dueDate: '2026-09-02',
+    dueDate: getTodayStr(),
     opportunityName: '',
     estimatedValue: '',
     currentStage: 'Qualified',
     probability: '60%',
-    closeDate: '2026-09-28'
+    closeDate: getFutureDateStr(30)
   });
 
   const overlayRef = useRef(null);
@@ -40,12 +47,18 @@ export default function CommonActionsModal({ isOpen, onClose, onSave, initialTyp
 
   useEffect(() => {
     if (isOpen) {
-      setActionType(initialType);
       if (cardRef.current) {
         animateModalEnter(cardRef.current, overlayRef.current);
       }
     }
-  }, [initialType, isOpen]);
+  }, [isOpen]);
+
+  // Sync actionType when initialType changes and modal opens
+  useEffect(() => {
+    if (isOpen && initialType) {
+      setActionType(prev => (prev !== initialType ? initialType : prev));
+    }
+  }, [isOpen, initialType]);
 
   if (!isOpen) return null;
 

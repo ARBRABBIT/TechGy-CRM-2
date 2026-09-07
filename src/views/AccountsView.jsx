@@ -1,5 +1,5 @@
 import React from 'react';
-import { LuBuilding2, LuGlobe, LuMapPin, LuUsers, LuFileText, LuChevronRight } from 'react-icons/lu';
+import { LuBuilding2, LuGlobe, LuMapPin, LuChevronRight } from 'react-icons/lu';
 import { isDateInFilter } from '../utils/dateUtils';
 
 export default function AccountsView({

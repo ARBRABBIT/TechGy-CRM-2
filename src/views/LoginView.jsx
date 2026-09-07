@@ -30,14 +30,21 @@ export default function LoginView({ onLoginSuccess, initialMode = 'login' }) {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
   const [resetEmailSent, setResetEmailSent] = useState(false);
   const [resetEmail, setResetEmail] = useState('');
 
   const currentRole = ROLES.find(r => r.id === selectedRoleId) || ROLES[0];
 
-
   const handleLoginSubmit = (e) => {
     e.preventDefault();
+    setErrorMessage('');
+
+    if (!password || password.length < 4) {
+      setErrorMessage('Password must be at least 4 characters long.');
+      return;
+    }
+
     setIsSubmitting(true);
     setTimeout(() => {
       setIsSubmitting(false);
@@ -48,7 +55,7 @@ export default function LoginView({ onLoginSuccess, initialMode = 'login' }) {
           name: currentRole.id === 'admin' ? 'System Administrator' : (currentRole.id === 'rep' ? 'Rajesh Sharma' : 'Priya Patel')
         });
       }
-    }, 600);
+    }, 500);
   };
 
   const handleForgotSubmit = (e) => {
@@ -58,7 +65,7 @@ export default function LoginView({ onLoginSuccess, initialMode = 'login' }) {
     setTimeout(() => {
       setIsSubmitting(false);
       setResetEmailSent(true);
-    }, 600);
+    }, 500);
   };
 
   return (
@@ -176,15 +183,51 @@ export default function LoginView({ onLoginSuccess, initialMode = 'login' }) {
 
               <div className="security-notice-footer">
                 <LuShieldCheck size={18} className="shield-icon" />
-                <span>Secured by TechGy Link. End-to-end encrypted connection.</span>
+                <span>TechGy Link Enterprise Workspace • Protected CRM Session</span>
               </div>
             </div>
           )
         ) : (
           /* ================= Standard Login View ================= */
           <div className="login-card-box">
+            {/* Role Switcher Pills */}
+            <div style={{ display: 'flex', gap: '0.4rem', marginBottom: '1.25rem', backgroundColor: '#F1F5F9', padding: '3px', borderRadius: '8px' }}>
+              {ROLES.map(role => (
+                <button
+                  key={role.id}
+                  type="button"
+                  onClick={() => {
+                    setSelectedRoleId(role.id);
+                    setLoginId(role.email);
+                    setErrorMessage('');
+                  }}
+                  style={{
+                    flex: 1,
+                    border: 'none',
+                    padding: '0.35rem 0.5rem',
+                    borderRadius: '6px',
+                    fontSize: '0.75rem',
+                    fontWeight: selectedRoleId === role.id ? 700 : 500,
+                    backgroundColor: selectedRoleId === role.id ? '#FFFFFF' : 'transparent',
+                    color: selectedRoleId === role.id ? '#063669' : '#557396',
+                    boxShadow: selectedRoleId === role.id ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
+                    cursor: 'pointer',
+                    transition: 'all 0.15s ease'
+                  }}
+                >
+                  {role.title.replace(' Access', '')}
+                </button>
+              ))}
+            </div>
+
             <h1 className="login-title">{currentRole.title}</h1>
             <p className="login-subtitle">{currentRole.desc}</p>
+
+            {errorMessage && (
+              <div style={{ backgroundColor: '#FEF2F2', border: '1px solid #FECACA', color: '#DC2626', padding: '0.5rem 0.75rem', borderRadius: '8px', fontSize: '0.8rem', marginBottom: '1rem', fontWeight: 500 }}>
+                {errorMessage}
+              </div>
+            )}
 
             <form onSubmit={handleLoginSubmit} className="login-form">
               {/* Login ID Input */}
@@ -233,7 +276,7 @@ export default function LoginView({ onLoginSuccess, initialMode = 'login' }) {
                   type="button"
                   className="forgot-link-btn"
                   onClick={() => {
-                    setResetEmail(loginId);
+                    setResetEmail(loginId || currentRole.email);
                     setResetEmailSent(false);
                     setViewMode('forgot');
                   }}
@@ -251,14 +294,14 @@ export default function LoginView({ onLoginSuccess, initialMode = 'login' }) {
                 {isSubmitting ? (
                   <span className="btn-loading-text">Authenticating...</span>
                 ) : (
-                  <span>Login</span>
+                  <span>Login to Workspace</span>
                 )}
               </button>
 
               {/* Security Encrypted Footer Badge */}
               <div className="security-notice-footer">
                 <LuShieldCheck size={18} className="shield-icon" />
-                <span>Secured by TechGy Link. End-to-end encrypted connection.</span>
+                <span>TechGy Link Enterprise Workspace • Protected CRM Session</span>
               </div>
             </form>
           </div>

@@ -1,20 +1,13 @@
 import React, { useState, useEffect, useRef } from 'react';
 import {
-  LuUsers,
   LuSearch,
-  LuFilter,
   LuPlus,
-  LuBuilding2,
-  LuPhone,
-  LuMail,
   LuClock,
   LuTriangleAlert,
-  LuChevronRight,
-  LuArrowLeft
+  LuChevronRight
 } from 'react-icons/lu';
 import { LEAD_SOURCES, INITIAL_OWNERS } from '../data/mockData';
 import { isDateInFilter } from '../utils/dateUtils';
-import { animateStaggerEntrance } from '../utils/animations';
 
 export default function LeadsView({
   leads = [],
@@ -42,11 +35,13 @@ export default function LeadsView({
   const selectAllRef = useRef(null);
 
   useEffect(() => {
-    setSourceFilter(propSourceFilter || initialFilterSource);
+    const next = propSourceFilter || initialFilterSource;
+    setSourceFilter(prev => (prev !== next ? next : prev));
   }, [propSourceFilter, initialFilterSource]);
 
   useEffect(() => {
-    setOverdueOnly(propOverdueOnlyFilter || initialOverdueOnly);
+    const next = propOverdueOnlyFilter || initialOverdueOnly;
+    setOverdueOnly(prev => (prev !== next ? next : prev));
   }, [propOverdueOnlyFilter, initialOverdueOnly]);
 
   const effectiveSearch = (searchQuery || localSearch).toLowerCase().trim();

@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { 
   LuSearch, 
   LuList, 
@@ -11,9 +11,7 @@ import {
   LuChevronLeft, 
   LuChevronRight,
   LuX,
-  LuCircleCheck,
-  LuGripVertical,
-  LuMoveRight
+  LuGripVertical
 } from 'react-icons/lu';
 import { isDateInFilter } from '../utils/dateUtils';
 
@@ -45,6 +43,11 @@ export default function OpportunitiesView({
   // Combined Search Query (Global Header + Local Page Search)
   const activeSearch = (localSearch || globalSearchQuery).toLowerCase().trim();
 
+  // Reset to page 1 on search / filter change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [activeSearch, selectedStage, selectedOwner]);
+
   // Filtered Opportunities List
   const filteredOpps = useMemo(() => {
     return opportunities.filter(opp => {
@@ -62,11 +65,6 @@ export default function OpportunitiesView({
       return matchesSearch && matchesStage && matchesOwner && matchesGlobalOwner && matchesDate;
     });
   }, [opportunities, activeSearch, selectedStage, selectedOwner, selectedOwnerFilter, selectedDateFilter]);
-
-  // Reset to page 1 on search / filter change
-  useMemo(() => {
-    setCurrentPage(1);
-  }, [activeSearch, selectedStage, selectedOwner]);
 
   // Pagination Slice
   const totalItems = filteredOpps.length;

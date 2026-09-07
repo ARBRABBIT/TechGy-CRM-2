@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { LuLogOut, LuX, LuTriangleAlert } from 'react-icons/lu';
+import { LuLogOut, LuX } from 'react-icons/lu';
 
 export default function LogoutConfirmModal({
   isOpen,

@@ -12,7 +12,7 @@ import {
   LuCalendar,
   LuX
 } from 'react-icons/lu';
-import { INITIAL_OWNERS, INITIAL_DATE_FILTERS } from '../data/mockData';
+import { INITIAL_OWNERS } from '../data/mockData';
 import NotificationsPopover from './NotificationsPopover';
 import CustomDateSelector from './CustomDateSelector';
 
@@ -37,9 +37,7 @@ export default function GlobalHeader({
   onMarkAsRead,
   onMarkAllAsRead,
   onClearAll,
-  onSelectNotification,
-  onOpenProfile,
-  onLogout
+  onSelectNotification
 }) {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);

@@ -1,19 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
-  LuHouse,
   LuChevronRight,
-  LuArrowLeft,
-  LuBuilding2,
   LuGlobe,
   LuMapPin,
   LuUsers,
   LuTrendingUp,
   LuFileText,
-  LuPlus,
-  LuPhone,
-  LuMail,
-  LuClock,
-  LuIndianRupee
+  LuPlus
 } from 'react-icons/lu';
 
 export default function AccountDetailView({
@@ -21,14 +14,12 @@ export default function AccountDetailView({
   onBack,
   onNavigateHome,
   leads = [],
-  activities = [],
   contacts = [],
   opportunities = [],
   proposals = [],
   onSelectLead,
   onOpenCreateModal,
   navigationSource = 'accounts',
-  fromDashboard = false,
   initialTab,
   onNavigateToActivities,
   onNavigateToProposals,
@@ -36,19 +27,9 @@ export default function AccountDetailView({
   onNavigateToOpportunities,
   onNavigateToLeads
 }) {
-  const [activeTab, setActiveTab] = useState(() => {
-    if (initialTab) return initialTab;
-    if (navigationSource === 'proposals') return 'Proposals';
-    return 'Leads';
-  });
-
-  useEffect(() => {
-    if (initialTab) {
-      setActiveTab(initialTab);
-    } else if (navigationSource === 'proposals') {
-      setActiveTab('Proposals');
-    }
-  }, [initialTab, navigationSource]);
+  const defaultTab = initialTab || (navigationSource === 'proposals' ? 'Proposals' : 'Leads');
+  const [selectedTab, setSelectedTab] = useState(null);
+  const activeTab = selectedTab !== null ? selectedTab : defaultTab;
 
   if (!account) {
     return (
@@ -64,11 +45,6 @@ export default function AccountDetailView({
   // Filter linked items safely
   const accountLeads = leads.filter(l => {
     const c = (l.company || l.companyName || '').toLowerCase().trim();
-    return c && compNameLower && (c === compNameLower || c.includes(compNameLower) || compNameLower.includes(c));
-  });
-
-  const accountActivities = activities.filter(act => {
-    const c = (act.company || '').toLowerCase().trim();
     return c && compNameLower && (c === compNameLower || c.includes(compNameLower) || compNameLower.includes(c));
   });
 
@@ -313,7 +289,7 @@ export default function AccountDetailView({
               <div
                 key={tab}
                 className={`tab-item ${activeTab === tab ? 'active' : ''}`}
-                onClick={() => setActiveTab(tab)}
+                onClick={() => setSelectedTab(tab)}
               >
                 {tab} ({
                   tab === 'Leads' ? accountLeads.length :

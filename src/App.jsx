@@ -31,7 +31,24 @@ import {
   INITIAL_CONTACTS,
   INITIAL_NOTIFICATIONS
 } from './data/mockData';
-import { LuCircleCheck, LuBell, LuX } from 'react-icons/lu';
+import { LuCircleCheck, LuX } from 'react-icons/lu';
+
+function loadFromStorage(key, fallback) {
+  if (typeof window === 'undefined') return fallback;
+  try {
+    const item = localStorage.getItem(`techgy_${key}`);
+    return item ? JSON.parse(item) : fallback;
+  } catch {
+    return fallback;
+  }
+}
+
+function saveToStorage(key, data) {
+  if (typeof window === 'undefined') return;
+  try {
+    localStorage.setItem(`techgy_${key}`, JSON.stringify(data));
+  } catch {}
+}
 
 export default function App() {
   // Authentication State (Default to logged in on refresh; support ?view=forgot or ?view=login)
@@ -58,15 +75,24 @@ export default function App() {
   const [selectedDateFilter, setSelectedDateFilter] = useState('This Month');
   const [selectedOwnerFilter, setSelectedOwnerFilter] = useState('All Owners');
 
-  // Relational Data State
-  const [leads, setLeads] = useState(INITIAL_LEADS);
-  const [accounts, setAccounts] = useState(INITIAL_ACCOUNTS);
-  const [activities, setActivities] = useState(INITIAL_ACTIVITIES);
-  const [opportunities, setOpportunities] = useState(INITIAL_OPPORTUNITIES);
-  const [proposals, setProposals] = useState(INITIAL_PROPOSALS);
-  const [contacts, setContacts] = useState(INITIAL_CONTACTS);
-  const [notifications, setNotifications] = useState(INITIAL_NOTIFICATIONS);
+  // Relational Data State (Hydrated from localStorage with mock fallback)
+  const [leads, setLeads] = useState(() => loadFromStorage('leads', INITIAL_LEADS));
+  const [accounts, setAccounts] = useState(() => loadFromStorage('accounts', INITIAL_ACCOUNTS));
+  const [activities, setActivities] = useState(() => loadFromStorage('activities', INITIAL_ACTIVITIES));
+  const [opportunities, setOpportunities] = useState(() => loadFromStorage('opportunities', INITIAL_OPPORTUNITIES));
+  const [proposals, setProposals] = useState(() => loadFromStorage('proposals', INITIAL_PROPOSALS));
+  const [contacts, setContacts] = useState(() => loadFromStorage('contacts', INITIAL_CONTACTS));
+  const [notifications, setNotifications] = useState(() => loadFromStorage('notifications', INITIAL_NOTIFICATIONS));
   const [toastMessage, setToastMessage] = useState(null);
+
+  // Automatically synchronize state changes to localStorage
+  useEffect(() => { saveToStorage('leads', leads); }, [leads]);
+  useEffect(() => { saveToStorage('accounts', accounts); }, [accounts]);
+  useEffect(() => { saveToStorage('activities', activities); }, [activities]);
+  useEffect(() => { saveToStorage('opportunities', opportunities); }, [opportunities]);
+  useEffect(() => { saveToStorage('proposals', proposals); }, [proposals]);
+  useEffect(() => { saveToStorage('contacts', contacts); }, [contacts]);
+  useEffect(() => { saveToStorage('notifications', notifications); }, [notifications]);
 
   // Auto-dismiss toast pop-up notification after 5 seconds
   useEffect(() => {
@@ -398,6 +424,47 @@ export default function App() {
         setSelectedLead({ ...selectedLead, leadOwner: formData.owner });
       }
       pushNotification('Owner Reassigned', `Assigned ${selectedLead.leadName} to ${formData.owner}`, 'Lead', 'leads');
+    } else if (type === 'createActivity') {
+      const newAct = {
+        id: `ACT-${Date.now()}`,
+        title: formData.notes || 'Engagement Activity',
+        type: formData.status || 'Meeting',
+        company: formData.company || (selectedLead ? selectedLead.company : 'Reliance Cloud Solutions'),
+        contactPerson: formData.leadName || (selectedLead ? selectedLead.leadName : 'Contact'),
+        date: formData.dueDate || new Date().toISOString().split('T')[0],
+        time: '14:30',
+        status: 'Scheduled',
+        owner: formData.owner || currentUser.name || 'Rajesh Sharma',
+        notes: formData.notes || 'Activity logged in CRM.'
+      };
+      setActivities([newAct, ...activities]);
+      pushNotification('New Activity Scheduled', `Activity scheduled for ${newAct.company}`, 'Activity', 'activities');
+    } else if (type === 'createProposal') {
+      const newProp = {
+        id: `PROP-${Date.now()}`,
+        title: formData.opportunityName || `${formData.company || 'Enterprise'} Solution Proposal`,
+        company: formData.company || 'Enterprise Account',
+        contactPerson: formData.leadName || 'Procurement Lead',
+        amount: formData.estimatedValue || '₹45,00,000',
+        status: 'Draft',
+        submissionDate: formData.dueDate || new Date().toISOString().split('T')[0],
+        validUntil: formData.closeDate || '2026-10-15',
+        owner: formData.owner || currentUser.name || 'Rajesh Sharma'
+      };
+      setProposals([newProp, ...proposals]);
+      pushNotification('New Proposal Drafted', `Proposal drafted for ${newProp.company}`, 'Proposal', 'proposals');
+    } else if (type === 'createContact') {
+      const newCont = {
+        id: `CONT-${Date.now()}`,
+        name: formData.leadName || 'New Contact',
+        designation: formData.designation || 'Director',
+        company: formData.company || 'Enterprise Account',
+        email: formData.email || 'contact@example.co.in',
+        phone: formData.phone || '+91 98765 00000',
+        owner: formData.owner || currentUser.name || 'Rajesh Sharma'
+      };
+      setContacts([newCont, ...contacts]);
+      pushNotification('New Contact Added', `Added ${newCont.name} to directory`, 'Lead', 'contacts');
     }
   };
 
