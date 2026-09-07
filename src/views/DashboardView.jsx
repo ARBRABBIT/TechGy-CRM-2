@@ -93,15 +93,18 @@ export default function DashboardView({
   const totalCompanies = filteredAccounts.length;
   const totalLeadsCount = filteredLeads.length;
   const overdueLeadsCount = filteredLeads.filter(l => l.isOverdue).length;
-  const todayFollowupsCount = filteredActivities.filter(a => a.type === 'Follow-up').length;
+  const todayFollowupsCount = filteredActivities.filter(a =>
+    a.type === 'Follow-up' && (a.dueToday || isDateInFilter(a.date, 'Today'))
+  ).length;
 
   // Active revenue data based on toggle
   const currentRevObj = REVENUE_DATA[revenueToggle] || REVENUE_DATA.Monthly;
 
-  // Filter follow-up action items (Overdue + Today items)
+  // Filter follow-up action items (Overdue + Today items, sorted with Overdue first)
   const followUpActions = filteredLeads
     .filter(l => l.isOverdue || l.dueToday)
-    .sort(a => (a.isOverdue ? -1 : 1));
+    .sort((a, b) => Number(b.isOverdue) - Number(a.isOverdue));
+
 
   // Y-axis tick formatter for Indian numbers (Lakhs & Crores)
   const formatYAxis = (val) => {

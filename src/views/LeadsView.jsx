@@ -351,7 +351,7 @@ export default function LeadsView({
                       </td>
                       <td>{lead.leadOwner}</td>
                       <td>
-                        <span style={{ color: lead.isOverdue ? '#063669' : '#063669', fontWeight: 600 }}>
+                        <span style={{ color: lead.isOverdue ? '#DC2626' : '#063669', fontWeight: 600 }}>
                           <LuClock size={12} style={{ display: 'inline', marginRight: 4 }} />
                           {lead.nextFollowup}
                         </span>

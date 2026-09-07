@@ -7,34 +7,14 @@ import {
   LuRotateCcw
 } from 'react-icons/lu';
 
-const WEEKDAYS = ['SU', 'MO', 'TU', 'WE', 'TH', 'FR', 'SA'];
-const MONTH_NAMES = [
-  'January', 'February', 'March', 'April', 'May', 'June',
-  'July', 'August', 'September', 'October', 'November', 'December'
-];
+import {
+  WEEKDAYS,
+  MONTH_NAMES,
+  formatDateToISO,
+  parseISOToDate,
+  formatReadableDate
+} from '../utils/dateUtils';
 
-function formatDateToISO(d) {
-  if (!d) return '';
-  const year = d.getFullYear();
-  const month = String(d.getMonth() + 1).padStart(2, '0');
-  const day = String(d.getDate()).padStart(2, '0');
-  return `${year}-${month}-${day}`;
-}
-
-function parseISOToDate(isoStr) {
-  if (!isoStr) return null;
-  const parts = isoStr.split('-');
-  if (parts.length !== 3) return null;
-  return new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10));
-}
-
-function formatReadableDate(isoStr) {
-  const d = parseISOToDate(isoStr);
-  if (!d) return 'Select Date';
-  const monthShort = MONTH_NAMES[d.getMonth()].slice(0, 3);
-  const day = String(d.getDate()).padStart(2, '0');
-  return `${day} ${monthShort} ${d.getFullYear()}`;
-}
 
 export default function FormDateSelector({
   value = '',

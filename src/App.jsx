@@ -32,6 +32,7 @@ import {
   INITIAL_NOTIFICATIONS
 } from './data/mockData';
 import { LuCircleCheck, LuX } from 'react-icons/lu';
+import { getTodayISO, getFutureISO } from './utils/dateUtils';
 
 function loadFromStorage(key, fallback) {
   if (typeof window === 'undefined') return fallback;
@@ -48,6 +49,26 @@ function saveToStorage(key, data) {
   try {
     localStorage.setItem(`techgy_${key}`, JSON.stringify(data));
   } catch {}
+}
+
+function createGeneratedAccount(companyName, overrides = {}) {
+  const comp = companyName || 'Enterprise Account';
+  const sanitized = comp.toLowerCase().replace(/[^a-z0-9]/g, '');
+  return {
+    id: `ACC-GEN-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+    companyName: comp,
+    industry: 'Enterprise Technology',
+    companySize: '100-500 employees',
+    website: `www.${sanitized || 'enterprise'}.co.in`,
+    location: 'Mumbai, MH',
+    accountOwner: 'Rajesh Sharma',
+    estimatedAccountValue: '₹1,00,00,000',
+    leadsCount: 1,
+    contactsCount: 1,
+    oppsCount: 0,
+    proposalsCount: 0,
+    ...overrides
+  };
 }
 
 export default function App() {
@@ -288,8 +309,8 @@ export default function App() {
         visualLevel: 'Medium',
         estimatedValue: '₹1,20,00,000',
         probability: '60%',
-        expectedClosureDate: '2026-09-28',
-        createdDate: new Date().toISOString().split('T')[0],
+        expectedClosureDate: getFutureISO(30),
+        createdDate: getTodayISO(),
         currentStage: 'Qualified',
         owner: lead.leadOwner
       };
@@ -298,7 +319,8 @@ export default function App() {
       setSelectedLead(null);
       setActiveModule('opportunities');
     } else {
-      setModalInitialType(actionType === 'call' || actionType === 'email' || actionType === 'sms' ? 'addNote' : actionType);
+      setModalInitialType(actionType);
+      setSelectedLead(lead);
       setIsCreateModalOpen(true);
     }
   };
@@ -313,14 +335,22 @@ export default function App() {
       setIsProfileActive(false);
       setActiveModule('accounts');
     } else {
-      alert(`Account record for "${companyName}" not found.`);
+      triggerToast(`Account record for "${companyName}" not found.`, 'warning');
     }
   };
 
   // Common Action Save Handler
   const handleSaveAction = (type, formData) => {
+    const isLeadScoped = ['addNote', 'assignOwner', 'changeStatus', 'scheduleFollowup', 'call', 'email', 'sms'].includes(type);
+    const targetLead = selectedLead || leads.find(l => l.id === formData.targetLeadId);
+
+    if (isLeadScoped && !targetLead) {
+      triggerToast('Please select a target lead first.', 'warning');
+      return;
+    }
+
     if (type === 'createOpportunity') {
-      const closeDateFormatted = formData.closeDate || '2026-09-28';
+      const closeDateFormatted = formData.closeDate || getFutureISO(30);
       const oppTitle = formData.opportunityName || `${formData.company || 'Enterprise'} Opportunity`;
       const compName = formData.company || 'Enterprise Client';
       const probVal = formData.probability ? (formData.probability.includes('%') ? formData.probability : `${formData.probability}%`) : '60%';
@@ -333,37 +363,30 @@ export default function App() {
         currentStage: formData.currentStage || 'Qualified',
         probability: probVal,
         expectedClosureDate: closeDateFormatted,
-        createdDate: new Date().toISOString().split('T')[0],
-        owner: formData.owner || 'Rajesh Sharma',
+        createdDate: getTodayISO(),
+        owner: formData.owner || currentUser?.name || 'Rajesh Sharma',
         score: 80,
         visualLevel: 'High'
       };
 
       setOpportunities([newOppObj, ...opportunities]);
       pushNotification('New Opportunity Created', `Opportunity "${oppTitle}" created for ${compName}`, 'Opportunity', 'opportunities');
+      triggerToast(`Opportunity "${oppTitle}" created`, 'success');
 
       // Ensure Account exists or increment its opp count
       const existingAcc = accounts.find(a => a.companyName.toLowerCase() === compName.toLowerCase());
       if (!existingAcc) {
-        const newAcc = {
-          id: `ACC-${Date.now()}`,
-          companyName: compName,
-          industry: 'Enterprise Technology',
-          companySize: '100-500 employees',
-          website: `www.${compName.toLowerCase().replace(/[^a-z]/g, '')}.co.in`,
-          location: 'Mumbai, MH',
-          accountOwner: formData.owner || 'Rajesh Sharma',
+        const newAcc = createGeneratedAccount(compName, {
+          accountOwner: formData.owner || currentUser?.name || 'Rajesh Sharma',
           estimatedAccountValue: formData.estimatedValue || '₹1,00,00,000',
-          leadsCount: 0,
-          contactsCount: 1,
-          oppsCount: 1,
-          proposalsCount: 0
-        };
+          oppsCount: 1
+        });
         setAccounts([newAcc, ...accounts]);
       } else {
         setAccounts(accounts.map(a => a.id === existingAcc.id ? { ...a, oppsCount: (a.oppsCount || 0) + 1 } : a));
       }
     } else if (type === 'createLead') {
+      const dueDateVal = formData.dueDate || getTodayISO();
       const newLeadObj = {
         id: `LD-${Date.now()}`,
         leadName: formData.leadName,
@@ -373,11 +396,11 @@ export default function App() {
         designation: formData.designation || 'Manager',
         leadSource: formData.leadSource || 'Website',
         status: formData.status || 'New',
-        leadOwner: formData.owner || 'Rajesh Sharma',
+        leadOwner: formData.owner || currentUser?.name || 'Rajesh Sharma',
         priority: formData.priority || 'Medium',
-        createdDate: new Date().toISOString().split('T')[0],
+        createdDate: getTodayISO(),
         lastActivity: 'New lead record created in CRM',
-        nextFollowup: `${formData.dueDate} 10:00`,
+        nextFollowup: `${dueDateVal} 10:00`,
         dueToday: true,
         isOverdue: false,
         notes: formData.notes || 'Created via Common Action workspace.',
@@ -385,86 +408,211 @@ export default function App() {
       };
       setLeads([newLeadObj, ...leads]);
       pushNotification('New Lead Created', `Lead "${formData.leadName}" created for ${formData.company}`, 'Lead', 'leads');
+      triggerToast(`Lead "${formData.leadName}" created`, 'success');
 
       // Ensure Account exists
       const existingAcc = accounts.find(a => a.companyName.toLowerCase() === formData.company.toLowerCase());
       if (!existingAcc) {
-        const newAcc = {
-          id: `ACC-${Date.now()}`,
-          companyName: formData.company,
-          industry: 'Enterprise Technology',
-          companySize: '100-500 employees',
-          website: `www.${formData.company.toLowerCase().replace(/[^a-z]/g, '')}.co.in`,
-          location: 'Mumbai, MH',
-          accountOwner: formData.owner || 'Rajesh Sharma',
-          estimatedAccountValue: '₹1,00,00,000',
-          leadsCount: 1,
-          contactsCount: 1,
-          oppsCount: 0,
-          proposalsCount: 0
-        };
+        const newAcc = createGeneratedAccount(formData.company, {
+          accountOwner: formData.owner || currentUser?.name || 'Rajesh Sharma',
+          leadsCount: 1
+        });
         setAccounts([newAcc, ...accounts]);
       }
     } else if (type === 'addNote') {
       const noteText = formData.notes || 'Note added to lead record';
-      const targetLead = selectedLead || leads[0];
-      if (targetLead) {
-        const updatedNotes = `${targetLead.notes || ''}\n• ${noteText}`;
-        const updatedLeads = leads.map(l => l.id === targetLead.id ? { ...l, notes: updatedNotes } : l);
-        setLeads(updatedLeads);
-        if (selectedLead && selectedLead.id === targetLead.id) {
-          setSelectedLead({ ...selectedLead, notes: updatedNotes });
-        }
-        pushNotification('Note Added', `Added note to lead ${targetLead.leadName}`, 'Lead', 'leads');
-      }
-    } else if (type === 'assignOwner' && selectedLead) {
-      const updatedLeads = leads.map(l => l.id === selectedLead.id ? { ...l, leadOwner: formData.owner } : l);
+      const updatedNotes = `${targetLead.notes || ''}\n• ${noteText}`;
+      const lastAct = `Note added: ${noteText.slice(0, 35)}...`;
+      const updatedLeads = leads.map(l => l.id === targetLead.id ? { ...l, notes: updatedNotes, lastActivity: lastAct } : l);
       setLeads(updatedLeads);
-      if (selectedLead) {
-        setSelectedLead({ ...selectedLead, leadOwner: formData.owner });
+      if (selectedLead && selectedLead.id === targetLead.id) {
+        setSelectedLead({ ...selectedLead, notes: updatedNotes, lastActivity: lastAct });
       }
-      pushNotification('Owner Reassigned', `Assigned ${selectedLead.leadName} to ${formData.owner}`, 'Lead', 'leads');
+      pushNotification('Note Added', `Added note to lead ${targetLead.leadName}`, 'Lead', 'leads');
+      triggerToast(`Note added to ${targetLead.leadName}`, 'success');
+    } else if (type === 'assignOwner') {
+      const newOwner = formData.owner || currentUser?.name || 'Rajesh Sharma';
+      const updatedLeads = leads.map(l => l.id === targetLead.id ? { ...l, leadOwner: newOwner } : l);
+      setLeads(updatedLeads);
+      if (selectedLead && selectedLead.id === targetLead.id) {
+        setSelectedLead({ ...selectedLead, leadOwner: newOwner });
+      }
+      pushNotification('Owner Reassigned', `Assigned ${targetLead.leadName} to ${newOwner}`, 'Lead', 'leads');
+      triggerToast(`Assigned ${targetLead.leadName} to ${newOwner}`, 'success');
+    } else if (type === 'changeStatus') {
+      const newStatus = formData.status || 'Contacted';
+      const updatedLeads = leads.map(l => l.id === targetLead.id ? { ...l, status: newStatus } : l);
+      setLeads(updatedLeads);
+      if (selectedLead && selectedLead.id === targetLead.id) {
+        setSelectedLead({ ...selectedLead, status: newStatus });
+      }
+      pushNotification('Status Updated', `Updated status for ${targetLead.leadName} to "${newStatus}"`, 'Lead', 'leads');
+      triggerToast(`Status for ${targetLead.leadName} changed to "${newStatus}"`, 'success');
+    } else if (type === 'scheduleFollowup') {
+      const dateFormatted = formData.dueDate ? formData.dueDate.replace('T', ' ') : `${getTodayISO()} 11:00`;
+      const isDueToday = formData.dueDate ? formData.dueDate.startsWith(getTodayISO()) : true;
+      const nextActionText = formData.nextAction || 'Follow-up scheduled';
+
+      const updatedLeads = leads.map(l => l.id === targetLead.id ? {
+        ...l,
+        nextFollowup: dateFormatted,
+        nextAction: nextActionText,
+        dueToday: isDueToday,
+        isOverdue: false
+      } : l);
+      setLeads(updatedLeads);
+      if (selectedLead && selectedLead.id === targetLead.id) {
+        setSelectedLead({
+          ...selectedLead,
+          nextFollowup: dateFormatted,
+          nextAction: nextActionText,
+          dueToday: isDueToday,
+          isOverdue: false
+        });
+      }
+
+      const newAct = {
+        id: `ACT-${Date.now()}`,
+        type: 'Follow-up',
+        date: dateFormatted,
+        owner: targetLead.leadOwner || currentUser?.name || 'Rajesh Sharma',
+        company: targetLead.company,
+        lead: targetLead.leadName,
+        status: 'Scheduled',
+        notes: nextActionText,
+        dueToday: isDueToday,
+        isOverdue: false
+      };
+      setActivities([newAct, ...activities]);
+      pushNotification('Follow-up Scheduled', `Scheduled follow-up for ${targetLead.leadName} on ${dateFormatted}`, 'Activity', 'activities');
+      triggerToast(`Follow-up scheduled for ${targetLead.leadName}`, 'success');
+    } else if (type === 'call') {
+      const callNotes = formData.notes || 'Call completed with lead';
+      const outcome = formData.outcome || 'Connected - Positive';
+      const duration = formData.duration || '15 mins';
+
+      const newAct = {
+        id: `ACT-${Date.now()}`,
+        type: 'Call',
+        title: `Call: ${outcome}`,
+        date: `${getTodayISO()} ${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`,
+        duration,
+        owner: targetLead.leadOwner || currentUser?.name || 'Rajesh Sharma',
+        company: targetLead.company,
+        lead: targetLead.leadName,
+        outcome,
+        notes: callNotes,
+        status: 'Completed',
+        isOverdue: false
+      };
+      setActivities([newAct, ...activities]);
+
+      const lastAct = `Call logged: ${outcome} (${duration})`;
+      const updatedLeads = leads.map(l => l.id === targetLead.id ? { ...l, lastActivity: lastAct } : l);
+      setLeads(updatedLeads);
+      if (selectedLead && selectedLead.id === targetLead.id) {
+        setSelectedLead({ ...selectedLead, lastActivity: lastAct });
+      }
+
+      pushNotification('Call Logged', `Logged call with ${targetLead.leadName} (${outcome})`, 'Activity', 'activities');
+      triggerToast(`Call recorded for ${targetLead.leadName}`, 'success');
+    } else if (type === 'email') {
+      const emailSubject = formData.subject || 'CRM Solution Follow-up';
+      const emailNotes = formData.notes || 'Sent email communication to lead';
+
+      const newAct = {
+        id: `ACT-${Date.now()}`,
+        type: 'Email',
+        subject: emailSubject,
+        date: `${getTodayISO()} ${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`,
+        owner: targetLead.leadOwner || currentUser?.name || 'Rajesh Sharma',
+        company: targetLead.company,
+        lead: targetLead.leadName,
+        notes: emailNotes,
+        status: 'Completed',
+        isOverdue: false
+      };
+      setActivities([newAct, ...activities]);
+
+      const lastAct = `Email sent: ${emailSubject}`;
+      const updatedLeads = leads.map(l => l.id === targetLead.id ? { ...l, lastActivity: lastAct } : l);
+      setLeads(updatedLeads);
+      if (selectedLead && selectedLead.id === targetLead.id) {
+        setSelectedLead({ ...selectedLead, lastActivity: lastAct });
+      }
+
+      pushNotification('Email Recorded', `Sent email "${emailSubject}" to ${targetLead.leadName}`, 'Activity', 'activities');
+      triggerToast(`Email recorded for ${targetLead.leadName}`, 'success');
+    } else if (type === 'sms') {
+      const smsNotes = formData.notes || 'WhatsApp communication sent';
+
+      const newAct = {
+        id: `ACT-${Date.now()}`,
+        type: 'Follow-up',
+        title: 'WhatsApp Message',
+        date: `${getTodayISO()} ${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`,
+        owner: targetLead.leadOwner || currentUser?.name || 'Rajesh Sharma',
+        company: targetLead.company,
+        lead: targetLead.leadName,
+        notes: smsNotes,
+        status: 'Completed',
+        isOverdue: false
+      };
+      setActivities([newAct, ...activities]);
+
+      const lastAct = 'WhatsApp message sent';
+      const updatedLeads = leads.map(l => l.id === targetLead.id ? { ...l, lastActivity: lastAct } : l);
+      setLeads(updatedLeads);
+      if (selectedLead && selectedLead.id === targetLead.id) {
+        setSelectedLead({ ...selectedLead, lastActivity: lastAct });
+      }
+
+      pushNotification('WhatsApp Logged', `WhatsApp message recorded for ${targetLead.leadName}`, 'Activity', 'activities');
+      triggerToast(`WhatsApp message logged for ${targetLead.leadName}`, 'success');
     } else if (type === 'createActivity') {
       const newAct = {
         id: `ACT-${Date.now()}`,
-        title: formData.notes || 'Engagement Activity',
-        type: formData.status || 'Meeting',
-        company: formData.company || (selectedLead ? selectedLead.company : 'Reliance Cloud Solutions'),
-        contactPerson: formData.leadName || (selectedLead ? selectedLead.leadName : 'Contact'),
-        date: formData.dueDate || new Date().toISOString().split('T')[0],
+        title: formData.nextAction || formData.notes || 'Engagement Activity',
+        type: formData.activityType || formData.status || 'Meeting',
+        company: formData.company || (targetLead ? targetLead.company : 'Reliance Cloud Solutions'),
+        contactPerson: formData.leadName || (targetLead ? targetLead.leadName : 'Contact'),
+        date: formData.dueDate || getTodayISO(),
         time: '14:30',
         status: 'Scheduled',
-        owner: formData.owner || currentUser.name || 'Rajesh Sharma',
+        owner: formData.owner || currentUser?.name || 'Rajesh Sharma',
         notes: formData.notes || 'Activity logged in CRM.'
       };
       setActivities([newAct, ...activities]);
       pushNotification('New Activity Scheduled', `Activity scheduled for ${newAct.company}`, 'Activity', 'activities');
+      triggerToast(`Activity scheduled for ${newAct.company}`, 'success');
     } else if (type === 'createProposal') {
       const newProp = {
         id: `PROP-${Date.now()}`,
         title: formData.opportunityName || `${formData.company || 'Enterprise'} Solution Proposal`,
         company: formData.company || 'Enterprise Account',
-        contactPerson: formData.leadName || 'Procurement Lead',
+        contactPerson: formData.leadName || (targetLead ? targetLead.leadName : 'Procurement Lead'),
         amount: formData.estimatedValue || '₹45,00,000',
         status: 'Draft',
-        submissionDate: formData.dueDate || new Date().toISOString().split('T')[0],
-        validUntil: formData.closeDate || '2026-10-15',
-        owner: formData.owner || currentUser.name || 'Rajesh Sharma'
+        submissionDate: getTodayISO(),
+        validUntil: formData.closeDate || getFutureISO(45),
+        owner: formData.owner || currentUser?.name || 'Rajesh Sharma'
       };
       setProposals([newProp, ...proposals]);
       pushNotification('New Proposal Drafted', `Proposal drafted for ${newProp.company}`, 'Proposal', 'proposals');
+      triggerToast(`Proposal drafted for ${newProp.company}`, 'success');
     } else if (type === 'createContact') {
       const newCont = {
         id: `CONT-${Date.now()}`,
         name: formData.leadName || 'New Contact',
         designation: formData.designation || 'Director',
-        company: formData.company || 'Enterprise Account',
+        company: formData.company || (targetLead ? targetLead.company : 'Enterprise Account'),
         email: formData.email || 'contact@example.co.in',
         phone: formData.phone || '+91 98765 00000',
-        owner: formData.owner || currentUser.name || 'Rajesh Sharma'
+        owner: formData.owner || currentUser?.name || 'Rajesh Sharma'
       };
       setContacts([newCont, ...contacts]);
-      pushNotification('New Contact Added', `Added ${newCont.name} to directory`, 'Lead', 'contacts');
+      pushNotification('New Contact Added', `Added ${newCont.name} to directory`, 'Contact', 'contacts');
+      triggerToast(`Contact added: ${newCont.name}`, 'success');
     }
   };
 
@@ -510,6 +658,9 @@ export default function App() {
         isCollapsed={isSidebarCollapsed}
         setIsCollapsed={setIsSidebarCollapsed}
         onOpenProfile={handleOpenProfile}
+        currentUser={currentUser}
+        overdueCount={leads.filter(l => l.isOverdue).length}
+        tasksCount={activities.filter(a => a.status === 'Scheduled' || a.status === 'Pending' || a.dueToday).length}
       />
 
       {/* Main App Section */}
@@ -730,11 +881,11 @@ export default function App() {
                 <OpportunitiesView
                   opportunities={opportunities}
                   onUpdateOpportunityStage={(oppId, newStage) => {
-                    setOpportunities(prev => prev.map(o => o.id === oppId ? { ...o, currentStage: newStage } : o));
                     const targetOpp = opportunities.find(o => o.id === oppId);
                     if (targetOpp) {
                       pushNotification('Stage Updated', `Moved "${targetOpp.opportunityName}" to ${newStage}`, 'Opportunity', 'opportunities');
                     }
+                    setOpportunities(prev => prev.map(o => o.id === oppId ? { ...o, currentStage: newStage } : o));
                   }}
                   onSelectAccount={(companyName) => {
                     const fullAcc = accounts.find(a => a.companyName.toLowerCase() === companyName.toLowerCase());
@@ -806,20 +957,15 @@ export default function App() {
                     );
 
                     if (!fullAcc && companyName) {
-                      fullAcc = {
-                        id: `ACC-GEN-${Date.now()}`,
-                        companyName: companyName,
-                        industry: 'Enterprise Technology',
+                      fullAcc = createGeneratedAccount(companyName, {
                         companySize: '500-1000 employees',
-                        website: `www.${companyName.toLowerCase().replace(/[^a-z0-9]/g, '')}.com`,
                         location: 'Mumbai HQ, India',
-                        accountOwner: 'Rajesh Sharma',
                         estimatedAccountValue: '₹1,80,00,000',
                         leadsCount: 1,
                         contactsCount: 1,
                         oppsCount: 1,
                         proposalsCount: 1
-                      };
+                      });
                     }
 
                     if (fullAcc) {
@@ -843,20 +989,16 @@ export default function App() {
                     );
 
                     if (!fullAcc && companyName) {
-                      fullAcc = {
-                        id: `ACC-GEN-${Date.now()}`,
-                        companyName: companyName,
+                      fullAcc = createGeneratedAccount(companyName, {
                         industry: 'Enterprise Software',
                         companySize: '500-1000 employees',
-                        website: `www.${companyName.toLowerCase().replace(/[^a-z0-9]/g, '')}.com`,
                         location: 'Mumbai HQ, India',
-                        accountOwner: 'Rajesh Sharma',
                         estimatedAccountValue: '₹1,80,00,000',
                         leadsCount: 2,
                         contactsCount: 4,
                         oppsCount: 1,
                         proposalsCount: 1
-                      };
+                      });
                     }
 
                     if (fullAcc) {
@@ -880,6 +1022,9 @@ export default function App() {
         onClose={() => setIsCreateModalOpen(false)}
         onSave={handleSaveAction}
         initialType={modalInitialType}
+        selectedLead={selectedLead}
+        leads={leads}
+        currentUser={currentUser}
       />
 
       {/* Logout Confirmation Pop-up Modal with Smooth Animation */}

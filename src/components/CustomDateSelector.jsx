@@ -7,7 +7,14 @@ import {
   LuCheck,
   LuRotateCcw
 } from 'react-icons/lu';
-import { getFilterLabel } from '../utils/dateUtils';
+import {
+  getFilterLabel,
+  WEEKDAYS,
+  MONTH_NAMES,
+  formatDateToISO,
+  parseISOToDate,
+  formatReadableDate
+} from '../utils/dateUtils';
 
 const PRESET_OPTIONS = [
   'This Month',
@@ -18,37 +25,6 @@ const PRESET_OPTIONS = [
   'All Time'
 ];
 
-const WEEKDAYS = ['SU', 'MO', 'TU', 'WE', 'TH', 'FR', 'SA'];
-const MONTH_NAMES = [
-  'January', 'February', 'March', 'April', 'May', 'June',
-  'July', 'August', 'September', 'October', 'November', 'December'
-];
-
-// Helper to format Date to YYYY-MM-DD
-function formatDateToISO(d) {
-  if (!d) return '';
-  const year = d.getFullYear();
-  const month = String(d.getMonth() + 1).padStart(2, '0');
-  const day = String(d.getDate()).padStart(2, '0');
-  return `${year}-${month}-${day}`;
-}
-
-// Helper to parse YYYY-MM-DD into Date object
-function parseISOToDate(isoStr) {
-  if (!isoStr) return null;
-  const parts = isoStr.split('-');
-  if (parts.length !== 3) return null;
-  return new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10));
-}
-
-// Format YYYY-MM-DD for readable Apple badge display (e.g., "01 Aug 2026")
-function formatReadableDate(isoStr) {
-  const d = parseISOToDate(isoStr);
-  if (!d) return 'Select';
-  const monthShort = MONTH_NAMES[d.getMonth()].slice(0, 3);
-  const day = String(d.getDate()).padStart(2, '0');
-  return `${day} ${monthShort} ${d.getFullYear()}`;
-}
 
 export default function CustomDateSelector({ selectedDateFilter, setSelectedDateFilter }) {
   const [isOpen, setIsOpen] = useState(false);
@@ -170,8 +146,11 @@ export default function CustomDateSelector({ selectedDateFilter, setSelectedDate
 
   const handleReset = () => {
     setSelectedDateFilter('This Month');
-    setStartDateStr('2026-08-01');
-    setEndDateStr('2026-09-02');
+    const d = new Date();
+    const startStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-01`;
+    const endStr = formatDateToISO(d);
+    setStartDateStr(startStr);
+    setEndDateStr(endStr);
     setPickingMode('start');
     setIsOpen(false);
   };
@@ -181,6 +160,7 @@ export default function CustomDateSelector({ selectedDateFilter, setSelectedDate
     const firstDayIndex = new Date(viewYear, viewMonth, 1).getDay();
     const totalDays = new Date(viewYear, viewMonth + 1, 0).getDate();
     const prevMonthTotalDays = new Date(viewYear, viewMonth, 0).getDate();
+    const todayISO = formatDateToISO(new Date());
 
     const cells = [];
 
@@ -215,7 +195,7 @@ export default function CustomDateSelector({ selectedDateFilter, setSelectedDate
         }
       }
 
-      const isToday = iso === '2026-09-02';
+      const isToday = iso === todayISO || iso === '2026-09-02';
 
       cells.push({
         type: 'current',

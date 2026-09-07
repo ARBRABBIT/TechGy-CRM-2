@@ -12,14 +12,14 @@ import {
 } from 'react-icons/lu';
 import { animateDrawerEnter } from '../utils/animations';
 
-const MODULES = [
-  { id: 'dashboard', title: 'Dashboard', icon: LuLayoutDashboard, badge: null },
-  { id: 'leads', title: 'Leads', icon: LuUsers, badge: { text: '7 Alert', type: 'alert' } },
-  { id: 'accounts', title: 'Accounts', icon: LuBuilding2, badge: null },
-  { id: 'opportunities', title: 'Opportunities', icon: LuTrendingUp, badge: null },
-  { id: 'activities', title: 'Activities', icon: LuCalendar, badge: { text: '14 Tasks', type: 'tasks' } },
-  { id: 'proposals', title: 'Proposals', icon: LuFileText, badge: null },
-  { id: 'contacts', title: 'Contacts', icon: LuContact, badge: null }
+const BASE_MODULES = [
+  { id: 'dashboard', title: 'Dashboard', icon: LuLayoutDashboard },
+  { id: 'leads', title: 'Leads', icon: LuUsers },
+  { id: 'accounts', title: 'Accounts', icon: LuBuilding2 },
+  { id: 'opportunities', title: 'Opportunities', icon: LuTrendingUp },
+  { id: 'activities', title: 'Activities', icon: LuCalendar },
+  { id: 'proposals', title: 'Proposals', icon: LuFileText },
+  { id: 'contacts', title: 'Contacts', icon: LuContact }
 ];
 
 export default function Sidebar({
@@ -29,13 +29,50 @@ export default function Sidebar({
   setMobileOpen,
   isCollapsed,
   setIsCollapsed,
-  onOpenProfile
+  onOpenProfile,
+  currentUser,
+  overdueCount = 0,
+  tasksCount = 0
 }) {
   const [hoverAfterIcons, setHoverAfterIcons] = useState(false);
   const [hoverHeader, setHoverHeader] = useState(false);
   const showToggleIcon = isCollapsed && (hoverHeader || hoverAfterIcons);
   const sidebarRef = useRef(null);
   const backdropRef = useRef(null);
+
+  const userName = currentUser?.name || 'Rajesh Sharma';
+  const initials = userName
+    .split(' ')
+    .filter(Boolean)
+    .map(n => n[0])
+    .join('')
+    .toUpperCase()
+    .slice(0, 2) || 'RS';
+
+  const userRole = currentUser?.role === 'admin'
+    ? 'Administrator'
+    : currentUser?.role === 'manager'
+    ? 'Sales Manager'
+    : currentUser?.role === 'rep'
+    ? 'Sales Representative'
+    : (currentUser?.role || 'Sales Director');
+
+  const navModules = BASE_MODULES.map(item => {
+    if (item.id === 'leads') {
+      return {
+        ...item,
+        badge: overdueCount > 0 ? { text: `${overdueCount} Alert`, type: 'alert' } : null
+      };
+    }
+    if (item.id === 'activities') {
+      return {
+        ...item,
+        badge: tasksCount > 0 ? { text: `${tasksCount} Tasks`, type: 'tasks' } : null
+      };
+    }
+    return { ...item, badge: null };
+  });
+
 
   useEffect(() => {
     if (mobileOpen && sidebarRef.current) {
@@ -144,7 +181,7 @@ export default function Sidebar({
         className="sidebar-menu"
         onMouseEnter={() => setHoverAfterIcons(false)}
       >
-        {MODULES.map((item) => {
+        {navModules.map((item) => {
           const Icon = item.icon;
           const isActive = activeModule === item.id;
           return (
@@ -216,14 +253,14 @@ export default function Sidebar({
               flexShrink: 0
             }}
           >
-            RS
+            {initials}
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', minWidth: 0 }}>
             <span style={{ fontSize: '0.875rem', fontWeight: 700, color: '#063669', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-              Rajesh Sharma
+              {userName}
             </span>
             <span style={{ fontSize: '0.725rem', color: '#557396', whiteSpace: 'nowrap' }}>
-              Sales Director
+              {userRole}
             </span>
           </div>
         </div>
@@ -258,7 +295,7 @@ export default function Sidebar({
               border: 'none'
             }}
           >
-            RS
+            {initials}
           </div>
         </div>
       )}

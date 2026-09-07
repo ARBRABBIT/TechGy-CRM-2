@@ -167,3 +167,44 @@ export function getFilterLabel(filterValue) {
   }
   return 'Custom Date';
 }
+
+// Shared calendar & date constants
+export const WEEKDAYS = ['SU', 'MO', 'TU', 'WE', 'TH', 'FR', 'SA'];
+export const MONTH_NAMES = [
+  'January', 'February', 'March', 'April', 'May', 'June',
+  'July', 'August', 'September', 'October', 'November', 'December'
+];
+
+export function formatDateToISO(d) {
+  if (!d) return '';
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
+export function parseISOToDate(isoStr) {
+  if (!isoStr) return null;
+  const parts = isoStr.split('-');
+  if (parts.length !== 3) return null;
+  return new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10));
+}
+
+export function formatReadableDate(isoStr) {
+  const d = parseISOToDate(isoStr);
+  if (!d) return 'Select Date';
+  const monthShort = MONTH_NAMES[d.getMonth()].slice(0, 3);
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${day} ${monthShort} ${d.getFullYear()}`;
+}
+
+export function getTodayISO() {
+  return formatDateToISO(new Date());
+}
+
+export function getFutureISO(days = 30) {
+  const d = new Date();
+  d.setDate(d.getDate() + days);
+  return formatDateToISO(d);
+}
+
