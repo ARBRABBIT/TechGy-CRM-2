@@ -21,6 +21,7 @@ export default function AccountDetailView({
   onOpenCreateModal,
   navigationSource = 'accounts',
   initialTab,
+  fromDashboard = false,
   onNavigateToActivities,
   onNavigateToProposals,
   onNavigateToContacts,
@@ -50,7 +51,7 @@ export default function AccountDetailView({
 
   const accountContacts = contacts.filter(c => {
     const comp = (c.company || c.companyName || '').toLowerCase().trim();
-    return comp && compNameLower && (comp === compNameLower || comp.includes(compNameLower) || comp.includes(compNameLower));
+    return comp && compNameLower && (comp === compNameLower || comp.includes(compNameLower) || compNameLower.includes(comp));
   });
 
   const accountOpps = opportunities.filter(o => {

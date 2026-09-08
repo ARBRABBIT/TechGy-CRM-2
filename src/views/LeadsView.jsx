@@ -1,10 +1,14 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
   LuSearch,
   LuPlus,
   LuClock,
   LuTriangleAlert,
-  LuChevronRight
+  LuChevronRight,
+  LuUserPlus,
+  LuMail,
+  LuRefreshCw
 } from 'react-icons/lu';
 import { LEAD_SOURCES, INITIAL_OWNERS } from '../data/mockData';
 import { isDateInFilter } from '../utils/dateUtils';
@@ -12,6 +16,7 @@ import { isDateInFilter } from '../utils/dateUtils';
 export default function LeadsView({
   leads = [],
   onSelectLead,
+  onSelectAccount,
   onOpenCreateModal,
   sourceFilter: propSourceFilter = '',
   overdueOnlyFilter: propOverdueOnlyFilter = false,
@@ -45,6 +50,10 @@ export default function LeadsView({
   }, [propOverdueOnlyFilter, initialOverdueOnly]);
 
   const effectiveSearch = (searchQuery || localSearch).toLowerCase().trim();
+  const dateFilterKey = typeof selectedDateFilter === 'object' && selectedDateFilter !== null
+    ? `${selectedDateFilter?.startDate}_${selectedDateFilter?.endDate}_${selectedDateFilter?.label}`
+    : selectedDateFilter;
+  const filterKey = `${sourceFilter}_${statusFilter}_${ownerFilter}_${overdueOnly}_${localSearch}_${searchQuery}_${dateFilterKey}`;
 
   // Multi-field Lead filtering
   const filteredLeads = leads.filter((lead) => {
@@ -52,25 +61,25 @@ export default function LeadsView({
     if (effectiveSearch) {
       const matchName = lead.leadName.toLowerCase().includes(effectiveSearch);
       const matchCompany = lead.company.toLowerCase().includes(effectiveSearch);
-      const matchEmail = lead.emailId.toLowerCase().includes(effectiveSearch);
-      const matchPhone = lead.phoneNumber.toLowerCase().includes(effectiveSearch);
-      const matchDesignation = lead.designation.toLowerCase().includes(effectiveSearch);
+      const matchEmail = (lead.email || lead.emailId || '').toLowerCase().includes(effectiveSearch);
+      const matchPhone = (lead.phone || lead.phoneNumber || '').toLowerCase().includes(effectiveSearch);
+      const matchDesignation = (lead.designation || '').toLowerCase().includes(effectiveSearch);
       if (!matchName && !matchCompany && !matchEmail && !matchPhone && !matchDesignation) {
         return false;
       }
     }
 
-    // 2. Source Filter
-    if (sourceFilter && lead.leadSource !== sourceFilter) {
+    // 2. Lead Source
+    if (sourceFilter && sourceFilter !== 'All Sources' && lead.leadSource !== sourceFilter) {
       return false;
     }
 
-    // 3. Status Filter
-    if (statusFilter !== 'All Statuses' && lead.status !== statusFilter) {
+    // 3. Status Pipeline
+    if (statusFilter && statusFilter !== 'All Statuses' && statusFilter !== 'All Status' && lead.status !== statusFilter) {
       return false;
     }
 
-    // 4. Owner Filter
+    // 4. Owner
     if (ownerFilter !== 'All Owners' && lead.leadOwner !== ownerFilter) {
       return false;
     }
@@ -81,10 +90,11 @@ export default function LeadsView({
     }
 
     // 6. Global Date Filter
-    if (selectedDateFilter && selectedDateFilter !== 'All Time') {
+    // When filtered strictly for overdue records, don't drop active overdue records based on lead creation date;
+    // otherwise, filter leads by their creation date so lead-generation lists respond dynamically to date filters.
+    if (!overdueOnly && selectedDateFilter && selectedDateFilter !== 'All Time') {
       const matchCreated = isDateInFilter(lead.createdDate, selectedDateFilter);
-      const matchFollowup = isDateInFilter(lead.nextFollowup, selectedDateFilter);
-      if (!matchCreated && !matchFollowup) return false;
+      if (!matchCreated) return false;
     }
 
     return true;
@@ -120,6 +130,16 @@ export default function LeadsView({
     setSelectedLeadIds((prev) =>
       prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
     );
+  };
+
+  const handleBulkAction = (actionType) => {
+    if (selectedLeadIds.length === 0) return;
+    const firstSelected = leads.find((l) => l.id === selectedLeadIds[0]) || null;
+    if (onOpenCreateModal) {
+      onOpenCreateModal(actionType, firstSelected, selectedLeadIds, () => {
+        setSelectedLeadIds([]);
+      });
+    }
   };
 
   return (
@@ -202,29 +222,35 @@ export default function LeadsView({
             {/* Overdue Alert Filter Toggle */}
             <button
               className={`btn-secondary ${overdueOnly ? 'active' : ''}`}
-              style={overdueOnly ? { background: '#063669', color: 'white', borderColor: '#063669' } : {}}
+              style={overdueOnly ? { background: '#ef4444', color: 'white', borderColor: '#ef4444' } : {}}
               onClick={() => setOverdueOnly(!overdueOnly)}
             >
               <LuTriangleAlert size={14} /> Overdue Only ({leads.filter(l => l.isOverdue).length})
             </button>
 
             {/* Reset Filters */}
-            {(sourceFilter || statusFilter !== 'All Statuses' || ownerFilter !== 'All Owners' || overdueOnly || localSearch) && (
-              <button
-                className="btn-secondary"
-                style={{ fontSize: '0.75rem' }}
-                onClick={() => {
-                  setSourceFilter('');
-                  setStatusFilter('All Statuses');
-                  setOwnerFilter('All Owners');
-                  setOverdueOnly(false);
-                  setLocalSearch('');
-                  if (onClearFilters) onClearFilters();
-                }}
-              >
-                Reset Filters
-              </button>
-            )}
+            <AnimatePresence>
+              {(sourceFilter || statusFilter !== 'All Statuses' || ownerFilter !== 'All Owners' || overdueOnly || localSearch) && (
+                <motion.button
+                  initial={{ opacity: 0, scale: 0.9, x: -4 }}
+                  animate={{ opacity: 1, scale: 1, x: 0 }}
+                  exit={{ opacity: 0, scale: 0.9, x: -4 }}
+                  transition={{ duration: 0.18, ease: [0.22, 1, 0.36, 1] }}
+                  className="btn-secondary"
+                  style={{ fontSize: '0.75rem' }}
+                  onClick={() => {
+                    setSourceFilter('');
+                    setStatusFilter('All Statuses');
+                    setOwnerFilter('All Owners');
+                    setOverdueOnly(false);
+                    setLocalSearch('');
+                    if (onClearFilters) onClearFilters();
+                  }}
+                >
+                  Reset Filters
+                </motion.button>
+              )}
+            </AnimatePresence>
           </div>
         </div>
       </div>
@@ -233,45 +259,106 @@ export default function LeadsView({
       <div className="section-card">
         <div className="section-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-            <h3 className="section-title">
-              Lead Records ({filteredLeads.length})
-            </h3>
-            {selectedLeadIds.length > 0 && (
-              <span
+            <h3 className="section-title" style={{ display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
+              <span>Lead Records</span>
+              <motion.span
+                key={filteredLeads.length}
+                initial={{ scale: 0.82, opacity: 0.6 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
                 style={{
                   fontSize: '0.75rem',
-                  fontWeight: 600,
-                  padding: '0.2rem 0.65rem',
+                  fontWeight: 700,
+                  padding: '0.12rem 0.5rem',
                   borderRadius: '12px',
                   background: '#E6EFF8',
                   color: '#063669',
-                  border: '1px solid rgba(6, 54, 105, 0.15)',
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '0.4rem'
+                  display: 'inline-block'
                 }}
               >
-                {selectedLeadIds.length} selected
-                <button
-                  type="button"
-                  onClick={() => setSelectedLeadIds([])}
-                  style={{
-                    background: 'none',
-                    border: 'none',
-                    padding: 0,
-                    cursor: 'pointer',
-                    color: '#063669',
-                    fontSize: '0.85rem',
-                    fontWeight: 700,
-                    lineHeight: 1
-                  }}
-                  title="Clear selection"
-                  aria-label="Clear selection"
+                {filteredLeads.length}
+              </motion.span>
+            </h3>
+            <AnimatePresence>
+              {selectedLeadIds.length > 0 && (
+                <motion.div
+                  initial={{ opacity: 0, x: -8 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -8 }}
+                  transition={{ duration: 0.18, ease: [0.22, 1, 0.36, 1] }}
+                  style={{ display: 'inline-flex', alignItems: 'center', gap: '0.65rem', flexWrap: 'wrap' }}
                 >
-                  ✕
-                </button>
-              </span>
-            )}
+                  <span
+                    style={{
+                      fontSize: '0.75rem',
+                      fontWeight: 600,
+                      padding: '0.2rem 0.65rem',
+                      borderRadius: '12px',
+                      background: '#E6EFF8',
+                      color: '#063669',
+                      border: '1px solid rgba(6, 54, 105, 0.15)',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '0.4rem'
+                    }}
+                  >
+                    {selectedLeadIds.length} selected
+                    <button
+                      type="button"
+                      onClick={() => setSelectedLeadIds([])}
+                      style={{
+                        background: 'none',
+                        border: 'none',
+                        padding: 0,
+                        cursor: 'pointer',
+                        color: '#063669',
+                        fontSize: '0.85rem',
+                        fontWeight: 700,
+                        lineHeight: 1
+                      }}
+                      title="Clear selection"
+                      aria-label="Clear selection"
+                    >
+                      ✕
+                    </button>
+                  </span>
+
+                  <div className="table-cta-divider" />
+
+                  <div className="table-cta-bar">
+                    <button
+                      type="button"
+                      className="table-cta-btn"
+                      onClick={() => handleBulkAction('assignOwner')}
+                      title="Assign Owner to selected leads"
+                    >
+                      <LuUserPlus size={18} />
+                      <span>Assign Owner</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      className="table-cta-btn"
+                      onClick={() => handleBulkAction('email')}
+                      title="Send email to selected leads"
+                    >
+                      <LuMail size={18} />
+                      <span>Email</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      className="table-cta-btn"
+                      onClick={() => handleBulkAction('changeStatus')}
+                      title="Update pipeline stage for selected leads"
+                    >
+                      <LuRefreshCw size={18} />
+                      <span>Update Stage</span>
+                    </button>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
           <button
             className="btn-primary"
@@ -282,7 +369,7 @@ export default function LeadsView({
           </button>
         </div>
 
-        <div style={{ overflowX: 'auto' }}>
+        <div className="table-responsive-wrapper" style={{ overflowX: 'auto', overflowY: 'hidden', scrollbarWidth: 'none' }}>
           <table className="action-table">
             <thead>
               <tr>
@@ -306,19 +393,36 @@ export default function LeadsView({
                 <th>Action</th>
               </tr>
             </thead>
-            <tbody>
+            <motion.tbody
+              key={filterKey}
+              initial={{ opacity: 0.35 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.28, ease: [0.25, 1, 0.5, 1] }}
+            >
               {filteredLeads.length === 0 ? (
-                <tr>
-                  <td colSpan={9} style={{ textAlign: 'center', padding: '2rem', color: '#557396' }}>
+                <motion.tr
+                  key="no-leads"
+                  initial={{ opacity: 0, y: -4 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.22, ease: [0.25, 1, 0.5, 1] }}
+                >
+                  <td colSpan={9} style={{ textAlign: 'center', padding: '2.5rem 1rem', color: '#557396' }}>
                     No leads found matching current filter criteria.
                   </td>
-                </tr>
+                </motion.tr>
               ) : (
-                filteredLeads.map((lead) => {
+                filteredLeads.map((lead, idx) => {
                   const isSelected = selectedLeadIds.includes(lead.id);
                   return (
-                    <tr
+                    <motion.tr
                       key={lead.id}
+                      initial={{ opacity: 0, y: -4 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{
+                        duration: 0.28,
+                        ease: [0.25, 1, 0.5, 1],
+                        delay: Math.min(idx * 0.022, 0.1)
+                      }}
                       className={`${lead.isOverdue ? 'overdue-row' : ''} ${isSelected ? 'selected-row' : ''}`}
                       onClick={() => onSelectLead(lead)}
                     >
@@ -337,7 +441,34 @@ export default function LeadsView({
                       <td style={{ fontWeight: 700, color: '#063669' }}>
                         {lead.leadName}
                       </td>
-                      <td style={{ fontWeight: 600 }}>{lead.company}</td>
+                      <td
+                        style={{
+                          fontWeight: 600,
+                          cursor: onSelectAccount ? 'pointer' : 'inherit',
+                          transition: 'color 0.15s ease'
+                        }}
+                        onClick={(e) => {
+                          if (onSelectAccount) {
+                            e.stopPropagation();
+                            onSelectAccount(lead.company);
+                          }
+                        }}
+                        onMouseEnter={(e) => {
+                          if (onSelectAccount) {
+                            e.currentTarget.style.color = '#0B57D0';
+                            e.currentTarget.style.textDecoration = 'underline';
+                          }
+                        }}
+                        onMouseLeave={(e) => {
+                          if (onSelectAccount) {
+                            e.currentTarget.style.color = 'inherit';
+                            e.currentTarget.style.textDecoration = 'none';
+                          }
+                        }}
+                        title={onSelectAccount ? `View ${lead.company} account details` : undefined}
+                      >
+                        {lead.company}
+                      </td>
                       <td>{lead.designation}</td>
                       <td>
                         <span className="status-chip new" style={{ fontSize: '0.7rem' }}>
@@ -351,10 +482,41 @@ export default function LeadsView({
                       </td>
                       <td>{lead.leadOwner}</td>
                       <td>
-                        <span style={{ color: lead.isOverdue ? '#DC2626' : '#063669', fontWeight: 600 }}>
-                          <LuClock size={12} style={{ display: 'inline', marginRight: 4 }} />
-                          {lead.nextFollowup}
-                        </span>
+                        <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem', flexWrap: 'nowrap' }}>
+                          <span style={{ color: lead.isOverdue ? '#DC2626' : '#063669', fontWeight: 600, fontSize: '0.8rem', display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}>
+                            <LuClock size={12} style={{ color: lead.isOverdue ? '#DC2626' : '#5f6368' }} />
+                            {lead.nextFollowup}
+                          </span>
+                          {lead.isOverdue ? (
+                            <span style={{
+                              fontSize: '0.62rem',
+                              fontWeight: 700,
+                              color: '#DC2626',
+                              backgroundColor: '#FEE2E2',
+                              border: '1px solid #FECACA',
+                              padding: '1px 5px',
+                              borderRadius: '4px',
+                              textTransform: 'uppercase',
+                              letterSpacing: '0.03em'
+                            }}>
+                              Overdue
+                            </span>
+                          ) : lead.dueToday ? (
+                            <span style={{
+                              fontSize: '0.62rem',
+                              fontWeight: 700,
+                              color: '#0B57D0',
+                              backgroundColor: '#E8F0FE',
+                              border: '1px solid #D2E3FC',
+                              padding: '1px 5px',
+                              borderRadius: '4px',
+                              textTransform: 'uppercase',
+                              letterSpacing: '0.03em'
+                            }}>
+                              Today
+                            </span>
+                          ) : null}
+                        </div>
                       </td>
                       <td>
                         <button
@@ -368,11 +530,11 @@ export default function LeadsView({
                           Inspect <LuChevronRight size={12} />
                         </button>
                       </td>
-                    </tr>
+                    </motion.tr>
                   );
                 })
               )}
-            </tbody>
+            </motion.tbody>
           </table>
         </div>
       </div>

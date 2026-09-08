@@ -11,7 +11,7 @@ export default function ProposalsView({ proposals = [], searchQuery = '', select
       p.notes.toLowerCase().includes(q) ||
       p.owner.toLowerCase().includes(q);
 
-    const matchesDate = isDateInFilter(p.validityDate || p.createdDate, selectedDateFilter);
+    const matchesDate = isDateInFilter(p.proposalDate || p.createdDate, selectedDateFilter);
 
     return matchesSearch && matchesDate;
   });
@@ -57,36 +57,36 @@ export default function ProposalsView({ proposals = [], searchQuery = '', select
                       <button
                         type="button"
                         className="table-link-btn"
-                      onClick={() => handleAccountClick(prop.company)}
-                      title={`View ${prop.company} account details`}
-                      style={{ background: 'none', border: 'none', padding: 0, font: 'inherit', fontWeight: 700, color: '#063669', cursor: 'pointer', textDecoration: 'underline' }}
-                    >
-                      {prop.proposalId}
-                    </button>
-                  </td>
-                  <td>
-                    <button
-                      type="button"
-                      className="table-link-btn"
-                      onClick={() => handleAccountClick(prop.company)}
-                      title={`View ${prop.company} account details`}
-                      style={{ background: 'none', border: 'none', padding: 0, font: 'inherit', fontWeight: 600, color: '#084482', cursor: 'pointer', textDecoration: 'underline' }}
-                    >
-                      {prop.company}
-                    </button>
-                  </td>
-                  <td>{prop.opportunity}</td>
-                  <td style={{ fontWeight: 700 }}>{prop.proposalValue}</td>
-                  <td style={{ color: '#557396' }}>{prop.estimatedAccountWorth}</td>
-                  <td>{prop.validityDate}</td>
-                  <td>
-                    <span className={`status-chip ${prop.status.toLowerCase()}`}>
-                      {prop.status}
-                    </span>
-                  </td>
-                  <td>{prop.owner}</td>
-                </tr>
-              )))}
+                        onClick={() => handleAccountClick(prop.company)}
+                        title={`View ${prop.company} account details`}
+                        style={{ background: 'none', border: 'none', padding: 0, font: 'inherit', fontWeight: 700, color: '#063669', cursor: 'pointer', textDecoration: 'underline' }}
+                      >
+                        {prop.proposalId}
+                      </button>
+                    </td>
+                    <td>
+                      <button
+                        type="button"
+                        className="table-link-btn"
+                        onClick={() => handleAccountClick(prop.company)}
+                        title={`View ${prop.company} account details`}
+                        style={{ background: 'none', border: 'none', padding: 0, font: 'inherit', fontWeight: 600, color: '#084482', cursor: 'pointer', textDecoration: 'underline' }}
+                      >
+                        {prop.company}
+                      </button>
+                    </td>
+                    <td>{prop.opportunity}</td>
+                    <td style={{ fontWeight: 700 }}>{prop.proposalValue}</td>
+                    <td style={{ color: '#557396' }}>{prop.estimatedAccountWorth}</td>
+                    <td>{prop.validityDate}</td>
+                    <td>
+                      <span className={`status-chip ${prop.status.toLowerCase()}`}>
+                        {prop.status}
+                      </span>
+                    </td>
+                    <td>{prop.owner}</td>
+                  </tr>
+                )))}
             </tbody>
           </table>
         </div>

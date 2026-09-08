@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   LuChevronRight,
   LuPhone,
@@ -9,6 +9,7 @@ import {
   LuPlus,
   LuMessageSquare
 } from 'react-icons/lu';
+import ConvertConfirmModal from '../components/ConvertConfirmModal';
 
 export default function LeadDetailView({
   lead,
@@ -21,6 +22,7 @@ export default function LeadDetailView({
   onNavigateToProposals,
   onNavigateToContacts
 }) {
+  const [isConvertModalOpen, setIsConvertModalOpen] = useState(false);
   const notesList = lead.notes ? lead.notes.split('\n').filter(Boolean) : ['Initial lead inquiry received via website.'];
 
   const stages = ['New', 'Contacted', 'Qualified', 'Discussion', 'Proposal', 'Negotiation'];
@@ -125,7 +127,7 @@ export default function LeadDetailView({
           <div>
             {lead.isOverdue && (
               <div style={{ marginBottom: '0.35rem' }}>
-                <span className="overdue-badge-pill" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem', backgroundColor: '#063669', color: '#FFFFFF', padding: '0.2rem 0.55rem', borderRadius: '6px', fontSize: '0.725rem', fontWeight: 700 }}>
+                <span className="overdue-badge-pill" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem', backgroundColor: '#ef4444', color: '#FFFFFF', padding: '0.2rem 0.55rem', borderRadius: '6px', fontSize: '0.725rem', fontWeight: 700 }}>
                   <LuTriangleAlert size={12} /> OVERDUE FOLLOW-UP
                 </span>
               </div>
@@ -150,7 +152,7 @@ export default function LeadDetailView({
             <button
               className="btn-primary"
               style={{ padding: '0.5rem 1.05rem', fontSize: '0.85rem', display: 'inline-flex', alignItems: 'center', gap: '0.45rem' }}
-              onClick={() => onQuickAction && onQuickAction('convertOpportunity', lead)}
+              onClick={() => setIsConvertModalOpen(true)}
               title="Convert this lead to a pipeline opportunity"
             >
               <LuTrendingUp size={16} /> Convert to Opportunity
@@ -242,8 +244,8 @@ export default function LeadDetailView({
           <div className="section-card" style={{ marginBottom: 0 }}>
             <div className="section-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
               <h3 className="section-title">Notes & Logged Requirements</h3>
-              <button 
-                className="btn-primary" 
+              <button
+                className="btn-primary"
                 style={{ fontSize: '0.8rem', padding: '0.45rem 1.1rem', borderRadius: '20px', display: 'flex', alignItems: 'center', gap: '0.4rem', fontWeight: 600 }}
                 onClick={() => onQuickAction('addNote', lead)}
               >
@@ -324,6 +326,18 @@ export default function LeadDetailView({
 
         </div>
       </div>
+
+      {/* Convert to Opportunity Confirmation Pop-up Modal */}
+      <ConvertConfirmModal
+        isOpen={isConvertModalOpen}
+        onClose={() => setIsConvertModalOpen(false)}
+        onConfirm={() => {
+          if (onQuickAction) {
+            onQuickAction('convertOpportunity', lead);
+          }
+        }}
+        lead={lead}
+      />
     </div>
   );
 }

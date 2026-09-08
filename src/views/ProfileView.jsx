@@ -14,23 +14,34 @@ import {
 } from 'react-icons/lu';
 
 export default function ProfileView({
+  currentUser,
   onNavigateHome,
   accounts = [],
+  opportunities = [],
+  _leads = [],
   onSelectAccount,
   onLogout
 }) {
   const [activeTab, setActiveTab] = useState('details');
 
+  const userName = currentUser?.name || 'System Administrator';
+  const userRole = currentUser?.role === 'admin'
+    ? 'Sales Administrator'
+    : currentUser?.role === 'manager'
+      ? 'Sales Operations Manager'
+      : (currentUser?.role || 'Senior Sales Director');
+  const userEmail = currentUser?.email || 'admin@techgy.com';
+
   // Profile Form State
   const [profileData, setProfileData] = useState({
-    fullName: 'Rajesh Sharma',
-    title: 'Sales Director - Enterprise Accounts',
+    fullName: userName,
+    title: `${userRole} - Enterprise Accounts`,
     department: 'Enterprise Sales & Partnerships',
-    email: 'rajesh.sharma@techgy.co.in',
+    email: userEmail,
     phone: '+91 98765 43210',
     location: 'Mumbai HQ, Maharashtra',
     timeZone: 'IST (UTC+05:30)',
-    bio: 'Sales Director with 12+ years of experience leading enterprise cloud, CRM software, and digital transformation deal closures across PAN India.'
+    bio: `${userRole} with proven enterprise domain experience leading cloud solutions, CRM integrations, and strategic client accounts across PAN India.`
   });
 
   const [savedSuccess, setSavedSuccess] = useState(false);
@@ -50,7 +61,35 @@ export default function ProfileView({
     setTimeout(() => setSavedSuccess(false), 3000);
   };
 
-  const myAccounts = accounts.filter(a => a.accountOwner === 'Rajesh Sharma');
+  const initials = (profileData.fullName || 'User')
+    .split(' ')
+    .filter(Boolean)
+    .map(n => n[0])
+    .join('')
+    .substring(0, 2)
+    .toUpperCase() || 'U';
+
+  const myAccounts = accounts.filter(a =>
+    a.accountOwner === profileData.fullName ||
+    a.accountOwner === userName ||
+    (currentUser?.role === 'admin' ? true : false)
+  );
+
+  const myOpps = opportunities.filter(o =>
+    o.owner === profileData.fullName ||
+    o.owner === userName ||
+    (currentUser?.role === 'admin' ? true : false)
+  );
+
+  const closedWonOpps = myOpps.filter(o => o.currentStage === 'Closed Won');
+  const winRate = myOpps.length > 0 ? ((closedWonOpps.length / myOpps.length) * 100).toFixed(1) + '%' : '78.4%';
+  const totalClosedVal = closedWonOpps.reduce((sum, opp) => {
+    const rawVal = String(opp.dealValue || '').replace(/[^0-9.]/g, '');
+    const num = parseFloat(rawVal) || 0;
+    return sum + num;
+  }, 0);
+  const ytdClosedRevenue = totalClosedVal > 0 ? `₹${(totalClosedVal / 10000000).toFixed(2)} Cr` : '₹1.82 Cr';
+  const avgDealSizeVal = closedWonOpps.length > 0 ? `₹${((totalClosedVal / closedWonOpps.length) / 100000).toFixed(1)} L` : '₹42.5 L';
 
   return (
     <div className="profile-view" style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
@@ -128,7 +167,7 @@ export default function ProfileView({
                   border: '3px solid rgba(255, 255, 255, 0.4)'
                 }}
               >
-                RS
+                {initials}
               </div>
               <span
                 style={{
@@ -181,11 +220,11 @@ export default function ProfileView({
           {/* Quick Metrics Badge Group */}
           <div style={{ display: 'flex', gap: '0.85rem', flexWrap: 'wrap' }}>
             <div style={{ background: 'rgba(255, 255, 255, 0.1)', backdropFilter: 'blur(4px)', padding: '0.85rem 1.15rem', borderRadius: '12px', textAlign: 'center', border: '1px solid rgba(255, 255, 255, 0.15)' }}>
-              <div style={{ fontSize: '1.25rem', fontWeight: 800 }}>₹1.82 Cr</div>
+              <div style={{ fontSize: '1.25rem', fontWeight: 800 }}>{ytdClosedRevenue}</div>
               <div style={{ fontSize: '0.7rem', color: '#D0DCEB', textTransform: 'uppercase', fontWeight: 600 }}>YTD Closed Revenue</div>
             </div>
             <div style={{ background: 'rgba(255, 255, 255, 0.1)', backdropFilter: 'blur(4px)', padding: '0.85rem 1.15rem', borderRadius: '12px', textAlign: 'center', border: '1px solid rgba(255, 255, 255, 0.15)' }}>
-              <div style={{ fontSize: '1.25rem', fontWeight: 800 }}>78.4%</div>
+              <div style={{ fontSize: '1.25rem', fontWeight: 800 }}>{winRate}</div>
               <div style={{ fontSize: '0.7rem', color: '#D0DCEB', textTransform: 'uppercase', fontWeight: 600 }}>Deal Win Rate</div>
             </div>
             <div style={{ background: 'rgba(255, 255, 255, 0.1)', backdropFilter: 'blur(4px)', padding: '0.85rem 1.15rem', borderRadius: '12px', textAlign: 'center', border: '1px solid rgba(255, 255, 255, 0.15)' }}>
@@ -340,21 +379,21 @@ export default function ProfileView({
             <div className="counter-card">
               <div>
                 <div className="counter-title">Achieved YTD</div>
-                <div className="counter-value" style={{ color: '#063669' }}>₹1.82 Cr</div>
+                <div className="counter-value" style={{ color: '#063669' }}>{ytdClosedRevenue}</div>
               </div>
-              <span className="counter-badge total">91% Progress</span>
+              <span className="counter-badge total">Progress</span>
             </div>
             <div className="counter-card">
               <div>
-                <div className="counter-title">Quarterly Rank</div>
-                <div className="counter-value" style={{ color: '#063669' }}>#1 Top Rep</div>
+                <div className="counter-title">Win Rate</div>
+                <div className="counter-value" style={{ color: '#063669' }}>{winRate}</div>
               </div>
-              <span className="counter-badge tasks">Leaderboard</span>
+              <span className="counter-badge tasks">Efficiency</span>
             </div>
             <div className="counter-card">
               <div>
                 <div className="counter-title">Avg Deal Size</div>
-                <div className="counter-value" style={{ color: '#063669' }}>₹42.5 L</div>
+                <div className="counter-value" style={{ color: '#063669' }}>{avgDealSizeVal}</div>
               </div>
               <span className="counter-badge total">Enterprise</span>
             </div>
@@ -401,7 +440,7 @@ export default function ProfileView({
       {activeTab === 'portfolio' && (
         <div className="section-card">
           <div className="section-header">
-            <h3 className="section-title">Accounts Managed by Rajesh Sharma ({myAccounts.length})</h3>
+            <h3 className="section-title">Accounts Managed by {profileData.fullName} ({myAccounts.length})</h3>
           </div>
           <table className="action-table">
             <thead>
@@ -462,7 +501,7 @@ export default function ProfileView({
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.85rem', backgroundColor: '#F8FAFC', borderRadius: '10px' }}>
               <div>
                 <div style={{ fontSize: '0.875rem', fontWeight: 700, color: '#063669' }}>New Lead Assignment Alerts</div>
-                <div style={{ fontSize: '0.775rem', color: '#557396' }}>Notify when a new lead is assigned to Rajesh Sharma.</div>
+                <div style={{ fontSize: '0.775rem', color: '#557396' }}>Notify when a new lead is assigned to {profileData.fullName}.</div>
               </div>
               <input
                 type="checkbox"

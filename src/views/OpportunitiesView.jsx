@@ -1,25 +1,26 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { 
-  LuSearch, 
-  LuList, 
-  LuLayoutGrid, 
-  LuFilter, 
-  LuPlus, 
-  LuPhone, 
-  LuMail, 
-  LuMessageSquare, 
-  LuChevronLeft, 
+import {
+  LuSearch,
+  LuList,
+  LuLayoutGrid,
+  LuFilter,
+  LuPlus,
+  LuPhone,
+  LuMail,
+  LuMessageSquare,
+  LuChevronLeft,
   LuChevronRight,
   LuX,
   LuGripVertical
 } from 'react-icons/lu';
 import { isDateInFilter } from '../utils/dateUtils';
+import { INITIAL_OWNERS } from '../data/mockData';
 
-export default function OpportunitiesView({ 
-  opportunities = [], 
+export default function OpportunitiesView({
+  opportunities = [],
   onUpdateOpportunityStage,
-  onSelectAccount, 
-  searchQuery: globalSearchQuery = '', 
+  onSelectAccount,
+  searchQuery: globalSearchQuery = '',
   selectedDateFilter = 'This Month',
   selectedOwnerFilter = 'All Owners',
   onOpenCreateModal,
@@ -51,7 +52,7 @@ export default function OpportunitiesView({
   // Filtered Opportunities List
   const filteredOpps = useMemo(() => {
     return opportunities.filter(opp => {
-      const matchesSearch = !activeSearch || 
+      const matchesSearch = !activeSearch ||
         opp.opportunityName.toLowerCase().includes(activeSearch) ||
         opp.accountName.toLowerCase().includes(activeSearch) ||
         opp.owner.toLowerCase().includes(activeSearch) ||
@@ -129,10 +130,10 @@ export default function OpportunitiesView({
     <div className="opportunities-view-container" style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
       {/* Main Opportunities Queue Card */}
       <div className="section-card" style={{ background: '#FFFFFF', borderRadius: '16px', border: '1px solid #F1F5F9', boxShadow: '0 4px 20px rgba(6, 54, 105, 0.03)', padding: '1.25rem 1.5rem', overflow: 'hidden' }}>
-        
+
         {/* Card Control Header */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1rem', marginBottom: '1.25rem' }}>
-          
+
           {/* Card Title with Red Indicator Dot */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <h3 style={{ fontSize: '1.15rem', fontWeight: 700, color: '#063669', margin: 0 }}>
@@ -149,7 +150,7 @@ export default function OpportunitiesView({
 
           {/* Right Action Controls */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
-            
+
             {/* Search Accounts / Opportunities Input Box */}
             <div style={{ position: 'relative', width: '220px' }}>
               <LuSearch size={15} color="#64748B" style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)' }} />
@@ -329,12 +330,9 @@ export default function OpportunitiesView({
                 style={{ padding: '6px 12px', borderRadius: '8px', border: '1px solid #CBD5E1', background: '#FFFFFF', fontSize: '0.85rem', color: '#0F172A', outline: 'none' }}
               >
                 <option value="All">All Owners</option>
-                <option value="Rahul Verma">Rahul Verma</option>
-                <option value="Priya Sharma">Priya Sharma</option>
-                <option value="Rajesh Sharma">Rajesh Sharma</option>
-                <option value="Priya Patel">Priya Patel</option>
-                <option value="Amit Verma">Amit Verma</option>
-                <option value="Ananya Rao">Ananya Rao</option>
+                {INITIAL_OWNERS.filter(o => o !== 'All Owners').map(o => (
+                  <option key={o} value={o}>{o}</option>
+                ))}
               </select>
             </div>
 
@@ -387,8 +385,8 @@ export default function OpportunitiesView({
                     const probNum = parseInt(opp.probability, 10) || 0;
 
                     return (
-                      <tr 
-                        key={opp.id} 
+                      <tr
+                        key={opp.id}
                         style={{ borderBottom: '1px solid #F8FAFC', transition: 'background-color 0.15s ease' }}
                         onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#F8FAFC'}
                         onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
@@ -396,12 +394,37 @@ export default function OpportunitiesView({
                         {/* Col 1: Opportunity / Account */}
                         <td style={{ padding: '14px' }}>
                           <div
-                            onClick={() => onSelectAccount && onSelectAccount(opp.accountName)}
+                            onClick={() => {
+                              if (onSelectAccount) onSelectAccount(opp.accountName);
+                            }}
                             style={{ fontWeight: 600, color: '#0B57D0', fontSize: '0.925rem', cursor: 'pointer', display: 'inline-block' }}
+                            title={`Open ${opp.accountName} company account`}
                           >
                             {opp.opportunityName}
                           </div>
-                          <div style={{ color: '#64748B', fontSize: '0.825rem', marginTop: '2px' }}>
+                          <div
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              if (onSelectAccount) onSelectAccount(opp.accountName);
+                            }}
+                            style={{
+                              color: '#64748B',
+                              fontSize: '0.825rem',
+                              marginTop: '3px',
+                              cursor: 'pointer',
+                              display: 'inline-block',
+                              transition: 'color 0.15s ease, text-decoration 0.15s ease'
+                            }}
+                            onMouseEnter={(e) => {
+                              e.currentTarget.style.color = '#0B57D0';
+                              e.currentTarget.style.textDecoration = 'underline';
+                            }}
+                            onMouseLeave={(e) => {
+                              e.currentTarget.style.color = '#64748B';
+                              e.currentTarget.style.textDecoration = 'none';
+                            }}
+                            title={`Open ${opp.accountName} company account`}
+                          >
                             {opp.accountName}
                           </div>
                         </td>
@@ -521,8 +544,8 @@ export default function OpportunitiesView({
             alignItems: 'start'
           }}>
             {kanbanColumns.map((stg) => {
-              const colOpps = filteredOpps.filter(o => 
-                o.currentStage === stg || 
+              const colOpps = filteredOpps.filter(o =>
+                o.currentStage === stg ||
                 (stg === 'Proposal Sent' && o.currentStage === 'Proposal')
               );
 
@@ -629,7 +652,9 @@ export default function OpportunitiesView({
                             {/* Card Header: Drag Handle & Title */}
                             <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '6px', marginBottom: '4px' }}>
                               <div
-                                onClick={() => onSelectAccount && onSelectAccount(opp.accountName)}
+                                onClick={() => {
+                                  if (onSelectAccount) onSelectAccount(opp.accountName);
+                                }}
                                 style={{ fontWeight: 700, color: '#0B57D0', fontSize: '0.875rem', cursor: 'pointer', lineHeight: 1.3 }}
                               >
                                 {opp.opportunityName}
@@ -638,7 +663,29 @@ export default function OpportunitiesView({
                             </div>
 
                             {/* Account Name */}
-                            <div style={{ fontSize: '0.785rem', color: '#64748B', marginBottom: '8px' }}>
+                            <div
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                if (onSelectAccount) onSelectAccount(opp.accountName);
+                              }}
+                              style={{
+                                fontSize: '0.785rem',
+                                color: '#64748B',
+                                marginBottom: '8px',
+                                cursor: 'pointer',
+                                display: 'inline-block',
+                                transition: 'color 0.15s ease, text-decoration 0.15s ease'
+                              }}
+                              onMouseEnter={(e) => {
+                                e.currentTarget.style.color = '#0B57D0';
+                                e.currentTarget.style.textDecoration = 'underline';
+                              }}
+                              onMouseLeave={(e) => {
+                                e.currentTarget.style.color = '#64748B';
+                                e.currentTarget.style.textDecoration = 'none';
+                              }}
+                              title={`Open ${opp.accountName} company account`}
+                            >
                               {opp.accountName}
                             </div>
 
@@ -726,7 +773,7 @@ export default function OpportunitiesView({
             flexWrap: 'wrap',
             gap: '1rem'
           }}>
-            
+
             {/* Left Counter Text */}
             <div style={{ fontSize: '0.85rem', color: '#64748B', fontWeight: 500 }}>
               Showing <strong style={{ color: '#0F172A' }}>{totalItems > 0 ? startIndex + 1 : 0} – {Math.min(startIndex + pageSize, totalItems)}</strong> of <strong style={{ color: '#0F172A' }}>{totalItems}</strong> Opportunities

@@ -13,13 +13,14 @@ import {
   MONTH_NAMES,
   formatDateToISO,
   parseISOToDate,
-  formatReadableDate
+  formatReadableDate,
+  getCurrentFiscalYear
 } from '../utils/dateUtils';
 
 const PRESET_OPTIONS = [
   'This Month',
   'This Quarter',
-  'FY 2025-26',
+  getCurrentFiscalYear(),
   'Last 7 Days',
   'Last 30 Days',
   'All Time'
@@ -195,7 +196,7 @@ export default function CustomDateSelector({ selectedDateFilter, setSelectedDate
         }
       }
 
-      const isToday = iso === todayISO || iso === '2026-09-02';
+      const isToday = iso === todayISO;
 
       cells.push({
         type: 'current',

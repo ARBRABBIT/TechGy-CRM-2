@@ -31,8 +31,26 @@ import {
   INITIAL_CONTACTS,
   INITIAL_NOTIFICATIONS
 } from './data/mockData';
-import { LuCircleCheck, LuX } from 'react-icons/lu';
+import { LuCircleCheck, LuX, LuTriangleAlert, LuCircleAlert, LuInfo } from 'react-icons/lu';
 import { getTodayISO, getFutureISO } from './utils/dateUtils';
+
+const DATA_VERSION = 'v3.9_filter_fixes';
+
+// Clean atomic migration on DATA_VERSION change
+if (typeof window !== 'undefined') {
+  try {
+    const currentVer = localStorage.getItem('techgy_data_version');
+    if (currentVer !== DATA_VERSION) {
+      const keysToRemove = [
+        'techgy_leads', 'techgy_accounts', 'techgy_opportunities',
+        'techgy_activities', 'techgy_proposals', 'techgy_contacts',
+        'techgy_notifications'
+      ];
+      keysToRemove.forEach(k => localStorage.removeItem(k));
+      localStorage.setItem('techgy_data_version', DATA_VERSION);
+    }
+  } catch {}
+}
 
 function loadFromStorage(key, fallback) {
   if (typeof window === 'undefined') return fallback;
@@ -48,7 +66,7 @@ function saveToStorage(key, data) {
   if (typeof window === 'undefined') return;
   try {
     localStorage.setItem(`techgy_${key}`, JSON.stringify(data));
-  } catch {}
+  } catch { }
 }
 
 function createGeneratedAccount(companyName, overrides = {}) {
@@ -61,7 +79,7 @@ function createGeneratedAccount(companyName, overrides = {}) {
     companySize: '100-500 employees',
     website: `www.${sanitized || 'enterprise'}.co.in`,
     location: 'Mumbai, MH',
-    accountOwner: 'Rajesh Sharma',
+    accountOwner: overrides.accountOwner || 'Unassigned',
     estimatedAccountValue: '₹1,00,00,000',
     leadsCount: 1,
     contactsCount: 1,
@@ -125,6 +143,54 @@ export default function App() {
     }
   }, [toastMessage]);
 
+  const opportunitiesRef = useRef(opportunities);
+  useEffect(() => {
+    opportunitiesRef.current = opportunities;
+  }, [opportunities]);
+
+  // Recompute overdue and dueToday status at runtime
+  useEffect(() => {
+    const checkOverdueLeads = () => {
+      const now = new Date();
+      const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+      setLeads(prevLeads => {
+        let hasChanged = false;
+        const updated = prevLeads.map(lead => {
+          if (!lead.nextFollowup) return lead;
+
+          let nextFollowup = lead.nextFollowup;
+          // Keep default designated 'Today' mock leads anchored to the current calendar day
+          if (lead.id === 'LD-201' && !lead.customFollowupSet) {
+            nextFollowup = `${todayStr} 15:30`;
+          } else if (lead.id === 'LD-203' && !lead.customFollowupSet) {
+            nextFollowup = `${todayStr} 16:30`;
+          } else if (lead.id === 'LD-206' && !lead.customFollowupSet) {
+            nextFollowup = `${todayStr} 17:00`;
+          } else if (lead.id === 'LD-207' && !lead.customFollowupSet) {
+            nextFollowup = `${todayStr} 18:00`;
+          }
+
+          const followupTs = new Date(nextFollowup.replace(' ', 'T')).getTime();
+          if (isNaN(followupTs)) return lead;
+
+          const isToday = nextFollowup.startsWith(todayStr);
+          const isOverdue = !isToday && followupTs < now.getTime() && lead.status !== 'Converted' && lead.status !== 'Lost';
+
+          if (lead.isOverdue !== isOverdue || lead.dueToday !== isToday || lead.nextFollowup !== nextFollowup) {
+            hasChanged = true;
+            return { ...lead, nextFollowup, isOverdue, dueToday: isToday };
+          }
+          return lead;
+        });
+        return hasChanged ? updated : prevLeads;
+      });
+    };
+
+    checkOverdueLeads();
+    const timer = setInterval(checkOverdueLeads, 60000);
+    return () => clearInterval(timer);
+  }, []);
+
   // Dedicated Full Page Selection States (Replaces side drawers)
   const [selectedLead, setSelectedLead] = useState(null);
   const [selectedAccount, setSelectedAccount] = useState(null);
@@ -136,6 +202,9 @@ export default function App() {
   // Create & Logout Modal States
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [modalInitialType, setModalInitialType] = useState('createLead');
+  const [modalBulkLeadIds, setModalBulkLeadIds] = useState([]);
+  const [modalTargetLead, setModalTargetLead] = useState(null);
+  const [modalBulkCallback, setModalBulkCallback] = useState(null);
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
 
   // Interactive View Filter State
@@ -150,15 +219,32 @@ export default function App() {
     setFromDashboard(false);
   };
 
-  const triggerToast = (payload, desc = '') => {
+  const triggerToast = (payload, descOrType = '') => {
+    let title = '';
+    let description = '';
+    let type = 'success';
+
     if (typeof payload === 'object' && payload !== null) {
-      setToastMessage(payload);
-    } else if (typeof payload === 'string' && payload.includes(': ')) {
-      const [title, ...rest] = payload.split(': ');
-      setToastMessage({ title, description: rest.join(': ') });
-    } else {
-      setToastMessage({ title: payload, description: desc });
+      title = payload.title || '';
+      description = payload.description || '';
+      type = payload.type || 'success';
+    } else if (typeof payload === 'string') {
+      if (['success', 'warning', 'error', 'info'].includes(descOrType)) {
+        type = descOrType;
+        title = payload;
+        description = '';
+      } else if (descOrType) {
+        title = payload;
+        description = descOrType;
+      } else if (payload.includes(': ')) {
+        const [t, ...rest] = payload.split(': ');
+        title = t;
+        description = rest.join(': ');
+      } else {
+        title = payload;
+      }
     }
+    setToastMessage({ title, description, type });
   };
 
   const pushNotification = (title, message, category = 'Lead', targetModule = 'leads') => {
@@ -325,27 +411,50 @@ export default function App() {
     }
   };
 
-  // Navigate directly from Lead to Account full page view
-  const handleNavigateToCompanyAccount = (companyName) => {
-    const parentAcc = accounts.find(a => a.companyName.toLowerCase() === companyName.toLowerCase());
-    if (parentAcc) {
-      setLeadNavSource('leads');
+  // Navigate directly to Account (Company) full page detail view
+  const handleSelectAccountByCompany = (companyInput, source = 'opportunities', initialTab = 'Opportunities') => {
+    const companyName = typeof companyInput === 'string' ? companyInput : (companyInput?.company || companyInput?.companyName || companyInput?.accountName);
+    if (!companyName) return;
+
+    let fullAcc = accounts.find(a =>
+      a.companyName.toLowerCase() === companyName.toLowerCase() ||
+      a.companyName.toLowerCase().includes(companyName.toLowerCase()) ||
+      companyName.toLowerCase().includes(a.companyName.toLowerCase())
+    );
+
+    if (!fullAcc) {
+      fullAcc = createGeneratedAccount(companyName, {
+        accountOwner: currentUser?.name || 'Rahul Verma',
+        industry: companyName.includes('Energy') ? 'Renewable Energy & CleanTech' :
+                  companyName.includes('Retail') ? 'Retail & Consumer Goods' :
+                  companyName.includes('Tech') ? 'Cloud Infrastructure & DevOps' : 'Enterprise Technology',
+        location: 'Mumbai HQ, India',
+        estimatedAccountValue: '₹1,50,00,000'
+      });
+      setAccounts(prev => [fullAcc, ...prev]);
+    }
+
+    if (fullAcc) {
+      setLeadNavSource(source);
+      setAccountInitialTab(initialTab);
       setSelectedLead(null);
-      setSelectedAccount(parentAcc);
+      setSelectedAccount(fullAcc);
       setIsProfileActive(false);
       setActiveModule('accounts');
-    } else {
-      triggerToast(`Account record for "${companyName}" not found.`, 'warning');
     }
+  };
+
+  const handleNavigateToCompanyAccount = (companyName) => {
+    handleSelectAccountByCompany(companyName, 'leads', 'Leads');
   };
 
   // Common Action Save Handler
   const handleSaveAction = (type, formData) => {
     const isLeadScoped = ['addNote', 'assignOwner', 'changeStatus', 'scheduleFollowup', 'call', 'email', 'sms'].includes(type);
-    const targetLead = selectedLead || leads.find(l => l.id === formData.targetLeadId);
+    const targetLead = modalTargetLead || selectedLead || leads.find(l => l.id === formData.targetLeadId);
 
     if (isLeadScoped && !targetLead) {
-      triggerToast('Please select a target lead first.', 'warning');
+      triggerToast({ title: 'No Lead Selected', description: 'Please select a target lead before continuing.', type: 'warning' });
       return;
     }
 
@@ -364,7 +473,7 @@ export default function App() {
         probability: probVal,
         expectedClosureDate: closeDateFormatted,
         createdDate: getTodayISO(),
-        owner: formData.owner || currentUser?.name || 'Rajesh Sharma',
+        owner: formData.owner || currentUser?.name || 'Unassigned',
         score: 80,
         visualLevel: 'High'
       };
@@ -377,7 +486,7 @@ export default function App() {
       const existingAcc = accounts.find(a => a.companyName.toLowerCase() === compName.toLowerCase());
       if (!existingAcc) {
         const newAcc = createGeneratedAccount(compName, {
-          accountOwner: formData.owner || currentUser?.name || 'Rajesh Sharma',
+          accountOwner: formData.owner || currentUser?.name || 'Unassigned',
           estimatedAccountValue: formData.estimatedValue || '₹1,00,00,000',
           oppsCount: 1
         });
@@ -387,6 +496,9 @@ export default function App() {
       }
     } else if (type === 'createLead') {
       const dueDateVal = formData.dueDate || getTodayISO();
+      const followupTs = new Date(`${dueDateVal} 10:00`.replace(' ', 'T')).getTime();
+      const isDueToday = dueDateVal.startsWith(getTodayISO());
+      const isDueOverdue = !isDueToday && !isNaN(followupTs) && followupTs < Date.now();
       const newLeadObj = {
         id: `LD-${Date.now()}`,
         leadName: formData.leadName,
@@ -396,13 +508,13 @@ export default function App() {
         designation: formData.designation || 'Manager',
         leadSource: formData.leadSource || 'Website',
         status: formData.status || 'New',
-        leadOwner: formData.owner || currentUser?.name || 'Rajesh Sharma',
+        leadOwner: formData.owner || currentUser?.name || 'Unassigned',
         priority: formData.priority || 'Medium',
         createdDate: getTodayISO(),
         lastActivity: 'New lead record created in CRM',
         nextFollowup: `${dueDateVal} 10:00`,
-        dueToday: true,
-        isOverdue: false,
+        dueToday: isDueToday,
+        isOverdue: isDueOverdue,
         notes: formData.notes || 'Created via Common Action workspace.',
         nextAction: formData.nextAction || 'Schedule introductory discovery call'
       };
@@ -414,7 +526,7 @@ export default function App() {
       const existingAcc = accounts.find(a => a.companyName.toLowerCase() === formData.company.toLowerCase());
       if (!existingAcc) {
         const newAcc = createGeneratedAccount(formData.company, {
-          accountOwner: formData.owner || currentUser?.name || 'Rajesh Sharma',
+          accountOwner: formData.owner || currentUser?.name || 'Unassigned',
           leadsCount: 1
         });
         setAccounts([newAcc, ...accounts]);
@@ -431,26 +543,36 @@ export default function App() {
       pushNotification('Note Added', `Added note to lead ${targetLead.leadName}`, 'Lead', 'leads');
       triggerToast(`Note added to ${targetLead.leadName}`, 'success');
     } else if (type === 'assignOwner') {
-      const newOwner = formData.owner || currentUser?.name || 'Rajesh Sharma';
-      const updatedLeads = leads.map(l => l.id === targetLead.id ? { ...l, leadOwner: newOwner } : l);
+      const newOwner = formData.owner || currentUser?.name || 'Unassigned';
+      const targetIds = formData.bulkLeadIds || (targetLead ? [targetLead.id] : []);
+      const targetIdSet = new Set(targetIds);
+      const updatedLeads = leads.map(l => targetIdSet.has(l.id) ? { ...l, leadOwner: newOwner } : l);
       setLeads(updatedLeads);
-      if (selectedLead && selectedLead.id === targetLead.id) {
+      if (selectedLead && targetIdSet.has(selectedLead.id)) {
         setSelectedLead({ ...selectedLead, leadOwner: newOwner });
       }
-      pushNotification('Owner Reassigned', `Assigned ${targetLead.leadName} to ${newOwner}`, 'Lead', 'leads');
-      triggerToast(`Assigned ${targetLead.leadName} to ${newOwner}`, 'success');
+      const count = targetIds.length;
+      const msg = count > 1 ? `Assigned ${count} leads to ${newOwner}` : `Assigned ${targetLead?.leadName || 'lead'} to ${newOwner}`;
+      pushNotification('Owner Reassigned', msg, 'Lead', 'leads');
+      triggerToast(msg, 'success');
     } else if (type === 'changeStatus') {
       const newStatus = formData.status || 'Contacted';
-      const updatedLeads = leads.map(l => l.id === targetLead.id ? { ...l, status: newStatus } : l);
+      const targetIds = formData.bulkLeadIds || (targetLead ? [targetLead.id] : []);
+      const targetIdSet = new Set(targetIds);
+      const updatedLeads = leads.map(l => targetIdSet.has(l.id) ? { ...l, status: newStatus } : l);
       setLeads(updatedLeads);
-      if (selectedLead && selectedLead.id === targetLead.id) {
+      if (selectedLead && targetIdSet.has(selectedLead.id)) {
         setSelectedLead({ ...selectedLead, status: newStatus });
       }
-      pushNotification('Status Updated', `Updated status for ${targetLead.leadName} to "${newStatus}"`, 'Lead', 'leads');
-      triggerToast(`Status for ${targetLead.leadName} changed to "${newStatus}"`, 'success');
+      const count = targetIds.length;
+      const msg = count > 1 ? `Updated stage to "${newStatus}" for ${count} leads` : `Status for ${targetLead?.leadName || 'lead'} changed to "${newStatus}"`;
+      pushNotification('Status Updated', msg, 'Lead', 'leads');
+      triggerToast(msg, 'success');
     } else if (type === 'scheduleFollowup') {
       const dateFormatted = formData.dueDate ? formData.dueDate.replace('T', ' ') : `${getTodayISO()} 11:00`;
       const isDueToday = formData.dueDate ? formData.dueDate.startsWith(getTodayISO()) : true;
+      const parsedFollowupDate = new Date(dateFormatted.replace(' ', 'T')).getTime();
+      const isFollowupOverdue = !isDueToday && !isNaN(parsedFollowupDate) && parsedFollowupDate < Date.now();
       const nextActionText = formData.nextAction || 'Follow-up scheduled';
 
       const updatedLeads = leads.map(l => l.id === targetLead.id ? {
@@ -458,7 +580,8 @@ export default function App() {
         nextFollowup: dateFormatted,
         nextAction: nextActionText,
         dueToday: isDueToday,
-        isOverdue: false
+        isOverdue: isFollowupOverdue,
+        customFollowupSet: true
       } : l);
       setLeads(updatedLeads);
       if (selectedLead && selectedLead.id === targetLead.id) {
@@ -467,7 +590,8 @@ export default function App() {
           nextFollowup: dateFormatted,
           nextAction: nextActionText,
           dueToday: isDueToday,
-          isOverdue: false
+          isOverdue: isFollowupOverdue,
+          customFollowupSet: true
         });
       }
 
@@ -475,13 +599,13 @@ export default function App() {
         id: `ACT-${Date.now()}`,
         type: 'Follow-up',
         date: dateFormatted,
-        owner: targetLead.leadOwner || currentUser?.name || 'Rajesh Sharma',
+        owner: targetLead.leadOwner || currentUser?.name || 'Unassigned',
         company: targetLead.company,
         lead: targetLead.leadName,
         status: 'Scheduled',
         notes: nextActionText,
         dueToday: isDueToday,
-        isOverdue: false
+        isOverdue: isFollowupOverdue
       };
       setActivities([newAct, ...activities]);
       pushNotification('Follow-up Scheduled', `Scheduled follow-up for ${targetLead.leadName} on ${dateFormatted}`, 'Activity', 'activities');
@@ -497,7 +621,7 @@ export default function App() {
         title: `Call: ${outcome}`,
         date: `${getTodayISO()} ${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`,
         duration,
-        owner: targetLead.leadOwner || currentUser?.name || 'Rajesh Sharma',
+        owner: targetLead.leadOwner || currentUser?.name || 'Unassigned',
         company: targetLead.company,
         lead: targetLead.leadName,
         outcome,
@@ -519,30 +643,35 @@ export default function App() {
     } else if (type === 'email') {
       const emailSubject = formData.subject || 'CRM Solution Follow-up';
       const emailNotes = formData.notes || 'Sent email communication to lead';
+      const targetIds = formData.bulkLeadIds || (targetLead ? [targetLead.id] : []);
+      const targetIdSet = new Set(targetIds);
+      const targetLeadsList = leads.filter(l => targetIdSet.has(l.id));
 
-      const newAct = {
-        id: `ACT-${Date.now()}`,
+      const newActivities = (targetLeadsList.length > 0 ? targetLeadsList : (targetLead ? [targetLead] : [])).map((tl, index) => ({
+        id: `ACT-${Date.now()}-${index}`,
         type: 'Email',
         subject: emailSubject,
         date: `${getTodayISO()} ${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`,
-        owner: targetLead.leadOwner || currentUser?.name || 'Rajesh Sharma',
-        company: targetLead.company,
-        lead: targetLead.leadName,
+        owner: tl.leadOwner || currentUser?.name || 'Unassigned',
+        company: tl.company,
+        lead: tl.leadName,
         notes: emailNotes,
         status: 'Completed',
         isOverdue: false
-      };
-      setActivities([newAct, ...activities]);
+      }));
+      setActivities([...newActivities, ...activities]);
 
       const lastAct = `Email sent: ${emailSubject}`;
-      const updatedLeads = leads.map(l => l.id === targetLead.id ? { ...l, lastActivity: lastAct } : l);
+      const updatedLeads = leads.map(l => targetIdSet.has(l.id) ? { ...l, lastActivity: lastAct } : l);
       setLeads(updatedLeads);
-      if (selectedLead && selectedLead.id === targetLead.id) {
+      if (selectedLead && targetIdSet.has(selectedLead.id)) {
         setSelectedLead({ ...selectedLead, lastActivity: lastAct });
       }
 
-      pushNotification('Email Recorded', `Sent email "${emailSubject}" to ${targetLead.leadName}`, 'Activity', 'activities');
-      triggerToast(`Email recorded for ${targetLead.leadName}`, 'success');
+      const count = targetIds.length;
+      const msg = count > 1 ? `Email "${emailSubject}" sent to ${count} leads` : `Sent email "${emailSubject}" to ${targetLead?.leadName || 'lead'}`;
+      pushNotification('Email Recorded', msg, 'Activity', 'activities');
+      triggerToast(msg, 'success');
     } else if (type === 'sms') {
       const smsNotes = formData.notes || 'WhatsApp communication sent';
 
@@ -551,7 +680,7 @@ export default function App() {
         type: 'Follow-up',
         title: 'WhatsApp Message',
         date: `${getTodayISO()} ${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`,
-        owner: targetLead.leadOwner || currentUser?.name || 'Rajesh Sharma',
+        owner: targetLead.leadOwner || currentUser?.name || 'Unassigned',
         company: targetLead.company,
         lead: targetLead.leadName,
         notes: smsNotes,
@@ -579,7 +708,7 @@ export default function App() {
         date: formData.dueDate || getTodayISO(),
         time: '14:30',
         status: 'Scheduled',
-        owner: formData.owner || currentUser?.name || 'Rajesh Sharma',
+        owner: formData.owner || currentUser?.name || 'Unassigned',
         notes: formData.notes || 'Activity logged in CRM.'
       };
       setActivities([newAct, ...activities]);
@@ -595,7 +724,7 @@ export default function App() {
         status: 'Draft',
         submissionDate: getTodayISO(),
         validUntil: formData.closeDate || getFutureISO(45),
-        owner: formData.owner || currentUser?.name || 'Rajesh Sharma'
+        owner: formData.owner || currentUser?.name || 'Unassigned'
       };
       setProposals([newProp, ...proposals]);
       pushNotification('New Proposal Drafted', `Proposal drafted for ${newProp.company}`, 'Proposal', 'proposals');
@@ -608,7 +737,7 @@ export default function App() {
         company: formData.company || (targetLead ? targetLead.company : 'Enterprise Account'),
         email: formData.email || 'contact@example.co.in',
         phone: formData.phone || '+91 98765 00000',
-        owner: formData.owner || currentUser?.name || 'Rajesh Sharma'
+        owner: formData.owner || currentUser?.name || 'Unassigned'
       };
       setContacts([newCont, ...contacts]);
       pushNotification('New Contact Added', `Added ${newCont.name} to directory`, 'Contact', 'contacts');
@@ -620,10 +749,10 @@ export default function App() {
   const currentViewKey = isProfileActive
     ? 'profile'
     : selectedLead
-    ? `lead-${selectedLead.id}`
-    : selectedAccount
-    ? `account-${selectedAccount.id}`
-    : activeModule;
+      ? `lead-${selectedLead.id}`
+      : selectedAccount
+        ? `account-${selectedAccount.id}`
+        : activeModule;
 
   const contentRef = useRef(null);
   useEffect(() => {
@@ -700,6 +829,7 @@ export default function App() {
           {/* User Profile View */}
           {isProfileActive ? (
             <ProfileView
+              currentUser={currentUser}
               onBack={() => setIsProfileActive(false)}
               onNavigateHome={() => {
                 setIsProfileActive(false);
@@ -823,6 +953,7 @@ export default function App() {
                     setSelectedAccount(null);
                     setSelectedLead(lead);
                   }}
+                  onSelectAccount={(comp) => handleSelectAccountByCompany(comp, 'dashboard', 'Leads')}
                   searchQuery={searchQuery}
                   selectedDateFilter={selectedDateFilter}
                   selectedOwnerFilter={selectedOwnerFilter}
@@ -837,8 +968,12 @@ export default function App() {
                     setSelectedAccount(null);
                     setSelectedLead(lead);
                   }}
-                  onOpenCreateModal={() => {
-                    setModalInitialType('createLead');
+                  onSelectAccount={(comp) => handleSelectAccountByCompany(comp, 'leads', 'Leads')}
+                  onOpenCreateModal={(type = 'createLead', targetLead = null, bulkIds = [], onComplete = null) => {
+                    setModalInitialType(type);
+                    setModalBulkLeadIds(bulkIds || []);
+                    setModalTargetLead(targetLead);
+                    setModalBulkCallback(() => onComplete);
                     setIsCreateModalOpen(true);
                   }}
                   searchQuery={searchQuery}
@@ -881,21 +1016,13 @@ export default function App() {
                 <OpportunitiesView
                   opportunities={opportunities}
                   onUpdateOpportunityStage={(oppId, newStage) => {
-                    const targetOpp = opportunities.find(o => o.id === oppId);
+                    const targetOpp = opportunitiesRef.current.find(o => o.id === oppId);
                     if (targetOpp) {
                       pushNotification('Stage Updated', `Moved "${targetOpp.opportunityName}" to ${newStage}`, 'Opportunity', 'opportunities');
                     }
                     setOpportunities(prev => prev.map(o => o.id === oppId ? { ...o, currentStage: newStage } : o));
                   }}
-                  onSelectAccount={(companyName) => {
-                    const fullAcc = accounts.find(a => a.companyName.toLowerCase() === companyName.toLowerCase());
-                    if (fullAcc) {
-                      setLeadNavSource('opportunities');
-                      setSelectedLead(null);
-                      setSelectedAccount(fullAcc);
-                      setActiveModule('accounts');
-                    }
-                  }}
+                  onSelectAccount={(comp) => handleSelectAccountByCompany(comp, 'opportunities', 'Opportunities')}
                   searchQuery={searchQuery}
                   selectedDateFilter={selectedDateFilter}
                   selectedOwnerFilter={selectedOwnerFilter}
@@ -1009,6 +1136,7 @@ export default function App() {
                   }}
                   searchQuery={searchQuery}
                   selectedDateFilter={selectedDateFilter}
+                  selectedOwnerFilter={selectedOwnerFilter}
                 />
               )}
             </>
@@ -1019,10 +1147,24 @@ export default function App() {
       {/* Common Create Modal */}
       <CommonActionsModal
         isOpen={isCreateModalOpen}
-        onClose={() => setIsCreateModalOpen(false)}
-        onSave={handleSaveAction}
+        onClose={() => {
+          setIsCreateModalOpen(false);
+          setModalBulkLeadIds([]);
+          setModalTargetLead(null);
+          setModalBulkCallback(null);
+        }}
+        onSave={(type, data) => {
+          handleSaveAction(type, data);
+          if (modalBulkCallback) {
+            modalBulkCallback();
+            setModalBulkCallback(null);
+          }
+          setModalBulkLeadIds([]);
+          setModalTargetLead(null);
+        }}
         initialType={modalInitialType}
-        selectedLead={selectedLead}
+        selectedLead={modalTargetLead || selectedLead}
+        bulkLeadIds={modalBulkLeadIds}
         leads={leads}
         currentUser={currentUser}
       />
@@ -1040,8 +1182,8 @@ export default function App() {
         <AnimatePresence mode="wait">
           {toastMessage && (
             <motion.div
-              key={typeof toastMessage === 'object' ? `${toastMessage.title}-${toastMessage.description || ''}` : toastMessage}
-              className="toast-banner"
+              key={typeof toastMessage === 'object' ? `${toastMessage.title}-${toastMessage.description || ''}-${toastMessage.type || 'success'}` : toastMessage}
+              className={`toast-banner ${typeof toastMessage === 'object' ? (toastMessage.type || 'success') : 'success'}`}
               initial={{ opacity: 0, y: 35, scale: 0.92, filter: 'blur(4px)' }}
               animate={{ opacity: 1, y: 0, scale: 1, filter: 'blur(0px)' }}
               exit={{
@@ -1060,13 +1202,21 @@ export default function App() {
               whileHover={{ y: -3, transition: { duration: 0.15 } }}
             >
               <div className="toast-icon-wrap">
-                <LuCircleCheck size={18} />
+                {typeof toastMessage === 'object' && toastMessage.type === 'warning' ? (
+                  <LuTriangleAlert size={18} />
+                ) : typeof toastMessage === 'object' && toastMessage.type === 'error' ? (
+                  <LuCircleAlert size={18} />
+                ) : typeof toastMessage === 'object' && toastMessage.type === 'info' ? (
+                  <LuInfo size={18} />
+                ) : (
+                  <LuCircleCheck size={18} />
+                )}
               </div>
               <div className="toast-content">
                 {typeof toastMessage === 'object' ? (
                   <>
                     <div className="toast-title">{toastMessage.title}</div>
-                    {toastMessage.description && (
+                    {toastMessage.description && !['success', 'warning', 'error', 'info'].includes(toastMessage.description) && (
                       <div className="toast-desc">{toastMessage.description}</div>
                     )}
                   </>

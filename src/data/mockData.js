@@ -1,5 +1,6 @@
 // TechGy Internal CRM Mock Data Store
 // Color System: Primary Deep Navy #063669 & Off-White #F9F9F9
+import { getTodayISO, getPastISO, getFutureISO, getCurrentFiscalYear } from '../utils/dateUtils';
 
 export const INITIAL_OWNERS = [
   'All Owners',
@@ -13,7 +14,7 @@ export const INITIAL_OWNERS = [
 export const INITIAL_DATE_FILTERS = [
   'This Month',
   'This Quarter',
-  'FY 2025-26',
+  getCurrentFiscalYear(),
   'All Time'
 ];
 
@@ -146,6 +147,51 @@ export const INITIAL_ACCOUNTS = [
     oppsCount: 1,
     proposalsCount: 0,
     createdDate: '2026-08-25'
+  },
+  {
+    id: 'ACC-106',
+    companyName: 'GreenGrid Energy Pvt Ltd',
+    industry: 'Renewable Energy & CleanTech',
+    companySize: '250-500 employees',
+    website: 'www.greengridenergy.in',
+    location: 'Ahmedabad, GJ',
+    accountOwner: 'Rahul Verma',
+    estimatedAccountValue: '₹1,50,00,000',
+    leadsCount: 1,
+    contactsCount: 2,
+    oppsCount: 1,
+    proposalsCount: 1,
+    createdDate: '2026-08-15'
+  },
+  {
+    id: 'ACC-107',
+    companyName: 'Apex Technologies Ltd',
+    industry: 'Cloud Infrastructure & DevOps',
+    companySize: '500-1000 employees',
+    website: 'www.apextech.co.in',
+    location: 'Bengaluru, KA',
+    accountOwner: 'Priya Sharma',
+    estimatedAccountValue: '₹2,10,00,000',
+    leadsCount: 1,
+    contactsCount: 2,
+    oppsCount: 1,
+    proposalsCount: 1,
+    createdDate: '2026-08-20'
+  },
+  {
+    id: 'ACC-108',
+    companyName: 'Nexus Retails India',
+    industry: 'Retail & Consumer Goods',
+    companySize: '1000+ employees',
+    website: 'www.nexusretails.in',
+    location: 'Gurugram, HR',
+    accountOwner: 'Rahul Verma',
+    estimatedAccountValue: '₹1,25,00,000',
+    leadsCount: 1,
+    contactsCount: 3,
+    oppsCount: 5,
+    proposalsCount: 1,
+    createdDate: '2026-08-22'
   }
 ];
 
@@ -161,9 +207,9 @@ export const INITIAL_LEADS = [
     status: 'Qualified',
     leadOwner: 'Rajesh Sharma',
     priority: 'High',
-    createdDate: '2026-08-10',
-    lastActivity: 'Call completed on Aug 28, discussed CRM migration',
-    nextFollowup: '2026-09-01 15:30',
+    createdDate: getPastISO(2),
+    lastActivity: 'Call completed, discussed CRM migration',
+    nextFollowup: `${getTodayISO()} 15:30`,
     dueToday: true,
     isOverdue: false,
     notes: 'Looking to transition from legacy CRM to unified solution by Q4. Budget approved.',
@@ -180,9 +226,9 @@ export const INITIAL_LEADS = [
     status: 'Discussion',
     leadOwner: 'Priya Patel',
     priority: 'High',
-    createdDate: '2026-08-05',
-    lastActivity: 'Proposal sent on Aug 25, pending executive review',
-    nextFollowup: '2026-08-30 11:00', // Overdue
+    createdDate: getPastISO(5),
+    lastActivity: 'Proposal sent, pending executive review',
+    nextFollowup: `${getPastISO(2)} 11:00`, // Overdue
     dueToday: false,
     isOverdue: true,
     notes: 'Referred by executive board member. Requires custom SLA terms in proposal.',
@@ -199,9 +245,9 @@ export const INITIAL_LEADS = [
     status: 'New',
     leadOwner: 'Amit Verma',
     priority: 'Medium',
-    createdDate: '2026-08-28',
+    createdDate: getPastISO(1),
     lastActivity: 'Inbound inquiry received regarding security compliance',
-    nextFollowup: '2026-09-01 16:00',
+    nextFollowup: `${getTodayISO()} 16:00`,
     dueToday: true,
     isOverdue: false,
     notes: 'Interested in enterprise security module. Needs documentation on data encryption.',
@@ -218,9 +264,9 @@ export const INITIAL_LEADS = [
     status: 'Proposal',
     leadOwner: 'Ananya Rao',
     priority: 'High',
-    createdDate: '2026-07-20',
-    lastActivity: 'Demo completed on Aug 22, proposal presented',
-    nextFollowup: '2026-08-29 14:00', // Overdue
+    createdDate: getPastISO(4),
+    lastActivity: 'Demo completed, proposal presented',
+    nextFollowup: `${getPastISO(1)} 14:00`, // Overdue
     dueToday: false,
     isOverdue: true,
     notes: 'Proposal PR-404 sent for ₹95 Lakhs annual license. Needs review with CFO.',
@@ -237,9 +283,9 @@ export const INITIAL_LEADS = [
     status: 'Contacted',
     leadOwner: 'Vikram Malhotra',
     priority: 'Low',
-    createdDate: '2026-08-15',
-    lastActivity: 'Intro email sent on Aug 18, opened twice',
-    nextFollowup: '2026-08-27 10:00', // Overdue
+    createdDate: getPastISO(6),
+    lastActivity: 'Intro email sent, opened twice',
+    nextFollowup: `${getPastISO(3)} 10:00`, // Overdue
     dueToday: false,
     isOverdue: true,
     notes: 'Downloaded whitepaper from summer marketing campaign.',
@@ -256,9 +302,9 @@ export const INITIAL_LEADS = [
     status: 'Qualified',
     leadOwner: 'Rajesh Sharma',
     priority: 'Medium',
-    createdDate: '2026-08-22',
-    lastActivity: 'Discovery call held on Aug 26',
-    nextFollowup: '2026-09-01 17:00',
+    createdDate: getPastISO(3),
+    lastActivity: 'Discovery call held on lead management',
+    nextFollowup: `${getTodayISO()} 17:00`,
     dueToday: true,
     isOverdue: false,
     notes: 'Evaluator for lead management workflow.',
@@ -275,13 +321,70 @@ export const INITIAL_LEADS = [
     status: 'Negotiation',
     leadOwner: 'Priya Patel',
     priority: 'High',
-    createdDate: '2026-08-01',
-    lastActivity: 'Contract revision meeting on Aug 27',
-    nextFollowup: '2026-08-28 15:00', // Overdue
-    dueToday: false,
-    isOverdue: true,
+    createdDate: getPastISO(5),
+    lastActivity: 'Contract revision meeting held',
+    nextFollowup: `${getTodayISO()} 18:00`,
+    dueToday: true,
+    isOverdue: false,
     notes: 'Negotiating multi-year discount structure.',
     nextAction: 'Send updated contract draft with approved 5% volume discount'
+  },
+  {
+    id: 'LD-208',
+    leadName: 'Deepak Nair',
+    phoneNumber: '+91 92109 87654',
+    emailId: 'deepak.nair@wiprocloud.in',
+    company: 'Wipro Enterprise Cloud',
+    designation: 'Head of Infrastructure',
+    leadSource: 'Campaign',
+    status: 'Contacted',
+    leadOwner: 'Amit Verma',
+    priority: 'Medium',
+    createdDate: getPastISO(18),
+    lastActivity: 'Assessment sent, awaiting technical evaluation',
+    nextFollowup: `${getPastISO(12)} 14:30`, // 12 days ago (Last 30 Days, not Last 7 Days)
+    dueToday: false,
+    isOverdue: true,
+    notes: 'Follow up on cloud assessment report sent end of August.',
+    nextAction: 'Review infrastructure assessment with technical lead'
+  },
+  {
+    id: 'LD-209',
+    leadName: 'Sunita Rao',
+    phoneNumber: '+91 91098 76543',
+    emailId: 'sunita.rao@airtelbusiness.in',
+    company: 'Bharti Airtel Business',
+    designation: 'VP of Enterprise Solutions',
+    leadSource: 'LinkedIn',
+    status: 'Discussion',
+    leadOwner: 'Vikram Malhotra',
+    priority: 'High',
+    createdDate: getPastISO(1),
+    lastActivity: 'Product demo scheduled for next week',
+    nextFollowup: `${getFutureISO(6)} 11:30`, // 6 days in future (This Month & Quarter, not Last 7/30 Days)
+    dueToday: false,
+    isOverdue: false,
+    notes: 'Scheduled product demo with VP of Enterprise Solutions for next week.',
+    nextAction: 'Prepare tailored enterprise demonstration deck'
+  },
+  {
+    id: 'LD-210',
+    leadName: 'Vikrant Joshi',
+    phoneNumber: '+91 90987 65432',
+    emailId: 'vikrant.j@ltinfotech.com',
+    company: 'L&T Infotech Systems',
+    designation: 'Procurement Director',
+    leadSource: 'Referral',
+    status: 'Qualified',
+    leadOwner: 'Rajesh Sharma',
+    priority: 'Medium',
+    createdDate: getPastISO(3),
+    lastActivity: 'Initial qualification complete, budget allocated for Q4',
+    nextFollowup: `${getFutureISO(35)} 10:00`, // Next month (FY & All Time)
+    dueToday: false,
+    isOverdue: false,
+    notes: 'Longer evaluation cycle; decision planned for next month.',
+    nextAction: 'Send quarterly roadmap update and follow up on procurement timeline'
   }
 ];
 
@@ -445,7 +548,7 @@ export const INITIAL_ACTIVITIES = [
   {
     id: 'ACT-501',
     type: 'Call',
-    date: '2026-09-01 10:30 AM',
+    date: `${getTodayISO()} 10:30 AM`,
     duration: '25 mins',
     owner: 'Rajesh Sharma',
     company: 'Tata Consultancy Tech Ltd',
@@ -458,8 +561,8 @@ export const INITIAL_ACTIVITIES = [
   {
     id: 'ACT-502',
     type: 'Follow-up',
-    date: '2026-09-02 11:00 AM',
-    dueTime: '2026-09-02 11:00',
+    date: `${getTodayISO()} 11:00 AM`,
+    dueTime: `${getTodayISO()} 11:00`,
     owner: 'Priya Patel',
     company: 'Reliance Cloud Solutions',
     lead: 'Ananya Patel',
@@ -473,7 +576,7 @@ export const INITIAL_ACTIVITIES = [
   {
     id: 'ACT-503',
     type: 'Email',
-    date: '2026-09-01 09:15 AM',
+    date: `${getPastISO(1)} 09:15 AM`,
     subject: 'Security Whitepaper & Compliance Specs',
     owner: 'Amit Verma',
     company: 'Infosys Digital Systems',
@@ -485,7 +588,7 @@ export const INITIAL_ACTIVITIES = [
   {
     id: 'ACT-504',
     type: 'SMS / WhatsApp',
-    date: '2026-08-29 02:00 PM',
+    date: `${getPastISO(2)} 02:00 PM`,
     owner: 'Ananya Rao',
     company: 'HDFC Fintech Dynamics',
     lead: 'Pooja Iyer',
@@ -496,7 +599,7 @@ export const INITIAL_ACTIVITIES = [
   {
     id: 'ACT-505',
     type: 'Meeting',
-    date: '2026-09-01 02:00 PM',
+    date: `${getTodayISO()} 02:00 PM`,
     attendees: 'Priya Patel, Aditya Joshi, CFO Team',
     owner: 'Priya Patel',
     company: 'Reliance Cloud Solutions',
@@ -509,8 +612,8 @@ export const INITIAL_ACTIVITIES = [
   {
     id: 'ACT-506',
     type: 'Follow-up',
-    date: '2026-08-27 10:00 AM',
-    dueTime: '2026-08-27 10:00',
+    date: `${getPastISO(3)} 10:00 AM`,
+    dueTime: `${getPastISO(3)} 10:00`,
     owner: 'Vikram Malhotra',
     company: 'Mahindra Supply Chain Logistics',
     lead: 'Karan Mehta',

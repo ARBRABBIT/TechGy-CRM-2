@@ -31,7 +31,8 @@ export default function DashboardView({
   onNavigateToLeads,
   onNavigateToAccounts,
   onNavigateToActivities,
-  onSelectLead
+  onSelectLead,
+  onSelectAccount
 }) {
   const [revenueToggle, setRevenueToggle] = useState('Monthly');
   const dashboardRef = useRef(null);
@@ -48,18 +49,15 @@ export default function DashboardView({
 
   // Sync global header date filter changes directly to revenue chart toggle & card states!
   useEffect(() => {
-    if (selectedDateFilter === 'This Month') {
-      setRevenueToggle('Monthly');
-      setMarketingDateFilter('This Month');
-    } else if (selectedDateFilter === 'This Quarter') {
-      setRevenueToggle('Quarterly');
-      setMarketingDateFilter('This Quarter');
-    } else if (selectedDateFilter === 'FY 2025-26') {
-      setRevenueToggle('FY');
-      setMarketingDateFilter('FY 2025-26');
-    } else if (selectedDateFilter === 'All Time') {
-      setRevenueToggle('FY');
-      setMarketingDateFilter('All Time');
+    setMarketingDateFilter(selectedDateFilter);
+    if (typeof selectedDateFilter === 'string') {
+      if (selectedDateFilter === 'This Month') {
+        setRevenueToggle('Monthly');
+      } else if (selectedDateFilter === 'This Quarter') {
+        setRevenueToggle('Quarterly');
+      } else if (selectedDateFilter.startsWith('FY') || selectedDateFilter === 'All Time') {
+        setRevenueToggle('FY');
+      }
     }
   }, [selectedDateFilter]);
 
@@ -75,13 +73,16 @@ export default function DashboardView({
 
   const filteredLeads = leads.filter(l => {
     const matchOwner = selectedOwnerFilter === 'All Owners' || l.leadOwner === selectedOwnerFilter;
-    const matchDate = isDateMatch(l.createdDate) || isDateMatch(l.nextFollowup);
+    const matchDate = isDateMatch(l.createdDate);
     return matchOwner && matchDate;
   });
 
-  const filteredAccounts = accounts.filter(a =>
-    selectedOwnerFilter === 'All Owners' || a.accountOwner === selectedOwnerFilter
-  );
+  const isCustomDate = typeof selectedDateFilter === 'object' && selectedDateFilter?.type === 'custom';
+  const filteredAccounts = accounts.filter(a => {
+    const matchOwner = selectedOwnerFilter === 'All Owners' || a.accountOwner === selectedOwnerFilter;
+    const matchDate = isCustomDate ? (!a.createdDate ? true : isDateInFilter(a.createdDate, selectedDateFilter)) : true;
+    return matchOwner && matchDate;
+  });
 
   const filteredActivities = activities.filter(act => {
     const matchOwner = selectedOwnerFilter === 'All Owners' || act.owner === selectedOwnerFilter;
@@ -92,7 +93,10 @@ export default function DashboardView({
   // Compute live counters
   const totalCompanies = filteredAccounts.length;
   const totalLeadsCount = filteredLeads.length;
-  const overdueLeadsCount = filteredLeads.filter(l => l.isOverdue).length;
+  const overdueLeadsCount = leads.filter(l => {
+    const matchOwner = selectedOwnerFilter === 'All Owners' || l.leadOwner === selectedOwnerFilter;
+    return matchOwner && l.isOverdue;
+  }).length;
   const todayFollowupsCount = filteredActivities.filter(a =>
     a.type === 'Follow-up' && (a.dueToday || isDateInFilter(a.date, 'Today'))
   ).length;
@@ -100,10 +104,17 @@ export default function DashboardView({
   // Active revenue data based on toggle
   const currentRevObj = REVENUE_DATA[revenueToggle] || REVENUE_DATA.Monthly;
 
-  // Filter follow-up action items (Overdue + Today items, sorted with Overdue first)
-  const followUpActions = filteredLeads
-    .filter(l => l.isOverdue || l.dueToday)
+  // Filter follow-up action items: must match owner filter AND date filter on scheduled follow-up time
+  const followUpActions = leads
+    .filter(l => {
+      if (!l.nextFollowup) return false;
+      const matchOwner = selectedOwnerFilter === 'All Owners' || l.leadOwner === selectedOwnerFilter;
+      const matchDate = isDateMatch(l.nextFollowup);
+      return matchOwner && matchDate;
+    })
     .sort((a, b) => Number(b.isOverdue) - Number(a.isOverdue));
+
+  const filterKey = `${selectedOwnerFilter}_${typeof selectedDateFilter === 'object' && selectedDateFilter !== null ? `${selectedDateFilter?.startDate}_${selectedDateFilter?.endDate}_${selectedDateFilter?.label}` : selectedDateFilter}`;
 
 
   // Y-axis tick formatter for Indian numbers (Lakhs & Crores)
@@ -234,12 +245,12 @@ export default function DashboardView({
               ))}
             </div>
           </div>
-          <div className="chart-container">
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={currentRevObj.trend} margin={{ top: 10, right: 20, left: 10, bottom: 0 }}>
+          <div className="chart-container revenue-chart-container">
+            <ResponsiveContainer width="100%" height="100%" minHeight={280}>
+              <LineChart data={currentRevObj.trend} margin={{ top: 20, right: 35, left: 5, bottom: 20 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#E0E6EE" />
-                <XAxis dataKey="period" stroke="#557396" fontSize={12} />
-                <YAxis stroke="#557396" fontSize={12} tickFormatter={formatYAxis} />
+                <XAxis dataKey="period" stroke="#557396" fontSize={12} tickLine={false} dy={6} />
+                <YAxis stroke="#557396" fontSize={12} tickFormatter={formatYAxis} tickLine={false} width={48} dx={-4} />
                 <Tooltip
                   formatter={(value, name) => [
                     `₹${value.toLocaleString('en-IN')}`,
@@ -293,13 +304,16 @@ export default function DashboardView({
             <div style={{ display: 'flex', gap: '0.35rem', alignItems: 'center', flexShrink: 0 }}>
               <select
                 className="select-filter card-select-filter"
-                value={marketingDateFilter}
+                value={typeof marketingDateFilter === 'string' ? marketingDateFilter : 'custom'}
                 onChange={(e) => setMarketingDateFilter(e.target.value)}
                 title="Filter Marketing by Date"
               >
                 {INITIAL_DATE_FILTERS.map(d => (
                   <option key={d} value={d}>{d}</option>
                 ))}
+                {typeof marketingDateFilter === 'object' && marketingDateFilter !== null && (
+                  <option value="custom">{marketingDateFilter.label || 'Custom Range'}</option>
+                )}
               </select>
 
               <select
@@ -486,30 +500,115 @@ export default function DashboardView({
                 <th>Action</th>
               </tr>
             </thead>
-            <tbody>
-              {followUpActions.map((item) => (
-                <tr
-                  key={item.id}
-                  className={item.isOverdue ? 'overdue-row' : ''}
-                  onClick={() => onSelectLead(item)}
-                >
-                  <td style={{ fontWeight: 600 }}>{item.company}</td>
-                  <td>{item.leadName}</td>
-                  <td>{item.leadOwner}</td>
-                  <td>
-                    <span style={{
-                      color: '#063669',
-                      fontWeight: 600,
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: '0.25rem'
-                    }}>
-                      <LuClock size={13} /> {item.nextFollowup}
-                    </span>
+            <tbody key={filterKey}>
+              {followUpActions.length === 0 ? (
+                <tr>
+                  <td colSpan={6} style={{ textAlign: 'center', padding: '2.75rem 1rem', color: '#557396' }}>
+                    <div style={{ fontWeight: 600, fontSize: '0.95rem', color: '#063669', marginBottom: '0.25rem' }}>
+                      No follow-up action items found
+                    </div>
+                    <div style={{ fontSize: '0.8rem', color: '#64748B' }}>
+                      No follow-ups match the selected date filter or owner criteria.
+                    </div>
                   </td>
+                </tr>
+              ) : (
+                followUpActions.map((item) => (
+                  <tr
+                    key={item.id}
+                    className={item.isOverdue ? 'overdue-row' : ''}
+                    onClick={() => onSelectLead(item)}
+                  >
+                    <td
+                      style={{
+                        fontWeight: 600,
+                        cursor: onSelectAccount ? 'pointer' : 'inherit',
+                        transition: 'color 0.15s ease'
+                      }}
+                      onClick={(e) => {
+                        if (onSelectAccount) {
+                          e.stopPropagation();
+                          onSelectAccount(item.company);
+                        }
+                      }}
+                      onMouseEnter={(e) => {
+                        if (onSelectAccount) {
+                          e.currentTarget.style.color = '#0B57D0';
+                          e.currentTarget.style.textDecoration = 'underline';
+                        }
+                      }}
+                      onMouseLeave={(e) => {
+                        if (onSelectAccount) {
+                          e.currentTarget.style.color = 'inherit';
+                          e.currentTarget.style.textDecoration = 'none';
+                        }
+                      }}
+                      title={onSelectAccount ? `View ${item.company} company details` : undefined}
+                    >
+                      {item.company}
+                    </td>
+                    <td>{item.leadName}</td>
+                    <td>{item.leadOwner}</td>
+                    <td>
+                      <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', flexWrap: 'nowrap' }}>
+                        <span style={{
+                          color: item.isOverdue ? '#D93025' : '#063669',
+                          fontWeight: 600,
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '0.25rem',
+                          fontSize: '0.8rem'
+                        }}>
+                          <LuClock size={13} style={{ color: item.isOverdue ? '#D93025' : '#5f6368' }} /> {item.nextFollowup}
+                        </span>
+                        {item.isOverdue ? (
+                          <span style={{
+                            fontSize: '0.65rem',
+                            fontWeight: 700,
+                            color: '#D93025',
+                            backgroundColor: '#FCE8E6',
+                            border: '1px solid #FAD2CF',
+                            padding: '0.1rem 0.45rem',
+                            borderRadius: '4px',
+                            letterSpacing: '0.04em',
+                            textTransform: 'uppercase'
+                          }}>
+                            Overdue
+                          </span>
+                        ) : item.dueToday ? (
+                          <span style={{
+                            fontSize: '0.65rem',
+                            fontWeight: 700,
+                            color: '#0B57D0',
+                            backgroundColor: '#E8F0FE',
+                            border: '1px solid #D2E3FC',
+                            padding: '0.1rem 0.45rem',
+                            borderRadius: '4px',
+                            letterSpacing: '0.04em',
+                            textTransform: 'uppercase'
+                          }}>
+                            Today
+                          </span>
+                        ) : (
+                          <span style={{
+                            fontSize: '0.65rem',
+                            fontWeight: 700,
+                            color: '#047857',
+                            backgroundColor: '#ECFDF5',
+                            border: '1px solid #A7F3D0',
+                            padding: '0.1rem 0.45rem',
+                            borderRadius: '4px',
+                            letterSpacing: '0.04em',
+                            textTransform: 'uppercase'
+                          }}>
+                            Upcoming
+                          </span>
+                        )}
+                      </div>
+                    </td>
                   <td>
-                    <span className={`status-chip ${item.isOverdue ? 'overdue' : item.status.toLowerCase()}`}>
-                      {item.isOverdue ? 'OVERDUE' : item.status}
+                    <span className={`status-chip ${item.status.toLowerCase()}`}>
+                      {item.status}
                     </span>
                   </td>
                   <td>
@@ -525,7 +624,7 @@ export default function DashboardView({
                     </button>
                   </td>
                 </tr>
-              ))}
+              )))}
             </tbody>
           </table>
         </div>

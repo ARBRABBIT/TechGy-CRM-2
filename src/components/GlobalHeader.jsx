@@ -40,8 +40,10 @@ export default function GlobalHeader({
   onSelectNotification
 }) {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [isSearchFocused, setIsSearchFocused] = useState(false);
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
   const searchContainerRef = useRef(null);
+  const searchInputRef = useRef(null);
 
   const getModuleTitle = () => {
     switch (activeModule) {
@@ -61,6 +63,7 @@ export default function GlobalHeader({
     function handleClickOutside(event) {
       if (searchContainerRef.current && !searchContainerRef.current.contains(event.target)) {
         setIsSearchOpen(false);
+        setIsSearchFocused(false);
       }
     }
     document.addEventListener('mousedown', handleClickOutside);
@@ -122,19 +125,40 @@ export default function GlobalHeader({
 
       <div className="header-right">
         {/* Universal Search Container with Live Results */}
-        <div className="search-box" ref={searchContainerRef}>
+        <div
+          className={`search-box ${isSearchFocused || hasQuery ? 'expanded' : ''}`}
+          ref={searchContainerRef}
+          onClick={() => searchInputRef.current?.focus()}
+        >
           <LuSearch className="search-icon" />
           <input
+            ref={searchInputRef}
             type="text"
             className="search-input"
-            placeholder="Universal search (Leads, Companies, Opps)..."
+            aria-label="Universal search across CRM"
             value={searchQuery}
-            onFocus={() => setIsSearchOpen(true)}
+            onFocus={() => {
+              setIsSearchFocused(true);
+              setIsSearchOpen(true);
+            }}
+            onBlur={() => {
+              if (!hasQuery) {
+                setIsSearchFocused(false);
+              }
+            }}
             onChange={(e) => {
               setSearchQuery(e.target.value);
               setIsSearchOpen(true);
             }}
           />
+          {!hasQuery && (
+            <div className="search-placeholder-overlay" aria-hidden="true">
+              <span className="search-placeholder-base">Universal search</span>
+              <span className={`search-placeholder-extended ${isSearchFocused ? 'visible' : ''}`}>
+                &nbsp;(Leads, Companies, Opps)...
+              </span>
+            </div>
+          )}
           {searchQuery && (
             <button
               onClick={() => setSearchQuery('')}

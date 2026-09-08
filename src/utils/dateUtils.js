@@ -92,58 +92,60 @@ export function isDateInFilter(dateStr, filterValue) {
     if (filterValue === 'This Month') {
       const monthPrefix = `${currentYear}-${pad(currentMonth + 1)}`;
       if (!parsed) {
-        return rawLower.includes(monthPrefix) || rawLower.includes('2026-09') || rawLower.includes('2026-08');
+        return rawLower.includes(monthPrefix);
       }
-      return parsed.startsWith(monthPrefix) || parsed.startsWith('2026-09') || parsed.startsWith('2026-08');
+      return parsed.startsWith(monthPrefix);
     }
 
     if (filterValue === 'This Quarter') {
       const qStartMonth = currentQuarter * 3;
       const qMonths = [qStartMonth + 1, qStartMonth + 2, qStartMonth + 3].map(m => `${currentYear}-${pad(m)}`);
       if (!parsed) {
-        return qMonths.some(qm => rawLower.includes(qm)) || rawLower.includes('2026-07') || rawLower.includes('2026-08') || rawLower.includes('2026-09');
+        return qMonths.some(qm => rawLower.includes(qm));
       }
-      return qMonths.some(qm => parsed.startsWith(qm)) || parsed.startsWith('2026-07') || parsed.startsWith('2026-08') || parsed.startsWith('2026-09');
+      return qMonths.some(qm => parsed.startsWith(qm));
     }
 
-    if (filterValue === 'FY 2025-26') {
+    const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+    const endOfToday = startOfToday + 24 * 60 * 60 * 1000 - 1;
+
+    const fyMatch = filterValue.match(/^FY\s*(\d{4})-(\d{2})$/);
+    if (fyMatch) {
+      const fyStartYear = parseInt(fyMatch[1], 10);
+      const fyEndYear = fyStartYear + 1;
+      const fyStartTs = new Date(fyStartYear, 3, 1).getTime();        // Apr 1, 00:00:00
+      const fyEndTs   = new Date(fyEndYear, 2, 31).getTime() + 24 * 60 * 60 * 1000 - 1; // Mar 31, 23:59:59.999
       if (!parsed) {
-        return rawLower.includes('2025') || rawLower.includes('2026');
+        return rawLower.includes(`${fyStartYear}-04`) || rawLower.includes(`${fyEndYear}-03`);
       }
-      return parsed.startsWith('2025') || parsed.startsWith('2026');
+      const itemTs = toTimestamp(parsed);
+      return itemTs !== null && itemTs >= fyStartTs && itemTs <= fyEndTs;
     }
 
     if (filterValue === 'Last 7 Days') {
       if (!parsed) return true;
       const itemTs = toTimestamp(parsed);
       if (!itemTs) return true;
-      const sevenDaysAgo = nowTs - 7 * 24 * 60 * 60 * 1000;
-      // Also match fixture reference if tested with seeded dates
-      const fixtureRefTs = new Date(2026, 8, 2).getTime();
-      const fixtureSevenDaysAgo = fixtureRefTs - 7 * 24 * 60 * 60 * 1000;
-      return (itemTs >= sevenDaysAgo && itemTs <= nowTs + 86400000) ||
-             (itemTs >= fixtureSevenDaysAgo && itemTs <= fixtureRefTs + 86400000);
+      const sevenDaysAgo = startOfToday - 7 * 24 * 60 * 60 * 1000;
+      return itemTs >= sevenDaysAgo && itemTs <= endOfToday;
     }
 
     if (filterValue === 'Last 30 Days') {
       if (!parsed) return true;
       const itemTs = toTimestamp(parsed);
       if (!itemTs) return true;
-      const thirtyDaysAgo = nowTs - 30 * 24 * 60 * 60 * 1000;
-      const fixtureRefTs = new Date(2026, 8, 2).getTime();
-      const fixtureThirtyDaysAgo = fixtureRefTs - 30 * 24 * 60 * 60 * 1000;
-      return (itemTs >= thirtyDaysAgo && itemTs <= nowTs + 86400000) ||
-             (itemTs >= fixtureThirtyDaysAgo && itemTs <= fixtureRefTs + 86400000);
+      const thirtyDaysAgo = startOfToday - 30 * 24 * 60 * 60 * 1000;
+      return itemTs >= thirtyDaysAgo && itemTs <= endOfToday;
     }
 
     if (filterValue === 'Today') {
-      if (!parsed) return rawLower.includes(todayStr) || rawLower.includes('2026-09-02');
-      return parsed === todayStr || parsed === '2026-09-02' || parsed === '2026-09-01';
+      if (!parsed) return rawLower.includes(todayStr);
+      return parsed === todayStr;
     }
 
     if (filterValue === 'Yesterday') {
-      if (!parsed) return rawLower.includes(yesterdayStr) || rawLower.includes('2026-09-01');
-      return parsed === yesterdayStr || parsed === '2026-09-01';
+      if (!parsed) return rawLower.includes(yesterdayStr);
+      return parsed === yesterdayStr;
     }
   }
 
@@ -207,4 +209,20 @@ export function getFutureISO(days = 30) {
   d.setDate(d.getDate() + days);
   return formatDateToISO(d);
 }
+
+export function getPastISO(days = 1) {
+  const d = new Date();
+  d.setDate(d.getDate() - days);
+  return formatDateToISO(d);
+}
+
+export function getCurrentFiscalYear() {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = now.getMonth(); // 0-indexed: 3 = April
+  const startYear = month >= 3 ? year : year - 1;
+  const endYearShort = String(startYear + 1).slice(-2);
+  return `FY ${startYear}-${endYearShort}`;
+}
+
 

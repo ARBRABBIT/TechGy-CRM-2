@@ -20,6 +20,7 @@ export default function CommonActionsModal({
   onSave,
   initialType = 'createLead',
   selectedLead = null,
+  bulkLeadIds = [],
   leads = [],
   currentUser = null
 }) {
@@ -33,7 +34,7 @@ export default function CommonActionsModal({
     email: '',
     designation: '',
     leadSource: 'Website',
-    owner: currentUser?.name || 'Rajesh Sharma',
+    owner: currentUser?.name || 'Unassigned',
     status: 'New',
     priority: 'Medium',
     notes: '',
@@ -59,44 +60,7 @@ export default function CommonActionsModal({
     }
   }, [isOpen]);
 
-  // Sync actionType and prefilled target lead when modal opens or initialType changes
-  useEffect(() => {
-    if (isOpen) {
-      if (initialType) {
-        setActionType(initialType);
-      }
-      if (selectedLead) {
-        setTargetLeadId(selectedLead.id);
-        setFormData(prev => ({
-          ...prev,
-          leadName: selectedLead.leadName || '',
-          company: selectedLead.company || '',
-          phone: selectedLead.phoneNumber || '',
-          email: selectedLead.emailId || '',
-          designation: selectedLead.designation || '',
-          owner: selectedLead.leadOwner || currentUser?.name || 'Rajesh Sharma',
-          status: selectedLead.status || 'New'
-        }));
-      } else if (leads.length > 0) {
-        const defaultLead = leads[0];
-        setTargetLeadId(prev => (prev && leads.some(l => l.id === prev) ? prev : defaultLead.id));
-        setFormData(prev => ({
-          ...prev,
-          leadName: defaultLead.leadName || '',
-          company: defaultLead.company || '',
-          phone: defaultLead.phoneNumber || '',
-          email: defaultLead.emailId || '',
-          designation: defaultLead.designation || '',
-          owner: defaultLead.leadOwner || currentUser?.name || 'Rajesh Sharma',
-          status: defaultLead.status || 'New'
-        }));
-      }
-    }
-  }, [isOpen, initialType, selectedLead, leads, currentUser]);
-
-  if (!isOpen) return null;
-
-  const isLeadScoped = [
+  const isLeadScopedActionType = (type) => [
     'addNote',
     'assignOwner',
     'changeStatus',
@@ -104,7 +68,76 @@ export default function CommonActionsModal({
     'call',
     'email',
     'sms'
-  ].includes(actionType);
+  ].includes(type);
+
+  // Sync actionType and prefilled target lead when modal opens or initialType changes
+  useEffect(() => {
+    if (isOpen) {
+      const type = initialType || 'createLead';
+      setActionType(type);
+
+      if (isLeadScopedActionType(type)) {
+        if (selectedLead) {
+          setTargetLeadId(selectedLead.id);
+          setFormData(prev => ({
+            ...prev,
+            leadName: selectedLead.leadName || '',
+            company: selectedLead.company || '',
+            phone: selectedLead.phoneNumber || '',
+            email: selectedLead.emailId || '',
+            designation: selectedLead.designation || '',
+            owner: selectedLead.leadOwner || currentUser?.name || 'Rajesh Sharma',
+            status: selectedLead.status || 'New'
+          }));
+        } else if (leads.length > 0) {
+          const defaultLead = leads[0];
+          setTargetLeadId(prev => (prev && leads.some(l => l.id === prev) ? prev : defaultLead.id));
+          setFormData(prev => ({
+            ...prev,
+            leadName: defaultLead.leadName || '',
+            company: defaultLead.company || '',
+            phone: defaultLead.phoneNumber || '',
+            email: defaultLead.emailId || '',
+            designation: defaultLead.designation || '',
+            owner: defaultLead.leadOwner || currentUser?.name || 'Rajesh Sharma',
+            status: defaultLead.status || 'New'
+          }));
+        }
+      } else {
+        // Entity creation actions (createLead, createOpportunity, createContact, etc.)
+        // Fields must remain blank so clean placeholder text is shown to the user
+        setTargetLeadId('');
+        setFormData(prev => ({
+          ...prev,
+          leadName: '',
+          company: '',
+          phone: '',
+          email: '',
+          designation: '',
+          leadSource: 'Website',
+          owner: currentUser?.name || 'Rajesh Sharma',
+          status: 'New',
+          priority: 'Medium',
+          notes: '',
+          subject: '',
+          outcome: 'Connected - Positive',
+          duration: '15 mins',
+          activityType: 'Meeting',
+          nextAction: '',
+          dueDate: getTodayISO(),
+          opportunityName: '',
+          estimatedValue: '',
+          currentStage: 'Qualified',
+          probability: '60%',
+          closeDate: getFutureISO(30)
+        }));
+      }
+    }
+  }, [isOpen, initialType, selectedLead, leads, currentUser]);
+
+  if (!isOpen) return null;
+
+  const isLeadScoped = isLeadScopedActionType(actionType);
 
   const activeTargetLead = selectedLead || leads.find(l => l.id === targetLeadId) || null;
 
@@ -125,11 +158,62 @@ export default function CommonActionsModal({
     }
   };
 
+  const handleActionTypeChange = (newType) => {
+    setActionType(newType);
+    if (isLeadScopedActionType(newType)) {
+      const chosen = selectedLead || leads.find(l => l.id === targetLeadId) || leads[0];
+      if (chosen) {
+        setTargetLeadId(chosen.id);
+        setFormData(prev => ({
+          ...prev,
+          leadName: chosen.leadName || '',
+          company: chosen.company || '',
+          phone: chosen.phoneNumber || '',
+          email: chosen.emailId || '',
+          designation: chosen.designation || '',
+          owner: chosen.leadOwner || prev.owner,
+          status: chosen.status || prev.status
+        }));
+      }
+    } else {
+      // Clear fields for new entity creation so placeholders show
+      setTargetLeadId('');
+      setFormData(prev => ({
+        ...prev,
+        leadName: '',
+        company: '',
+        phone: '',
+        email: '',
+        designation: '',
+        leadSource: 'Website',
+        owner: currentUser?.name || prev.owner,
+        status: 'New',
+        priority: 'Medium',
+        notes: '',
+        subject: '',
+        outcome: 'Connected - Positive',
+        duration: '15 mins',
+        activityType: 'Meeting',
+        nextAction: '',
+        dueDate: getTodayISO(),
+        opportunityName: '',
+        estimatedValue: '',
+        currentStage: 'Qualified',
+        probability: '60%',
+        closeDate: getFutureISO(30)
+      }));
+    }
+  };
+
+  const isBulk = bulkLeadIds && bulkLeadIds.length > 1;
+  const bulkCount = bulkLeadIds ? bulkLeadIds.length : 0;
+
   const handleSubmit = (e) => {
     e.preventDefault();
     onSave(actionType, {
       ...formData,
-      targetLeadId: isLeadScoped ? (selectedLead?.id || targetLeadId) : undefined
+      targetLeadId: isLeadScoped ? (selectedLead?.id || targetLeadId) : undefined,
+      bulkLeadIds: bulkLeadIds && bulkLeadIds.length > 0 ? bulkLeadIds : undefined
     });
     onClose();
   };
@@ -137,15 +221,15 @@ export default function CommonActionsModal({
   const getModalTitle = () => {
     switch (actionType) {
       case 'call': return 'Log Call';
-      case 'email': return 'Send / Log Email';
+      case 'email': return isBulk ? `Send Email (${bulkCount} Leads)` : 'Send / Log Email';
       case 'sms': return 'Log WhatsApp Message';
       case 'createOpportunity': return 'Create Pipeline Opportunity';
       case 'createLead': return 'Create New Lead';
       case 'createActivity': return 'Log Activity / Task';
       case 'createProposal': return 'Draft Commercial Proposal';
       case 'createContact': return 'Add Account Contact';
-      case 'assignOwner': return 'Reassign Lead Owner';
-      case 'changeStatus': return 'Change Lead Status';
+      case 'assignOwner': return isBulk ? `Reassign Owner (${bulkCount} Leads)` : 'Reassign Lead Owner';
+      case 'changeStatus': return isBulk ? `Update Stage (${bulkCount} Leads)` : 'Change Lead Status';
       case 'addNote': return 'Add Note / Requirement Context';
       case 'scheduleFollowup': return 'Schedule Lead Follow-up';
       default: return 'Common Action Workspace';
@@ -169,10 +253,10 @@ export default function CommonActionsModal({
             {/* Action Type Selector */}
             <div className="form-group">
               <label className="form-label">Select Action</label>
-              <select 
-                className="form-select" 
-                value={actionType} 
-                onChange={(e) => setActionType(e.target.value)}
+              <select
+                className="form-select"
+                value={actionType}
+                onChange={(e) => handleActionTypeChange(e.target.value)}
               >
                 <option value="createOpportunity">Create New Opportunity</option>
                 <option value="createLead">Create New Lead</option>
@@ -191,7 +275,46 @@ export default function CommonActionsModal({
 
             {/* Target Lead Selector for lead-scoped actions */}
             {isLeadScoped && (
-              selectedLead ? (
+              isBulk ? (
+                <div style={{
+                  marginBottom: '1.15rem',
+                  padding: '0.75rem 0.85rem',
+                  background: '#F0F5FA',
+                  borderRadius: '8px',
+                  border: '1px solid #D5E2EE'
+                }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.4rem' }}>
+                    <span style={{ fontSize: '0.8rem', color: '#557396', fontWeight: 600 }}>
+                      Selected Leads ({bulkCount}):
+                    </span>
+                    <span style={{
+                      fontSize: '0.725rem',
+                      fontWeight: 700,
+                      color: '#063669',
+                      background: '#E6EFF8',
+                      padding: '0.1rem 0.45rem',
+                      borderRadius: '10px'
+                    }}>
+                      Bulk Action
+                    </span>
+                  </div>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.35rem', maxHeight: '90px', overflowY: 'auto' }}>
+                    {leads.filter(l => bulkLeadIds.includes(l.id)).map(l => (
+                      <span key={l.id} style={{
+                        fontSize: '0.75rem',
+                        fontWeight: 600,
+                        color: '#063669',
+                        background: '#FFFFFF',
+                        border: '1px solid #D5E2EE',
+                        borderRadius: '4px',
+                        padding: '0.15rem 0.45rem'
+                      }}>
+                        {l.leadName} ({l.company})
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              ) : selectedLead ? (
                 <div style={{
                   marginBottom: '1.15rem',
                   padding: '0.65rem 0.85rem',
@@ -231,10 +354,10 @@ export default function CommonActionsModal({
               <>
                 <div className="form-group">
                   <label className="form-label">Opportunity Name *</label>
-                  <input 
-                    type="text" 
-                    className="form-input" 
-                    required 
+                  <input
+                    type="text"
+                    className="form-input"
+                    required
                     placeholder="e.g. Tata Tech – Cloud ERP Integration"
                     value={formData.opportunityName}
                     onChange={(e) => setFormData({ ...formData, opportunityName: e.target.value })}
@@ -243,10 +366,10 @@ export default function CommonActionsModal({
                 <div className="form-grid-2">
                   <div className="form-group">
                     <label className="form-label">Company / Account Name *</label>
-                    <input 
-                      type="text" 
-                      className="form-input" 
-                      required 
+                    <input
+                      type="text"
+                      className="form-input"
+                      required
                       placeholder="e.g. Tata Consultancy Tech Ltd"
                       value={formData.company}
                       onChange={(e) => setFormData({ ...formData, company: e.target.value })}
@@ -254,9 +377,9 @@ export default function CommonActionsModal({
                   </div>
                   <div className="form-group">
                     <label className="form-label">Estimated Value *</label>
-                    <input 
-                      type="text" 
-                      className="form-input" 
+                    <input
+                      type="text"
+                      className="form-input"
                       required
                       placeholder="e.g. ₹75.00 Lakh or ₹1.20 Cr"
                       value={formData.estimatedValue}
@@ -267,8 +390,8 @@ export default function CommonActionsModal({
                 <div className="form-grid-2">
                   <div className="form-group">
                     <label className="form-label">Current Stage</label>
-                    <select 
-                      className="form-select" 
+                    <select
+                      className="form-select"
                       value={formData.currentStage}
                       onChange={(e) => {
                         const newStage = e.target.value;
@@ -295,10 +418,10 @@ export default function CommonActionsModal({
                       </span>
                     </div>
                     <div className="probability-slider-wrapper">
-                      <input 
-                        type="range" 
-                        min="0" 
-                        max="100" 
+                      <input
+                        type="range"
+                        min="0"
+                        max="100"
                         step="5"
                         value={Math.min(100, Math.max(0, parseInt(formData.probability, 10) || 0))}
                         onChange={(e) => setFormData({ ...formData, probability: `${e.target.value}%` })}
@@ -314,7 +437,7 @@ export default function CommonActionsModal({
                 <div className="form-grid-2">
                   <div className="form-group">
                     <label className="form-label">Expected Close Date</label>
-                    <FormDateSelector 
+                    <FormDateSelector
                       value={formData.closeDate}
                       onChange={(newDate) => setFormData({ ...formData, closeDate: newDate })}
                       placement="top"
@@ -322,7 +445,7 @@ export default function CommonActionsModal({
                   </div>
                   <div className="form-group">
                     <label className="form-label">Opportunity Owner</label>
-                    <select 
+                    <select
                       className="form-select"
                       value={formData.owner}
                       onChange={(e) => setFormData({ ...formData, owner: e.target.value })}
@@ -338,10 +461,10 @@ export default function CommonActionsModal({
               <>
                 <div className="form-group">
                   <label className="form-label">Lead Name *</label>
-                  <input 
-                    type="text" 
-                    className="form-input" 
-                    required 
+                  <input
+                    type="text"
+                    className="form-input"
+                    required
                     placeholder="e.g. Vikram Malhotra"
                     value={formData.leadName}
                     onChange={(e) => setFormData({ ...formData, leadName: e.target.value })}
@@ -350,21 +473,21 @@ export default function CommonActionsModal({
                 <div className="form-grid-2">
                   <div className="form-group">
                     <label className="form-label">Company Name *</label>
-                    <input 
-                      type="text" 
-                      className="form-input" 
-                      required 
-                      placeholder="e.g. Tata Consultancy Tech Ltd"
+                    <input
+                      type="text"
+                      className="form-input"
+                      required
+                      placeholder="e.g. Acme Technologies Ltd"
                       value={formData.company}
                       onChange={(e) => setFormData({ ...formData, company: e.target.value })}
                     />
                   </div>
                   <div className="form-group">
                     <label className="form-label">Designation</label>
-                    <input 
-                      type="text" 
-                      className="form-input" 
-                      placeholder="e.g. General Manager"
+                    <input
+                      type="text"
+                      className="form-input"
+                      placeholder="e.g. VP of Technology"
                       value={formData.designation}
                       onChange={(e) => setFormData({ ...formData, designation: e.target.value })}
                     />
@@ -373,11 +496,11 @@ export default function CommonActionsModal({
                 <div className="form-grid-2">
                   <div className="form-group">
                     <label className="form-label">Phone Number</label>
-                    <input 
+                    <input
                       type="tel"
                       inputMode="numeric"
-                      className="form-input" 
-                      placeholder="+91 98765 00000"
+                      className="form-input"
+                      placeholder="+91 98765 43210"
                       value={formData.phone}
                       onChange={(e) => {
                         const numericOnly = e.target.value.replace(/[^0-9+\s-]/g, '');
@@ -387,9 +510,9 @@ export default function CommonActionsModal({
                   </div>
                   <div className="form-group">
                     <label className="form-label">Email ID</label>
-                    <input 
-                      type="email" 
-                      className="form-input" 
+                    <input
+                      type="email"
+                      className="form-input"
                       placeholder="name@company.co.in"
                       value={formData.email}
                       onChange={(e) => setFormData({ ...formData, email: e.target.value })}
@@ -399,7 +522,7 @@ export default function CommonActionsModal({
                 <div className="form-grid-2">
                   <div className="form-group">
                     <label className="form-label">Lead Source</label>
-                    <select 
+                    <select
                       className="form-select"
                       value={formData.leadSource}
                       onChange={(e) => setFormData({ ...formData, leadSource: e.target.value })}
@@ -409,7 +532,7 @@ export default function CommonActionsModal({
                   </div>
                   <div className="form-group">
                     <label className="form-label">Assign Owner</label>
-                    <select 
+                    <select
                       className="form-select"
                       value={formData.owner}
                       onChange={(e) => setFormData({ ...formData, owner: e.target.value })}
@@ -425,10 +548,10 @@ export default function CommonActionsModal({
               <>
                 <div className="form-group">
                   <label className="form-label">Activity Title / Subject *</label>
-                  <input 
-                    type="text" 
-                    className="form-input" 
-                    required 
+                  <input
+                    type="text"
+                    className="form-input"
+                    required
                     placeholder="e.g. Technical Discovery Call on Enterprise Security"
                     value={formData.nextAction}
                     onChange={(e) => setFormData({ ...formData, nextAction: e.target.value })}
@@ -437,7 +560,7 @@ export default function CommonActionsModal({
                 <div className="form-grid-2">
                   <div className="form-group">
                     <label className="form-label">Activity Type</label>
-                    <select 
+                    <select
                       className="form-select"
                       value={formData.activityType}
                       onChange={(e) => setFormData({ ...formData, activityType: e.target.value })}
@@ -451,9 +574,9 @@ export default function CommonActionsModal({
                   </div>
                   <div className="form-group">
                     <label className="form-label">Account / Company</label>
-                    <input 
-                      type="text" 
-                      className="form-input" 
+                    <input
+                      type="text"
+                      className="form-input"
                       placeholder="e.g. Reliance Cloud Solutions"
                       value={formData.company}
                       onChange={(e) => setFormData({ ...formData, company: e.target.value })}
@@ -463,7 +586,7 @@ export default function CommonActionsModal({
                 <div className="form-grid-2">
                   <div className="form-group">
                     <label className="form-label">Activity Date</label>
-                    <FormDateSelector 
+                    <FormDateSelector
                       value={formData.dueDate}
                       onChange={(d) => setFormData({ ...formData, dueDate: d })}
                       placement="top"
@@ -471,7 +594,7 @@ export default function CommonActionsModal({
                   </div>
                   <div className="form-group">
                     <label className="form-label">Assign Owner</label>
-                    <select 
+                    <select
                       className="form-select"
                       value={formData.owner}
                       onChange={(e) => setFormData({ ...formData, owner: e.target.value })}
@@ -482,9 +605,9 @@ export default function CommonActionsModal({
                 </div>
                 <div className="form-group">
                   <label className="form-label">Notes / Agenda</label>
-                  <textarea 
-                    className="form-textarea" 
-                    rows={3} 
+                  <textarea
+                    className="form-textarea"
+                    rows={3}
                     placeholder="Provide discussion topics or preparation notes..."
                     value={formData.notes}
                     onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
@@ -498,7 +621,7 @@ export default function CommonActionsModal({
                 <div className="form-grid-2">
                   <div className="form-group">
                     <label className="form-label">Call Outcome *</label>
-                    <select 
+                    <select
                       className="form-select"
                       value={formData.outcome}
                       onChange={(e) => setFormData({ ...formData, outcome: e.target.value })}
@@ -513,7 +636,7 @@ export default function CommonActionsModal({
                   </div>
                   <div className="form-group">
                     <label className="form-label">Call Duration</label>
-                    <select 
+                    <select
                       className="form-select"
                       value={formData.duration}
                       onChange={(e) => setFormData({ ...formData, duration: e.target.value })}
@@ -528,9 +651,9 @@ export default function CommonActionsModal({
                 </div>
                 <div className="form-group">
                   <label className="form-label">Call Discussion Summary & Notes *</label>
-                  <textarea 
-                    className="form-textarea" 
-                    rows={4} 
+                  <textarea
+                    className="form-textarea"
+                    rows={4}
                     required
                     placeholder="Key discussion points, objections raised, or agreed next steps..."
                     value={formData.notes}
@@ -544,9 +667,9 @@ export default function CommonActionsModal({
               <>
                 <div className="form-group">
                   <label className="form-label">Recipient Email *</label>
-                  <input 
-                    type="email" 
-                    className="form-input" 
+                  <input
+                    type="email"
+                    className="form-input"
                     required
                     placeholder="contact@company.co.in"
                     value={formData.email}
@@ -555,9 +678,9 @@ export default function CommonActionsModal({
                 </div>
                 <div className="form-group">
                   <label className="form-label">Subject *</label>
-                  <input 
-                    type="text" 
-                    className="form-input" 
+                  <input
+                    type="text"
+                    className="form-input"
                     required
                     placeholder="e.g. Follow-up: TechGy CRM Solution Overview & Commercials"
                     value={formData.subject}
@@ -566,9 +689,9 @@ export default function CommonActionsModal({
                 </div>
                 <div className="form-group">
                   <label className="form-label">Email Body / Summary *</label>
-                  <textarea 
-                    className="form-textarea" 
-                    rows={4} 
+                  <textarea
+                    className="form-textarea"
+                    rows={4}
                     required
                     placeholder="Enter sent email body or summary notes..."
                     value={formData.notes}
@@ -582,9 +705,9 @@ export default function CommonActionsModal({
               <>
                 <div className="form-group">
                   <label className="form-label">WhatsApp / Phone Number *</label>
-                  <input 
-                    type="tel" 
-                    className="form-input" 
+                  <input
+                    type="tel"
+                    className="form-input"
                     required
                     placeholder="+91 98765 00000"
                     value={formData.phone}
@@ -593,9 +716,9 @@ export default function CommonActionsModal({
                 </div>
                 <div className="form-group">
                   <label className="form-label">WhatsApp Message Context *</label>
-                  <textarea 
-                    className="form-textarea" 
-                    rows={4} 
+                  <textarea
+                    className="form-textarea"
+                    rows={4}
                     required
                     placeholder="Briefly describe message sent or conversation summary..."
                     value={formData.notes}
@@ -609,10 +732,10 @@ export default function CommonActionsModal({
               <>
                 <div className="form-group">
                   <label className="form-label">Proposal Title *</label>
-                  <input 
-                    type="text" 
-                    className="form-input" 
-                    required 
+                  <input
+                    type="text"
+                    className="form-input"
+                    required
                     placeholder="e.g. Enterprise Cloud ERP Implementation Proposal"
                     value={formData.opportunityName}
                     onChange={(e) => setFormData({ ...formData, opportunityName: e.target.value })}
@@ -621,10 +744,10 @@ export default function CommonActionsModal({
                 <div className="form-grid-2">
                   <div className="form-group">
                     <label className="form-label">Company / Account Name *</label>
-                    <input 
-                      type="text" 
-                      className="form-input" 
-                      required 
+                    <input
+                      type="text"
+                      className="form-input"
+                      required
                       placeholder="e.g. Tata Consultancy Tech Ltd"
                       value={formData.company}
                       onChange={(e) => setFormData({ ...formData, company: e.target.value })}
@@ -632,10 +755,10 @@ export default function CommonActionsModal({
                   </div>
                   <div className="form-group">
                     <label className="form-label">Proposal Amount *</label>
-                    <input 
-                      type="text" 
-                      className="form-input" 
-                      required 
+                    <input
+                      type="text"
+                      className="form-input"
+                      required
                       placeholder="e.g. ₹45,00,000"
                       value={formData.estimatedValue}
                       onChange={(e) => setFormData({ ...formData, estimatedValue: e.target.value })}
@@ -645,7 +768,7 @@ export default function CommonActionsModal({
                 <div className="form-grid-2">
                   <div className="form-group">
                     <label className="form-label">Valid Until Date</label>
-                    <FormDateSelector 
+                    <FormDateSelector
                       value={formData.closeDate}
                       onChange={(d) => setFormData({ ...formData, closeDate: d })}
                       placement="top"
@@ -653,7 +776,7 @@ export default function CommonActionsModal({
                   </div>
                   <div className="form-group">
                     <label className="form-label">Owner</label>
-                    <select 
+                    <select
                       className="form-select"
                       value={formData.owner}
                       onChange={(e) => setFormData({ ...formData, owner: e.target.value })}
@@ -670,10 +793,10 @@ export default function CommonActionsModal({
                 <div className="form-grid-2">
                   <div className="form-group">
                     <label className="form-label">Contact Name *</label>
-                    <input 
-                      type="text" 
-                      className="form-input" 
-                      required 
+                    <input
+                      type="text"
+                      className="form-input"
+                      required
                       placeholder="e.g. Rajesh Khurana"
                       value={formData.leadName}
                       onChange={(e) => setFormData({ ...formData, leadName: e.target.value })}
@@ -681,9 +804,9 @@ export default function CommonActionsModal({
                   </div>
                   <div className="form-group">
                     <label className="form-label">Designation</label>
-                    <input 
-                      type="text" 
-                      className="form-input" 
+                    <input
+                      type="text"
+                      className="form-input"
                       placeholder="e.g. VP Operations"
                       value={formData.designation}
                       onChange={(e) => setFormData({ ...formData, designation: e.target.value })}
@@ -692,10 +815,10 @@ export default function CommonActionsModal({
                 </div>
                 <div className="form-group">
                   <label className="form-label">Company Name *</label>
-                  <input 
-                    type="text" 
-                    className="form-input" 
-                    required 
+                  <input
+                    type="text"
+                    className="form-input"
+                    required
                     placeholder="e.g. Infosys Digital Systems"
                     value={formData.company}
                     onChange={(e) => setFormData({ ...formData, company: e.target.value })}
@@ -704,9 +827,9 @@ export default function CommonActionsModal({
                 <div className="form-grid-2">
                   <div className="form-group">
                     <label className="form-label">Email</label>
-                    <input 
-                      type="email" 
-                      className="form-input" 
+                    <input
+                      type="email"
+                      className="form-input"
                       placeholder="r.khurana@infosys.co.in"
                       value={formData.email}
                       onChange={(e) => setFormData({ ...formData, email: e.target.value })}
@@ -714,9 +837,9 @@ export default function CommonActionsModal({
                   </div>
                   <div className="form-group">
                     <label className="form-label">Phone Number</label>
-                    <input 
-                      type="tel" 
-                      className="form-input" 
+                    <input
+                      type="tel"
+                      className="form-input"
                       placeholder="+91 98765 11111"
                       value={formData.phone}
                       onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
@@ -729,7 +852,7 @@ export default function CommonActionsModal({
             {actionType === 'assignOwner' && (
               <div className="form-group">
                 <label className="form-label">Select New Owner *</label>
-                <select 
+                <select
                   className="form-select"
                   value={formData.owner}
                   onChange={(e) => setFormData({ ...formData, owner: e.target.value })}
@@ -747,7 +870,7 @@ export default function CommonActionsModal({
             {actionType === 'changeStatus' && (
               <div className="form-group">
                 <label className="form-label">New Status *</label>
-                <select 
+                <select
                   className="form-select"
                   value={formData.status}
                   onChange={(e) => setFormData({ ...formData, status: e.target.value })}
@@ -772,9 +895,9 @@ export default function CommonActionsModal({
             {actionType === 'addNote' && (
               <div className="form-group">
                 <label className="form-label">Note / Requirement Context *</label>
-                <textarea 
-                  className="form-textarea" 
-                  rows={4} 
+                <textarea
+                  className="form-textarea"
+                  rows={4}
                   required
                   placeholder="Enter context, conversation summary or requirement notes..."
                   value={formData.notes}
@@ -787,8 +910,8 @@ export default function CommonActionsModal({
               <>
                 <div className="form-group">
                   <label className="form-label">Follow-up Date & Time *</label>
-                  <input 
-                    type="datetime-local" 
+                  <input
+                    type="datetime-local"
                     className="form-input"
                     required
                     value={formData.dueDate}
@@ -797,9 +920,9 @@ export default function CommonActionsModal({
                 </div>
                 <div className="form-group">
                   <label className="form-label">Next Action Description *</label>
-                  <input 
-                    type="text" 
-                    className="form-input" 
+                  <input
+                    type="text"
+                    className="form-input"
                     required
                     placeholder="e.g. Call to discuss proposal approval and contract terms"
                     value={formData.nextAction}
@@ -816,7 +939,7 @@ export default function CommonActionsModal({
               Cancel
             </button>
             <button type="submit" className="btn-primary">
-              Confirm Action
+              {isBulk ? `Apply to ${bulkCount} Leads` : 'Confirm Action'}
             </button>
           </div>
         </form>
