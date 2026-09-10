@@ -622,6 +622,126 @@ export const INITIAL_ACTIVITIES = [
     reminder: '1 hour before',
     notes: 'Check if Karan reviewed whitepaper and wants a 15-min discovery chat.',
     isOverdue: true
+  },
+  {
+    id: 'ACT-507',
+    type: 'Follow-up',
+    date: `${getTodayISO()} 15:30`,
+    dueTime: `${getTodayISO()} 15:30`,
+    owner: 'Rajesh Sharma',
+    company: 'Tata Consultancy Tech Ltd',
+    lead: 'Aarav Sharma',
+    subject: 'Architecture Demo & Technical Q&A',
+    priority: 'High',
+    status: 'Scheduled',
+    notes: 'Conduct 45-min architecture walkthrough with Aarav and solution architects.',
+    isOverdue: false,
+    dueToday: true
+  },
+  {
+    id: 'ACT-508',
+    type: 'Email',
+    date: `${getPastISO(1)} 11:45 AM`,
+    subject: 'Enterprise CRM Migration Scope & Pricing Matrix',
+    owner: 'Rajesh Sharma',
+    company: 'Tata Consultancy Tech Ltd',
+    lead: 'Aarav Sharma',
+    summary: 'Delivered initial architectural scope document, pricing matrix, and SLA tiers.',
+    notes: 'Email delivered with PDF attachments (Architecture_Blueprint_v1.pdf, Licensing_Tiers.pdf).',
+    status: 'Delivered',
+    isOverdue: false
+  },
+  {
+    id: 'ACT-509',
+    type: 'SMS / WhatsApp',
+    date: `${getTodayISO()} 09:15 AM`,
+    owner: 'Rajesh Sharma',
+    company: 'Tata Consultancy Tech Ltd',
+    lead: 'Aarav Sharma',
+    subject: 'Demo Confirmation via WhatsApp',
+    shortPreview: 'Hi Aarav, confirming our 3:30 PM session today with the engineering leads. Looking forward!',
+    notes: 'Confirmed calendar invite and sent direct Google Meet join link.',
+    status: 'Delivered',
+    isOverdue: false
+  },
+  {
+    id: 'ACT-510',
+    type: 'Enquiry',
+    date: `${getPastISO(2)} 02:10 PM`,
+    owner: 'Rajesh Sharma',
+    company: 'Tata Consultancy Tech Ltd',
+    lead: 'Aarav Sharma',
+    subject: 'Enterprise Inbound Web Enquiry #ENQ-901',
+    notes: 'Submitted website request: "Looking to replace legacy on-prem CRM with modern cloud CRM for 250+ enterprise users by Q4."',
+    status: 'Qualified',
+    isOverdue: false
+  },
+  {
+    id: 'ACT-511',
+    type: 'Call',
+    date: `${getTodayISO()} 11:15 AM`,
+    duration: '18 mins',
+    owner: 'Rajesh Sharma',
+    company: 'Tata Consultancy Tech Ltd',
+    lead: 'Sneha Kulkarni',
+    subject: 'Sales Ops Automation Discovery Call',
+    outcome: 'Connected - Qualified',
+    notes: 'Discussed lead routing bottlenecks and territory assignment automation. Sneha approved scheduling a follow-up.',
+    status: 'Completed',
+    isOverdue: false
+  },
+  {
+    id: 'ACT-512',
+    type: 'SMS / WhatsApp',
+    date: `${getTodayISO()} 12:40 PM`,
+    owner: 'Rajesh Sharma',
+    company: 'Tata Consultancy Tech Ltd',
+    lead: 'Sneha Kulkarni',
+    subject: 'Product Brochure Shared via WhatsApp',
+    shortPreview: 'Hi Sneha, here is the link to our automated routing workflow overview: https://techgy.in/workflow',
+    notes: 'Message delivered and read. Sneha responded with a thumbs up.',
+    status: 'Delivered',
+    isOverdue: false
+  },
+  {
+    id: 'ACT-513',
+    type: 'Enquiry',
+    date: `${getPastISO(1)} 10:00 AM`,
+    owner: 'Rajesh Sharma',
+    company: 'Tata Consultancy Tech Ltd',
+    lead: 'Sneha Kulkarni',
+    subject: 'Web Portal Inquiry #ENQ-902',
+    notes: 'Submitted inbound query regarding sales ops automation and automated pipeline health metrics.',
+    status: 'In Progress',
+    isOverdue: false
+  },
+  {
+    id: 'ACT-514',
+    type: 'Follow-up',
+    date: `${getTodayISO()} 17:00`,
+    dueTime: `${getTodayISO()} 17:00`,
+    owner: 'Rajesh Sharma',
+    company: 'Tata Consultancy Tech Ltd',
+    lead: 'Sneha Kulkarni',
+    subject: 'Review Budget Approval Status',
+    priority: 'Medium',
+    status: 'Pending',
+    notes: 'Check if sales ops budget has been cleared by financial operations committee.',
+    isOverdue: false,
+    dueToday: true
+  },
+  {
+    id: 'ACT-515',
+    type: 'Email',
+    date: `${getPastISO(1)} 04:30 PM`,
+    subject: 'Platform Integration Capabilities & Case Studies',
+    owner: 'Rajesh Sharma',
+    company: 'Tata Consultancy Tech Ltd',
+    lead: 'Sneha Kulkarni',
+    summary: 'Sent detailed capabilities matrix and enterprise customer success case studies.',
+    notes: 'Email viewed 3 times by recipient.',
+    status: 'Sent',
+    isOverdue: false
   }
 ];
 
@@ -820,3 +940,47 @@ export const INITIAL_NOTIFICATIONS = [
     targetModule: 'leads'
   }
 ];
+
+export const INITIAL_EMAIL_TEMPLATES = [
+  {
+    id: 'TPL-001',
+    name: 'Introduction & Capabilities Overview',
+    category: 'Sales Outreach',
+    subject: 'Introduction: TechGy Enterprise CRM Overview for {company}',
+    body: `Hi {leadName},\n\nThank you for connecting with TechGy. We specialize in modern enterprise CRM solutions designed to streamline sales workflows, accelerate lead conversions, and centralize omnichannel interactions.\n\nI've attached our capabilities overview and solution brochure for your review. Would you be open for a brief 15-minute introductory call this week to explore how we can support {company}?\n\nBest regards,\nRajesh Sharma\nTechGy Solutions`,
+    status: 'Active'
+  },
+  {
+    id: 'TPL-002',
+    name: 'Meeting Follow-up & Commercials',
+    category: 'Follow-up',
+    subject: 'Follow-up: TechGy CRM Solution Overview & Commercials',
+    body: `Hi {leadName},\n\nThank you for your time during our discussion today regarding {company}'s requirements.\n\nAs discussed, I have outlined our proposed solution architecture and commercial terms. Please find the detailed summary and next milestones attached.\n\nLooking forward to hearing your thoughts.\n\nBest regards,\nRajesh Sharma\nTechGy Solutions`,
+    status: 'Active'
+  },
+  {
+    id: 'TPL-003',
+    name: 'Interactive Product Demo Invitation',
+    category: 'Demo & Pitch',
+    subject: 'Interactive Demo Invitation: TechGy CRM for {company}',
+    body: `Hi {leadName},\n\nFollowing up on our conversation, I would like to invite you and your team to an interactive walkthrough of the TechGy CRM platform tailored to {company}.\n\nDuring this session, we will demonstrate key capabilities including pipeline automation, activity logging, and intelligent reporting.\n\nPlease let me know a convenient time slot that works best for your schedule.\n\nBest regards,\nRajesh Sharma\nTechGy Solutions`,
+    status: 'Active'
+  },
+  {
+    id: 'TPL-004',
+    name: 'Proposal & Scope Review',
+    category: 'Commercials',
+    subject: 'TechGy CRM Proposal Review & Next Steps for {company}',
+    body: `Hi {leadName},\n\nI hope you are having a productive week.\n\nI wanted to follow up on the commercial proposal shared for {company}. Please let me know if your team had a chance to review the scope or if you would like us to clarify any specific details.\n\nBest regards,\nRajesh Sharma\nTechGy Solutions`,
+    status: 'Active'
+  },
+  {
+    id: 'TPL-005',
+    name: 'Pipeline Check-in / Re-engagement',
+    category: 'Lead Nurture',
+    subject: 'Checking in: Sales Workflow Optimization at {company}',
+    body: `Hi {leadName},\n\nI wanted to quickly check in and see how your sales automation initiatives are progressing at {company}.\n\nWe recently introduced several enhancements to our platform that could bring immediate value to your sales pipeline.\n\nWould you be open for a quick catch-up this week?\n\nBest regards,\nRajesh Sharma\nTechGy Solutions`,
+    status: 'Active'
+  }
+];
+

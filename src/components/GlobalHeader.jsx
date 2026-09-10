@@ -54,6 +54,7 @@ export default function GlobalHeader({
       case 'activities': return 'Activities & Engagement';
       case 'proposals': return 'Proposals & Value';
       case 'contacts': return 'Contacts Directory';
+      case 'masterData': return 'Master Data Management';
       default: return 'Dashboard';
     }
   };

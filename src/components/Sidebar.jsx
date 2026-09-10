@@ -3,10 +3,7 @@ import {
   LuLayoutDashboard,
   LuUsers,
   LuBuilding2,
-  LuTrendingUp,
-  LuCalendar,
-  LuFileText,
-  LuContact,
+  LuDatabase,
   LuPanelLeft,
   LuX
 } from 'react-icons/lu';
@@ -16,10 +13,7 @@ const BASE_MODULES = [
   { id: 'dashboard', title: 'Dashboard', icon: LuLayoutDashboard },
   { id: 'leads', title: 'Leads', icon: LuUsers },
   { id: 'accounts', title: 'Accounts', icon: LuBuilding2 },
-  { id: 'opportunities', title: 'Opportunities', icon: LuTrendingUp },
-  { id: 'activities', title: 'Activities', icon: LuCalendar },
-  { id: 'proposals', title: 'Proposals', icon: LuFileText },
-  { id: 'contacts', title: 'Contacts', icon: LuContact }
+  { id: 'masterData', title: 'Master Data', icon: LuDatabase }
 ];
 
 export default function Sidebar({
@@ -32,7 +26,7 @@ export default function Sidebar({
   onOpenProfile,
   currentUser,
   overdueCount = 0,
-  tasksCount = 0
+  tasksCount: _tasksCount = 0
 }) {
   const [hoverAfterIcons, setHoverAfterIcons] = useState(false);
   const [hoverHeader, setHoverHeader] = useState(false);
@@ -62,12 +56,6 @@ export default function Sidebar({
       return {
         ...item,
         badge: overdueCount > 0 ? { text: `${overdueCount} Alert`, type: 'alert' } : null
-      };
-    }
-    if (item.id === 'activities') {
-      return {
-        ...item,
-        badge: tasksCount > 0 ? { text: `${tasksCount} Tasks`, type: 'tasks' } : null
       };
     }
     return { ...item, badge: null };

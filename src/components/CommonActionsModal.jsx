@@ -1,9 +1,200 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { LuX } from 'react-icons/lu';
+import {
+  LuX,
+  LuStar,
+  LuCornerUpLeft,
+  LuExternalLink,
+  LuMail,
+  LuPaperclip,
+  LuFileText,
+  LuBuilding2
+} from 'react-icons/lu';
 import { animateModalEnter } from '../utils/animations';
-import { INITIAL_OWNERS, LEAD_SOURCES } from '../data/mockData';
+import { INITIAL_OWNERS, LEAD_SOURCES, INITIAL_ACCOUNTS } from '../data/mockData';
 import { getTodayISO, getFutureISO } from '../utils/dateUtils';
 import FormDateSelector from './FormDateSelector';
+
+function CompanyAutocompleteInput({
+  value,
+  onChange,
+  companies = [],
+  placeholder = "e.g. Acme Technologies Ltd",
+  required = false,
+  className = "form-input",
+  id,
+  name
+}) {
+  const [isOpen, setIsOpen] = useState(false);
+  const [highlightedIndex, setHighlightedIndex] = useState(-1);
+  const wrapperRef = useRef(null);
+
+  const trimmedQuery = (value || '').trim().toLowerCase();
+
+  // Filter matching companies
+  const matchingCompanies = trimmedQuery.length > 0
+    ? companies.filter(c => c.toLowerCase().includes(trimmedQuery))
+    : [];
+
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (wrapperRef.current && !wrapperRef.current.contains(event.target)) {
+        setIsOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const handleSelect = (companyName) => {
+    onChange(companyName);
+    setIsOpen(false);
+    setHighlightedIndex(-1);
+  };
+
+  const handleKeyDown = (e) => {
+    if (!isOpen || matchingCompanies.length === 0) return;
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      setHighlightedIndex(prev => (prev + 1) % matchingCompanies.length);
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      setHighlightedIndex(prev => (prev - 1 + matchingCompanies.length) % matchingCompanies.length);
+    } else if (e.key === 'Enter') {
+      if (highlightedIndex >= 0 && highlightedIndex < matchingCompanies.length) {
+        e.preventDefault();
+        handleSelect(matchingCompanies[highlightedIndex]);
+      }
+    } else if (e.key === 'Escape') {
+      setIsOpen(false);
+    }
+  };
+
+  const isNewCompany = trimmedQuery.length > 0 && matchingCompanies.length === 0;
+
+  return (
+    <div ref={wrapperRef} style={{ position: 'relative', width: '100%' }}>
+      <input
+        type="text"
+        className={className}
+        required={required}
+        placeholder={placeholder}
+        value={value}
+        autoComplete="off"
+        id={id}
+        name={name}
+        onChange={(e) => {
+          onChange(e.target.value);
+          setIsOpen(true);
+          setHighlightedIndex(-1);
+        }}
+        onFocus={() => {
+          if (trimmedQuery.length > 0 && matchingCompanies.length > 0) {
+            setIsOpen(true);
+          }
+        }}
+        onKeyDown={handleKeyDown}
+      />
+      {isNewCompany && (
+        <div style={{
+          fontSize: '0.735rem',
+          color: '#0284C7',
+          fontWeight: 600,
+          display: 'flex',
+          alignItems: 'center',
+          gap: '0.35rem',
+          marginTop: '0.35rem'
+        }}>
+          <span style={{
+            display: 'inline-block',
+            width: '6px',
+            height: '6px',
+            borderRadius: '50%',
+            backgroundColor: '#0284C7'
+          }} />
+          You are creating a new company
+        </div>
+      )}
+      {isOpen && matchingCompanies.length > 0 && (
+        <div
+          style={{
+            position: 'absolute',
+            top: 'calc(100% + 4px)',
+            left: 0,
+            right: 0,
+            backgroundColor: '#FFFFFF',
+            border: '1px solid #CBD5E1',
+            borderRadius: '8px',
+            boxShadow: '0 10px 25px -5px rgba(6, 54, 105, 0.15), 0 8px 10px -6px rgba(6, 54, 105, 0.1)',
+            zIndex: 100,
+            maxHeight: '200px',
+            overflowY: 'auto',
+            padding: '4px'
+          }}
+        >
+          <div style={{
+            padding: '4px 8px 6px 8px',
+            fontSize: '0.72rem',
+            fontWeight: 700,
+            textTransform: 'uppercase',
+            letterSpacing: '0.05em',
+            color: '#8A99AD',
+            borderBottom: '1px solid #F1F5F9',
+            marginBottom: '2px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between'
+          }}>
+            <span>Existing CRM Companies</span>
+            <span style={{ fontSize: '0.7rem', color: '#063669', fontWeight: 600 }}>{matchingCompanies.length} found</span>
+          </div>
+          {matchingCompanies.map((comp, idx) => {
+            const isHighlighted = idx === highlightedIndex;
+            return (
+              <div
+                key={comp}
+                onMouseDown={(e) => {
+                  e.preventDefault();
+                  handleSelect(comp);
+                }}
+                onMouseEnter={() => setHighlightedIndex(idx)}
+                style={{
+                  padding: '8px 10px',
+                  borderRadius: '6px',
+                  cursor: 'pointer',
+                  backgroundColor: isHighlighted ? '#F0F5FA' : 'transparent',
+                  color: isHighlighted ? '#063669' : '#1E293B',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  fontSize: '0.875rem',
+                  fontWeight: 500,
+                  transition: 'background-color 0.15s ease'
+                }}
+              >
+                <div style={{
+                  width: '24px',
+                  height: '24px',
+                  borderRadius: '6px',
+                  backgroundColor: isHighlighted ? '#E0ECF8' : '#F1F5F9',
+                  color: '#063669',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  flexShrink: 0
+                }}>
+                  <LuBuilding2 size={13} />
+                </div>
+                <div style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                  {comp}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
 
 const STAGE_DEFAULT_PROBABILITIES = {
   'Discovery': '20%',
@@ -14,6 +205,8 @@ const STAGE_DEFAULT_PROBABILITIES = {
   'Lost': '0%'
 };
 
+import { INITIAL_EMAIL_TEMPLATES } from '../data/mockData';
+
 export default function CommonActionsModal({
   isOpen,
   onClose,
@@ -22,10 +215,16 @@ export default function CommonActionsModal({
   selectedLead = null,
   bulkLeadIds = [],
   leads = [],
-  currentUser = null
+  accounts = [],
+  currentUser = null,
+  emailTemplates = []
 }) {
   const [actionType, setActionType] = useState(initialType);
   const [targetLeadId, setTargetLeadId] = useState('');
+  const [emailAttachments, setEmailAttachments] = useState([]);
+  const [selectedEmailTemplate, setSelectedEmailTemplate] = useState('');
+
+  const availableEmailTemplates = (emailTemplates && emailTemplates.length > 0 ? emailTemplates : INITIAL_EMAIL_TEMPLATES);
 
   const [formData, setFormData] = useState({
     leadName: '',
@@ -44,6 +243,7 @@ export default function CommonActionsModal({
     activityType: 'Meeting',
     nextAction: '',
     dueDate: getTodayISO(),
+    followupTime: '10:30 AM',
     opportunityName: '',
     estimatedValue: '',
     currentStage: 'Qualified',
@@ -53,6 +253,32 @@ export default function CommonActionsModal({
 
   const overlayRef = useRef(null);
   const cardRef = useRef(null);
+
+  // Extract all existing unique company names in CRM
+  const allExistingCompanies = React.useMemo(() => {
+    const companiesSet = new Set();
+    if (leads && Array.isArray(leads)) {
+      leads.forEach(l => {
+        if (l?.company && typeof l.company === 'string' && l.company.trim()) {
+          companiesSet.add(l.company.trim());
+        }
+      });
+    }
+    if (accounts && Array.isArray(accounts)) {
+      accounts.forEach(a => {
+        const name = a?.companyName || a?.company;
+        if (name && typeof name === 'string' && name.trim()) {
+          companiesSet.add(name.trim());
+        }
+      });
+    }
+    if (INITIAL_ACCOUNTS && Array.isArray(INITIAL_ACCOUNTS)) {
+      INITIAL_ACCOUNTS.forEach(a => {
+        if (a?.companyName) companiesSet.add(a.companyName.trim());
+      });
+    }
+    return Array.from(companiesSet).sort((a, b) => a.localeCompare(b));
+  }, [leads, accounts]);
 
   useEffect(() => {
     if (isOpen && cardRef.current) {
@@ -77,6 +303,17 @@ export default function CommonActionsModal({
       setActionType(type);
 
       if (isLeadScopedActionType(type)) {
+        // Always reset email-specific compose fields on every open so previous sends don't bleed through
+        if (type === 'email') {
+          setEmailAttachments([]);
+          setSelectedEmailTemplate('');
+          setFormData(prev => ({
+            ...prev,
+            subject: '',
+            notes: ''
+          }));
+        }
+
         if (selectedLead) {
           setTargetLeadId(selectedLead.id);
           setFormData(prev => ({
@@ -125,6 +362,7 @@ export default function CommonActionsModal({
           activityType: 'Meeting',
           nextAction: '',
           dueDate: getTodayISO(),
+          followupTime: '10:30 AM',
           opportunityName: '',
           estimatedValue: '',
           currentStage: 'Qualified',
@@ -134,6 +372,7 @@ export default function CommonActionsModal({
       }
     }
   }, [isOpen, initialType, selectedLead, leads, currentUser]);
+
 
   if (!isOpen) return null;
 
@@ -145,26 +384,21 @@ export default function CommonActionsModal({
     setTargetLeadId(chosenId);
     const chosen = leads.find(l => l.id === chosenId);
     if (chosen) {
-      setFormData(prev => ({
-        ...prev,
-        leadName: chosen.leadName || '',
-        company: chosen.company || '',
-        phone: chosen.phoneNumber || '',
-        email: chosen.emailId || '',
-        designation: chosen.designation || '',
-        owner: chosen.leadOwner || prev.owner,
-        status: chosen.status || prev.status
-      }));
-    }
-  };
-
-  const handleActionTypeChange = (newType) => {
-    setActionType(newType);
-    if (isLeadScopedActionType(newType)) {
-      const chosen = selectedLead || leads.find(l => l.id === targetLeadId) || leads[0];
-      if (chosen) {
-        setTargetLeadId(chosen.id);
-        setFormData(prev => ({
+      setFormData(prev => {
+        let updatedSubject = prev.subject;
+        let updatedNotes = prev.notes;
+        if (selectedEmailTemplate) {
+          const tpl = availableEmailTemplates.find(t => t.id === selectedEmailTemplate);
+          if (tpl) {
+            updatedSubject = tpl.subject
+              .replace(/\{leadName\}/g, chosen.leadName || 'there')
+              .replace(/\{company\}/g, chosen.company || 'your organization');
+            updatedNotes = tpl.body
+              .replace(/\{leadName\}/g, chosen.leadName || 'there')
+              .replace(/\{company\}/g, chosen.company || 'your organization');
+          }
+        }
+        return {
           ...prev,
           leadName: chosen.leadName || '',
           company: chosen.company || '',
@@ -172,46 +406,53 @@ export default function CommonActionsModal({
           email: chosen.emailId || '',
           designation: chosen.designation || '',
           owner: chosen.leadOwner || prev.owner,
-          status: chosen.status || prev.status
-        }));
-      }
-    } else {
-      // Clear fields for new entity creation so placeholders show
-      setTargetLeadId('');
-      setFormData(prev => ({
-        ...prev,
-        leadName: '',
-        company: '',
-        phone: '',
-        email: '',
-        designation: '',
-        leadSource: 'Website',
-        owner: currentUser?.name || prev.owner,
-        status: 'New',
-        priority: 'Medium',
-        notes: '',
-        subject: '',
-        outcome: 'Connected - Positive',
-        duration: '15 mins',
-        activityType: 'Meeting',
-        nextAction: '',
-        dueDate: getTodayISO(),
-        opportunityName: '',
-        estimatedValue: '',
-        currentStage: 'Qualified',
-        probability: '60%',
-        closeDate: getFutureISO(30)
-      }));
+          status: chosen.status || prev.status,
+          subject: updatedSubject,
+          notes: updatedNotes
+        };
+      });
     }
   };
+
+  const handleEmailTemplateChange = (templateId) => {
+    setSelectedEmailTemplate(templateId);
+    if (!templateId) return;
+
+    const tpl = availableEmailTemplates.find(t => t.id === templateId);
+    if (!tpl) return;
+
+    const targetLeadObj = selectedLead || leads.find(l => l.id === targetLeadId);
+    const leadName = formData.leadName || targetLeadObj?.leadName || 'there';
+    const company = formData.company || targetLeadObj?.company || 'your organization';
+
+    const processedSubject = tpl.subject
+      .replace(/\{leadName\}/g, leadName)
+      .replace(/\{company\}/g, company);
+
+    const processedBody = tpl.body
+      .replace(/\{leadName\}/g, leadName)
+      .replace(/\{company\}/g, company);
+
+    setFormData(prev => ({
+      ...prev,
+      subject: processedSubject,
+      notes: processedBody
+    }));
+  };
+
 
   const isBulk = bulkLeadIds && bulkLeadIds.length > 1;
   const bulkCount = bulkLeadIds ? bulkLeadIds.length : 0;
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    const submissionData = { ...formData };
+    if (actionType === 'scheduleFollowup' && formData.followupTime) {
+      submissionData.dueTime = `${formData.dueDate} ${formData.followupTime}`;
+      submissionData.date = `${formData.dueDate} ${formData.followupTime}`;
+    }
     onSave(actionType, {
-      ...formData,
+      ...submissionData,
       targetLeadId: isLeadScoped ? (selectedLead?.id || targetLeadId) : undefined,
       bulkLeadIds: bulkLeadIds && bulkLeadIds.length > 0 ? bulkLeadIds : undefined
     });
@@ -238,7 +479,16 @@ export default function CommonActionsModal({
 
   return (
     <div className="modal-overlay" ref={overlayRef} onClick={onClose}>
-      <div className="modal-card" ref={cardRef} onClick={(e) => e.stopPropagation()} style={{ maxWidth: '620px' }}>
+      <div
+        className="modal-card"
+        ref={cardRef}
+        onClick={(e) => e.stopPropagation()}
+        style={{
+          maxWidth: actionType === 'email' ? '1040px' : '620px',
+          width: actionType === 'email' ? '95vw' : '100%',
+          transition: 'max-width 0.2s ease, width 0.2s ease'
+        }}
+      >
         <div className="modal-header">
           <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: '#063669', margin: 0 }}>
             {getModalTitle()}
@@ -250,31 +500,8 @@ export default function CommonActionsModal({
 
         <form onSubmit={handleSubmit}>
           <div className="modal-body">
-            {/* Action Type Selector */}
-            <div className="form-group">
-              <label className="form-label">Select Action</label>
-              <select
-                className="form-select"
-                value={actionType}
-                onChange={(e) => handleActionTypeChange(e.target.value)}
-              >
-                <option value="createOpportunity">Create New Opportunity</option>
-                <option value="createLead">Create New Lead</option>
-                <option value="createActivity">Log Activity / Task</option>
-                <option value="call">Log Call</option>
-                <option value="email">Send / Log Email</option>
-                <option value="sms">Log WhatsApp Message</option>
-                <option value="createProposal">Draft Proposal</option>
-                <option value="createContact">Add Contact</option>
-                <option value="assignOwner">Assign Owner</option>
-                <option value="changeStatus">Change Status</option>
-                <option value="addNote">Add Note / Context</option>
-                <option value="scheduleFollowup">Schedule Follow-up</option>
-              </select>
-            </div>
-
-            {/* Target Lead Selector for lead-scoped actions */}
-            {isLeadScoped && (
+            {/* Target Lead Selector for non-email lead-scoped actions (email renders it inside left column) */}
+            {isLeadScoped && actionType !== 'email' && (
               isBulk ? (
                 <div style={{
                   marginBottom: '1.15rem',
@@ -366,13 +593,12 @@ export default function CommonActionsModal({
                 <div className="form-grid-2">
                   <div className="form-group">
                     <label className="form-label">Company / Account Name *</label>
-                    <input
-                      type="text"
-                      className="form-input"
+                    <CompanyAutocompleteInput
                       required
                       placeholder="e.g. Tata Consultancy Tech Ltd"
                       value={formData.company}
-                      onChange={(e) => setFormData({ ...formData, company: e.target.value })}
+                      onChange={(val) => setFormData({ ...formData, company: val })}
+                      companies={allExistingCompanies}
                     />
                   </div>
                   <div className="form-group">
@@ -473,13 +699,12 @@ export default function CommonActionsModal({
                 <div className="form-grid-2">
                   <div className="form-group">
                     <label className="form-label">Company Name *</label>
-                    <input
-                      type="text"
-                      className="form-input"
+                    <CompanyAutocompleteInput
                       required
                       placeholder="e.g. Acme Technologies Ltd"
                       value={formData.company}
-                      onChange={(e) => setFormData({ ...formData, company: e.target.value })}
+                      onChange={(val) => setFormData({ ...formData, company: val })}
+                      companies={allExistingCompanies}
                     />
                   </div>
                   <div className="form-group">
@@ -574,12 +799,11 @@ export default function CommonActionsModal({
                   </div>
                   <div className="form-group">
                     <label className="form-label">Account / Company</label>
-                    <input
-                      type="text"
-                      className="form-input"
+                    <CompanyAutocompleteInput
                       placeholder="e.g. Reliance Cloud Solutions"
                       value={formData.company}
-                      onChange={(e) => setFormData({ ...formData, company: e.target.value })}
+                      onChange={(val) => setFormData({ ...formData, company: val })}
+                      companies={allExistingCompanies}
                     />
                   </div>
                 </div>
@@ -664,41 +888,532 @@ export default function CommonActionsModal({
             )}
 
             {actionType === 'email' && (
-              <>
-                <div className="form-group">
-                  <label className="form-label">Recipient Email *</label>
-                  <input
-                    type="email"
-                    className="form-input"
-                    required
-                    placeholder="contact@company.co.in"
-                    value={formData.email}
-                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  />
+              <div style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fit, minmax(330px, 1fr))',
+                gap: '1.5rem',
+                alignItems: 'stretch'
+              }}>
+                {/* Left Column: Email Form Inputs */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem', height: '100%' }}>
+                  {/* Target Lead Selector */}
+                  {isBulk ? (
+                    <div style={{
+                      padding: '0.75rem 0.85rem',
+                      background: '#F0F5FA',
+                      borderRadius: '8px',
+                      border: '1px solid #D5E2EE'
+                    }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.4rem' }}>
+                        <span style={{ fontSize: '0.8rem', color: '#557396', fontWeight: 600 }}>
+                          Selected Leads ({bulkCount}):
+                        </span>
+                        <span style={{
+                          fontSize: '0.725rem',
+                          fontWeight: 700,
+                          color: '#063669',
+                          background: '#E6EFF8',
+                          padding: '0.1rem 0.45rem',
+                          borderRadius: '10px'
+                        }}>
+                          Bulk Action
+                        </span>
+                      </div>
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.35rem', maxHeight: '75px', overflowY: 'auto' }}>
+                        {leads.filter(l => bulkLeadIds.includes(l.id)).map(l => (
+                          <span key={l.id} style={{
+                            fontSize: '0.725rem',
+                            fontWeight: 600,
+                            color: '#063669',
+                            background: '#FFFFFF',
+                            border: '1px solid #D5E2EE',
+                            borderRadius: '4px',
+                            padding: '0.15rem 0.45rem'
+                          }}>
+                            {l.leadName} ({l.company})
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  ) : selectedLead ? (
+                    <div style={{
+                      padding: '0.65rem 0.85rem',
+                      background: '#F0F5FA',
+                      borderRadius: '8px',
+                      border: '1px solid #D5E2EE',
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center'
+                    }}>
+                      <span style={{ fontSize: '0.8rem', color: '#557396', fontWeight: 500 }}>Target Lead:</span>
+                      <span style={{ fontSize: '0.85rem', fontWeight: 700, color: '#063669' }}>
+                        {selectedLead.leadName} • {selectedLead.company}
+                      </span>
+                    </div>
+                  ) : (
+                    <div className="form-group" style={{ marginBottom: 0 }}>
+                      <label className="form-label">Target Lead *</label>
+                      <select
+                        className="form-select"
+                        value={targetLeadId}
+                        onChange={(e) => handleTargetLeadChange(e.target.value)}
+                        required
+                      >
+                        {leads.map(l => (
+                          <option key={l.id} value={l.id}>
+                            {l.leadName} – {l.company} ({l.status})
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  )}
+
+                  {/* 1. Select a Template Dropdown Field (First Field) */}
+                  <div className="form-group" style={{ marginBottom: 0 }}>
+                    <label className="form-label">Select a Template</label>
+                    <select
+                      className="form-select"
+                      value={selectedEmailTemplate}
+                      onChange={(e) => handleEmailTemplateChange(e.target.value)}
+                    >
+                      <option value="">-- Choose an Email Template (Optional) --</option>
+                      {availableEmailTemplates.filter(t => t.status !== 'Inactive').map(tpl => (
+                        <option key={tpl.id} value={tpl.id}>
+                          {tpl.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div className="form-group" style={{ marginBottom: 0 }}>
+                    <label className="form-label">Recipient Email *</label>
+                    <input
+                      type="email"
+                      className="form-input"
+                      required
+                      placeholder="contact@company.co.in"
+                      value={formData.email}
+                      onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                    />
+                  </div>
+
+                  <div className="form-group" style={{ marginBottom: 0 }}>
+                    <label className="form-label">Subject *</label>
+                    <input
+                      type="text"
+                      className="form-input"
+                      required
+                      placeholder="e.g. Follow-up: TechGy CRM Solution Overview & Commercials"
+                      value={formData.subject}
+                      onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
+                    />
+                  </div>
+
+                  <div className="form-group" style={{ marginBottom: 0, display: 'flex', flexDirection: 'column', flex: 1 }}>
+                    <label className="form-label">Email Body / Summary *</label>
+                    <div style={{
+                      display: 'flex',
+                      flexDirection: 'column',
+                      flex: 1,
+                      border: '1px solid #CBD5E1',
+                      borderRadius: '8px',
+                      backgroundColor: '#FFFFFF',
+                      overflow: 'hidden',
+                      boxShadow: '0 1px 2px rgba(6, 54, 105, 0.03)',
+                      transition: 'border-color 0.15s ease'
+                    }}>
+                      <textarea
+                        required
+                        placeholder="Enter sent email body or summary notes..."
+                        value={formData.notes}
+                        onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+                        style={{
+                          flex: 1,
+                          minHeight: '135px',
+                          resize: 'none',
+                          width: '100%',
+                          border: 'none',
+                          outline: 'none',
+                          padding: '0.75rem 0.85rem',
+                          fontSize: '0.85rem',
+                          color: '#1E293B',
+                          backgroundColor: 'transparent',
+                          fontFamily: 'inherit',
+                          boxSizing: 'border-box'
+                        }}
+                      />
+
+                      {/* Attachment Toolbar Inside Container at Bottom */}
+                      <div style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        padding: '0.45rem 0.75rem',
+                        borderTop: '1px solid #F1F5F9',
+                        backgroundColor: '#F8FAFC',
+                        gap: '0.5rem',
+                        flexWrap: 'wrap'
+                      }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', flexWrap: 'wrap' }}>
+                          {/* Attachment Button */}
+                          <label
+                            style={{
+                              cursor: 'pointer',
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '0.35rem',
+                              color: emailAttachments.length > 0 ? '#0284C7' : '#557396',
+                              backgroundColor: emailAttachments.length > 0 ? '#E0F2FE' : '#FFFFFF',
+                              border: '1px solid',
+                              borderColor: emailAttachments.length > 0 ? '#BAE6FD' : '#E2E8F0',
+                              padding: '0.22rem 0.55rem',
+                              borderRadius: '6px',
+                              fontSize: '0.75rem',
+                              fontWeight: 600,
+                              userSelect: 'none',
+                              transition: 'all 0.15s ease'
+                            }}
+                            title="Attach a file"
+                          >
+                            <LuPaperclip size={14} style={{ color: emailAttachments.length > 0 ? '#0284C7' : '#557396' }} />
+                            <span>Attach</span>
+                            <input
+                              type="file"
+                              multiple
+                              style={{ display: 'none' }}
+                              onChange={(e) => {
+                                if (e.target.files && e.target.files.length > 0) {
+                                  const newFiles = Array.from(e.target.files).map(f => ({
+                                    name: f.name,
+                                    size: (f.size / 1024).toFixed(1) + ' KB'
+                                  }));
+                                  setEmailAttachments(prev => [...prev, ...newFiles]);
+                                }
+                              }}
+                            />
+                          </label>
+
+                          {/* Render Attached Files */}
+                          {emailAttachments.map((file, idx) => (
+                            <span
+                              key={idx}
+                              style={{
+                                fontSize: '0.7rem',
+                                color: '#0369A1',
+                                backgroundColor: '#E0F2FE',
+                                border: '1px solid #BAE6FD',
+                                padding: '0.15rem 0.45rem',
+                                borderRadius: '4px',
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '0.25rem',
+                                maxWidth: '130px',
+                                overflow: 'hidden',
+                                textOverflow: 'ellipsis',
+                                whiteSpace: 'nowrap'
+                              }}
+                              title={`${file.name} (${file.size})`}
+                            >
+                              <LuFileText size={11} />
+                              <span style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>{file.name}</span>
+                              <LuX
+                                size={11}
+                                style={{ cursor: 'pointer', flexShrink: 0, marginLeft: '2px' }}
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  setEmailAttachments(prev => prev.filter((_, i) => i !== idx));
+                                }}
+                              />
+                            </span>
+                          ))}
+                        </div>
+
+                        <span style={{ fontSize: '0.7rem', color: '#94A3B8', flexShrink: 0 }}>
+                          {formData.notes.length} characters
+                        </span>
+                      </div>
+                    </div>
+                  </div>
                 </div>
-                <div className="form-group">
-                  <label className="form-label">Subject *</label>
-                  <input
-                    type="text"
-                    className="form-input"
-                    required
-                    placeholder="e.g. Follow-up: TechGy CRM Solution Overview & Commercials"
-                    value={formData.subject}
-                    onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
-                  />
+
+                {/* Right Column: Authentic Gmail Message Live Preview */}
+                <div style={{
+                  backgroundColor: '#FFFFFF',
+                  borderRadius: '12px',
+                  border: '1px solid #E2E8F0',
+                  boxShadow: '0 4px 14px rgba(6, 54, 105, 0.06)',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  overflow: 'hidden',
+                  minHeight: 0
+                }}>
+                  {/* Gmail Window Top Header Bar */}
+                  <div style={{
+                    padding: '0.65rem 1rem',
+                    backgroundColor: '#F8FAFC',
+                    borderBottom: '1px solid #E2E8F0',
+                    display: 'flex',
+                    alignItems: 'center',
+                    flexShrink: 0
+                  }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.55rem' }}>
+                      <div style={{
+                        width: '22px',
+                        height: '22px',
+                        borderRadius: '4px',
+                        backgroundColor: '#EA4335',
+                        color: '#FFFFFF',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontWeight: 900,
+                        fontSize: '0.75rem',
+                        letterSpacing: '-0.03em',
+                        boxShadow: '0 1px 3px rgba(234, 67, 53, 0.3)'
+                      }}>
+                        M
+                      </div>
+                      <span style={{ fontSize: '0.85rem', fontWeight: 700, color: '#1E293B' }}>
+                        Gmail Live Preview
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Scrollable Email Thread Wrapper */}
+                  <div style={{
+                    flex: 1,
+                    overflowY: 'auto',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    minHeight: 0
+                  }}>
+                    {/* Thread Subject Row */}
+                    <div style={{
+                      padding: '0.9rem 1.1rem 0.6rem',
+                      borderBottom: '1px solid #F1F5F9',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.75rem',
+                      flexShrink: 0
+                    }}>
+                      <h4 style={{
+                        margin: 0,
+                        fontSize: '1rem',
+                        fontWeight: 700,
+                        color: formData.subject.trim() ? '#1E293B' : '#94A3B8',
+                        letterSpacing: '-0.01em',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        whiteSpace: 'nowrap',
+                        flex: 1,
+                        minWidth: 0
+                      }}>
+                        {formData.subject.trim() || '(No Subject)'}
+                      </h4>
+                      <span style={{
+                        fontSize: '0.675rem',
+                        fontWeight: 600,
+                        color: '#475569',
+                        backgroundColor: '#F1F5F9',
+                        padding: '0.12rem 0.45rem',
+                        borderRadius: '4px',
+                        border: '1px solid #E2E8F0',
+                        flexShrink: 0
+                      }}>
+                        Inbox
+                      </span>
+                    </div>
+
+                    {/* Sender Meta Row */}
+                    <div style={{
+                      padding: '0.85rem 1.1rem',
+                      display: 'flex',
+                      alignItems: 'flex-start',
+                      gap: '0.75rem',
+                      borderBottom: '1px solid #F1F5F9',
+                      flexShrink: 0
+                    }}>
+                      <div style={{
+                        width: '38px',
+                        height: '38px',
+                        borderRadius: '50%',
+                        backgroundColor: '#063669',
+                        color: '#FFFFFF',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontSize: '0.95rem',
+                        fontWeight: 700,
+                        flexShrink: 0
+                      }}>
+                        {(currentUser?.name || formData.owner || 'S').charAt(0).toUpperCase()}
+                      </div>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: '0.5rem' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', flexWrap: 'wrap' }}>
+                            <span style={{ fontSize: '0.875rem', fontWeight: 700, color: '#1E293B' }}>
+                              {currentUser?.name || 'System Administrator'}
+                            </span>
+                            <span style={{ fontSize: '0.725rem', color: '#64748B' }}>
+                              &lt;{currentUser?.email || 'admin@techgy.com'}&gt;
+                            </span>
+                          </div>
+                          <span style={{ fontSize: '0.7rem', color: '#94A3B8', flexShrink: 0 }}>
+                            Today, {new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                          </span>
+                        </div>
+                        <div style={{ fontSize: '0.75rem', color: '#64748B', marginTop: '0.2rem' }}>
+                          to: <span style={{ fontWeight: 600, color: '#334155' }}>
+                            {formData.email.trim() || (selectedLead?.emailId || 'recipient@company.co.in')}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Corporate Email Body */}
+                    <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+
+                      {/* TechGy Corporate Banner */}
+                      <div style={{
+                        background: 'linear-gradient(135deg, #063669 0%, #0a4a8a 35%, #1565c0 60%, #0d47a1 80%, #063669 100%)',
+                        padding: '0',
+                        position: 'relative',
+                        overflow: 'hidden',
+                        height: '72px',
+                        flexShrink: 0
+                      }}>
+                        {/* Geometric chevron shapes (Cognizant-style facets) */}
+                        <div style={{
+                          position: 'absolute', right: 0, top: 0, bottom: 0,
+                          display: 'flex', alignItems: 'stretch'
+                        }}>
+                          {[
+                            { bg: 'rgba(255,255,255,0.04)', skew: '-12deg', width: '80px', right: '200px' },
+                            { bg: 'rgba(255,255,255,0.07)', skew: '-12deg', width: '70px', right: '140px' },
+                            { bg: 'rgba(21,101,192,0.5)', skew: '-12deg', width: '65px', right: '85px' },
+                            { bg: 'rgba(255,255,255,0.09)', skew: '-12deg', width: '55px', right: '38px' },
+                            { bg: 'rgba(255,255,255,0.06)', skew: '-12deg', width: '45px', right: '0px' },
+                          ].map((s, i) => (
+                            <div key={i} style={{
+                              position: 'absolute',
+                              top: 0, bottom: 0,
+                              right: s.right,
+                              width: s.width,
+                              backgroundColor: s.bg,
+                              transform: `skewX(${s.skew})`,
+                              transformOrigin: 'top left'
+                            }} />
+                          ))}
+                        </div>
+                        {/* TechGy Brandmark */}
+                        <div style={{
+                          position: 'relative',
+                          zIndex: 2,
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '0.6rem',
+                          padding: '0 1.25rem',
+                          height: '100%'
+                        }}>
+                          <div style={{
+                            width: '32px',
+                            height: '32px',
+                            borderRadius: '8px',
+                            background: 'rgba(255,255,255,0.18)',
+                            border: '1.5px solid rgba(255,255,255,0.35)',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            backdropFilter: 'blur(4px)'
+                          }}>
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                              <path d="M12 2L2 7l10 5 10-5-10-5z" fill="white" opacity="0.9"/>
+                              <path d="M2 17l10 5 10-5" stroke="white" strokeWidth="1.8" strokeLinecap="round" opacity="0.7"/>
+                              <path d="M2 12l10 5 10-5" stroke="white" strokeWidth="1.8" strokeLinecap="round" opacity="0.5"/>
+                            </svg>
+                          </div>
+                          <div>
+                            <div style={{ color: '#FFFFFF', fontWeight: 800, fontSize: '1rem', letterSpacing: '0.02em', lineHeight: 1 }}>
+                              TechGy
+                            </div>
+                            <div style={{ color: 'rgba(255,255,255,0.65)', fontSize: '0.6rem', fontWeight: 500, letterSpacing: '0.08em', marginTop: '2px' }}>
+                              ENTERPRISE CRM
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* White email body area */}
+                      <div style={{ padding: '1.1rem 1.25rem', flex: 1, backgroundColor: '#FFFFFF' }}>
+
+                        {/* Salutation */}
+                        <div style={{ fontSize: '0.85rem', color: '#202124', marginBottom: '0.65rem', lineHeight: 1.6 }}>
+                          Dear {formData.leadName || (selectedLead?.leadName) || 'Hiring Manager'},
+                        </div>
+
+                        {/* Dynamic Body Content */}
+                        {formData.notes.trim() ? (
+                          <div style={{
+                            fontSize: '0.84rem',
+                            color: '#202124',
+                            lineHeight: '1.7',
+                            whiteSpace: 'pre-wrap',
+                            wordBreak: 'break-word',
+                            marginBottom: '1rem'
+                          }}>
+                            {formData.notes}
+                          </div>
+                        ) : (
+                          <div style={{
+                            color: '#94A3B8',
+                            fontStyle: 'italic',
+                            padding: '1.25rem 0.75rem',
+                            textAlign: 'center',
+                            backgroundColor: '#F8FAFC',
+                            borderRadius: '6px',
+                            border: '1px dashed #CBD5E1',
+                            fontSize: '0.8rem',
+                            marginBottom: '1rem'
+                          }}>
+                            Start typing your email body in the box on the left, and it will appear here in real-time.
+                          </div>
+                        )}
+
+                        {/* Sign-off */}
+                        <div style={{ fontSize: '0.84rem', color: '#202124', marginBottom: '0.35rem', lineHeight: 1.7 }}>
+                          Thank you,
+                        </div>
+                        <div style={{ fontSize: '0.84rem', fontWeight: 700, color: '#063669', marginBottom: '0.1rem' }}>
+                          {currentUser?.name || 'System Administrator'}
+                        </div>
+                        <div style={{ fontSize: '0.75rem', color: '#64748B' }}>
+                          This is a system generated message. Please do not reply to this email.
+                        </div>
+
+                        {/* Divider */}
+                        <div style={{ borderTop: '1px solid #E2E8F0', margin: '0.85rem 0' }} />
+
+                        {/* Legal Disclaimer Footer */}
+                        <div style={{
+                          fontSize: '0.7rem',
+                          color: '#64748B',
+                          lineHeight: '1.6',
+                          backgroundColor: '#F8FAFC',
+                          padding: '0.75rem 0.85rem',
+                          borderRadius: '6px'
+                        }}>
+                          This e-mail and any files transmitted with it are for the sole use of the intended recipient(s) and may contain confidential and privileged information. If you are not the intended recipient(s), please reply to the sender and destroy all copies of the original message. Any unauthorized review, use, disclosure, dissemination, forwarding, printing or copying of this email and/or any action taken in reliance on the contents of this e-mail is strictly prohibited and may be unlawful.
+                        </div>
+
+                        {/* Copyright */}
+                        <div style={{ fontSize: '0.68rem', color: '#94A3B8', textAlign: 'center', marginTop: '0.75rem' }}>
+                          © {new Date().getFullYear()} TechGy. All rights reserved.
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                 </div>
-                <div className="form-group">
-                  <label className="form-label">Email Body / Summary *</label>
-                  <textarea
-                    className="form-textarea"
-                    rows={4}
-                    required
-                    placeholder="Enter sent email body or summary notes..."
-                    value={formData.notes}
-                    onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-                  />
-                </div>
-              </>
+              </div>
             )}
 
             {actionType === 'sms' && (
@@ -744,13 +1459,12 @@ export default function CommonActionsModal({
                 <div className="form-grid-2">
                   <div className="form-group">
                     <label className="form-label">Company / Account Name *</label>
-                    <input
-                      type="text"
-                      className="form-input"
+                    <CompanyAutocompleteInput
                       required
                       placeholder="e.g. Tata Consultancy Tech Ltd"
                       value={formData.company}
-                      onChange={(e) => setFormData({ ...formData, company: e.target.value })}
+                      onChange={(val) => setFormData({ ...formData, company: val })}
+                      companies={allExistingCompanies}
                     />
                   </div>
                   <div className="form-group">
@@ -815,13 +1529,12 @@ export default function CommonActionsModal({
                 </div>
                 <div className="form-group">
                   <label className="form-label">Company Name *</label>
-                  <input
-                    type="text"
-                    className="form-input"
+                  <CompanyAutocompleteInput
                     required
                     placeholder="e.g. Infosys Digital Systems"
                     value={formData.company}
-                    onChange={(e) => setFormData({ ...formData, company: e.target.value })}
+                    onChange={(val) => setFormData({ ...formData, company: val })}
+                    companies={allExistingCompanies}
                   />
                 </div>
                 <div className="form-grid-2">
@@ -908,15 +1621,41 @@ export default function CommonActionsModal({
 
             {actionType === 'scheduleFollowup' && (
               <>
-                <div className="form-group">
-                  <label className="form-label">Follow-up Date & Time *</label>
-                  <input
-                    type="datetime-local"
-                    className="form-input"
-                    required
-                    value={formData.dueDate}
-                    onChange={(e) => setFormData({ ...formData, dueDate: e.target.value })}
-                  />
+                <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '0.85rem' }}>
+                  <div className="form-group">
+                    <label className="form-label">Follow-up Date *</label>
+                    <FormDateSelector
+                      value={formData.dueDate}
+                      onChange={(d) => setFormData({ ...formData, dueDate: d })}
+                      placement="bottom"
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label className="form-label">Follow-up Time</label>
+                    <select
+                      className="form-select"
+                      value={formData.followupTime || '10:30 AM'}
+                      onChange={(e) => setFormData({ ...formData, followupTime: e.target.value })}
+                    >
+                      <option value="09:00 AM">09:00 AM (Morning)</option>
+                      <option value="09:30 AM">09:30 AM</option>
+                      <option value="10:00 AM">10:00 AM</option>
+                      <option value="10:30 AM">10:30 AM</option>
+                      <option value="11:00 AM">11:00 AM</option>
+                      <option value="11:30 AM">11:30 AM</option>
+                      <option value="12:00 PM">12:00 PM (Noon)</option>
+                      <option value="01:30 PM">01:30 PM</option>
+                      <option value="02:00 PM">02:00 PM</option>
+                      <option value="02:30 PM">02:30 PM</option>
+                      <option value="03:00 PM">03:00 PM</option>
+                      <option value="03:30 PM">03:30 PM</option>
+                      <option value="04:00 PM">04:00 PM</option>
+                      <option value="04:30 PM">04:30 PM</option>
+                      <option value="05:00 PM">05:00 PM</option>
+                      <option value="05:30 PM">05:30 PM</option>
+                      <option value="06:00 PM">06:00 PM (Evening)</option>
+                    </select>
+                  </div>
                 </div>
                 <div className="form-group">
                   <label className="form-label">Next Action Description *</label>

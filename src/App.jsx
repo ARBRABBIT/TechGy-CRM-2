@@ -5,6 +5,7 @@ import Sidebar from './components/Sidebar';
 import GlobalHeader from './components/GlobalHeader';
 import CommonActionsModal from './components/CommonActionsModal';
 import LogoutConfirmModal from './components/LogoutConfirmModal';
+import NewCompanyPromptModal from './components/NewCompanyPromptModal';
 
 // Views
 import DashboardView from './views/DashboardView';
@@ -14,6 +15,7 @@ import OpportunitiesView from './views/OpportunitiesView';
 import ActivitiesView from './views/ActivitiesView';
 import ProposalsView from './views/ProposalsView';
 import ContactsView from './views/ContactsView';
+import MasterDataView from './views/MasterDataView';
 import LoginView from './views/LoginView';
 
 // Dedicated Full-Page Detail Views with Interactive Breadcrumb Navigation
@@ -29,9 +31,11 @@ import {
   INITIAL_OPPORTUNITIES,
   INITIAL_PROPOSALS,
   INITIAL_CONTACTS,
-  INITIAL_NOTIFICATIONS
+  INITIAL_NOTIFICATIONS,
+  INITIAL_EMAIL_TEMPLATES
 } from './data/mockData';
 import { LuCircleCheck, LuX, LuTriangleAlert, LuCircleAlert, LuInfo } from 'react-icons/lu';
+import { getInitialStageHistory } from './utils/pipelineUtils';
 import { getTodayISO, getFutureISO } from './utils/dateUtils';
 
 const DATA_VERSION = 'v3.9_filter_fixes';
@@ -75,16 +79,16 @@ function createGeneratedAccount(companyName, overrides = {}) {
   return {
     id: `ACC-GEN-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
     companyName: comp,
-    industry: 'Enterprise Technology',
-    companySize: '100-500 employees',
-    website: `www.${sanitized || 'enterprise'}.co.in`,
-    location: 'Mumbai, MH',
+    industry: overrides.industry !== undefined ? overrides.industry : '',
+    companySize: overrides.companySize !== undefined ? overrides.companySize : '',
+    website: overrides.website !== undefined ? overrides.website : '',
+    location: overrides.location !== undefined ? overrides.location : '',
     accountOwner: overrides.accountOwner || 'Unassigned',
-    estimatedAccountValue: '₹1,00,00,000',
-    leadsCount: 1,
-    contactsCount: 1,
-    oppsCount: 0,
-    proposalsCount: 0,
+    estimatedAccountValue: overrides.estimatedAccountValue !== undefined ? overrides.estimatedAccountValue : '',
+    leadsCount: overrides.leadsCount !== undefined ? overrides.leadsCount : 1,
+    contactsCount: overrides.contactsCount !== undefined ? overrides.contactsCount : 0,
+    oppsCount: overrides.oppsCount !== undefined ? overrides.oppsCount : 0,
+    proposalsCount: overrides.proposalsCount !== undefined ? overrides.proposalsCount : 0,
     ...overrides
   };
 }
@@ -122,6 +126,7 @@ export default function App() {
   const [proposals, setProposals] = useState(() => loadFromStorage('proposals', INITIAL_PROPOSALS));
   const [contacts, setContacts] = useState(() => loadFromStorage('contacts', INITIAL_CONTACTS));
   const [notifications, setNotifications] = useState(() => loadFromStorage('notifications', INITIAL_NOTIFICATIONS));
+  const [emailTemplates, setEmailTemplates] = useState(() => loadFromStorage('email_templates', INITIAL_EMAIL_TEMPLATES));
   const [toastMessage, setToastMessage] = useState(null);
 
   // Automatically synchronize state changes to localStorage
@@ -132,6 +137,7 @@ export default function App() {
   useEffect(() => { saveToStorage('proposals', proposals); }, [proposals]);
   useEffect(() => { saveToStorage('contacts', contacts); }, [contacts]);
   useEffect(() => { saveToStorage('notifications', notifications); }, [notifications]);
+  useEffect(() => { saveToStorage('email_templates', emailTemplates); }, [emailTemplates]);
 
   // Auto-dismiss toast pop-up notification after 5 seconds
   useEffect(() => {
@@ -206,6 +212,7 @@ export default function App() {
   const [modalTargetLead, setModalTargetLead] = useState(null);
   const [modalBulkCallback, setModalBulkCallback] = useState(null);
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
+  const [newCompanyPrompt, setNewCompanyPrompt] = useState(null);
 
   // Interactive View Filter State
   const [leadsSourceFilter, setLeadsSourceFilter] = useState('');
@@ -411,6 +418,63 @@ export default function App() {
     }
   };
 
+  const handleUpdateLeadStage = (leadId, newStage) => {
+    const now = new Date();
+    const formattedDate = `${now.toISOString().split('T')[0]} • ${now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
+
+    const updateLeadWithHistory = (l) => {
+      const fromStage = l.status || 'New';
+      if (fromStage === newStage) return l;
+
+      const existingHistory = Array.isArray(l.stageHistory) && l.stageHistory.length > 0
+        ? [...l.stageHistory]
+        : getInitialStageHistory(l);
+
+      const newHistoryItem = {
+        id: `STG-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+        type: 'stage_change',
+        fromStage,
+        toStage: newStage,
+        title: `Lead status changed ${fromStage} → ${newStage}`,
+        timestamp: now.toISOString(),
+        date: formattedDate,
+        updatedBy: currentUser?.name || l.leadOwner || 'Rajesh Sharma',
+        notes: `Pipeline stage transitioned from "${fromStage}" to "${newStage}".`
+      };
+      return {
+        ...l,
+        status: newStage,
+        stageHistory: [...existingHistory, newHistoryItem]
+      };
+    };
+
+    setLeads(prev => prev.map(l => l.id === leadId ? updateLeadWithHistory(l) : l));
+    setSelectedLead(prev => prev && prev.id === leadId ? updateLeadWithHistory(prev) : prev);
+    triggerToast({
+      title: 'Lead Stage Updated',
+      description: `Lead moved to "${newStage}" stage.`,
+      type: 'success'
+    });
+    pushNotification('Lead Stage Updated', `Lead status updated to ${newStage}`, 'Lead', 'leads');
+  };
+
+  const handleUpdateAccount = (accountId, updatedFields) => {
+    setAccounts(prev => prev.map(acc => {
+      if (acc.id === accountId) {
+        return { ...acc, ...updatedFields };
+      }
+      return acc;
+    }));
+    if (selectedAccount && selectedAccount.id === accountId) {
+      setSelectedAccount(prev => ({ ...prev, ...updatedFields }));
+    }
+    triggerToast({
+      title: 'Company Profile Updated',
+      description: 'The company details have been successfully saved.',
+      type: 'success'
+    });
+  };
+
   // Navigate directly to Account (Company) full page detail view
   const handleSelectAccountByCompany = (companyInput, source = 'opportunities', initialTab = 'Opportunities') => {
     const companyName = typeof companyInput === 'string' ? companyInput : (companyInput?.company || companyInput?.companyName || companyInput?.accountName);
@@ -515,8 +579,8 @@ export default function App() {
         nextFollowup: `${dueDateVal} 10:00`,
         dueToday: isDueToday,
         isOverdue: isDueOverdue,
-        notes: formData.notes || 'Created via Common Action workspace.',
-        nextAction: formData.nextAction || 'Schedule introductory discovery call'
+        notes: formData.notes || '',
+        nextAction: formData.notes || ''
       };
       setLeads([newLeadObj, ...leads]);
       pushNotification('New Lead Created', `Lead "${formData.leadName}" created for ${formData.company}`, 'Lead', 'leads');
@@ -527,9 +591,15 @@ export default function App() {
       if (!existingAcc) {
         const newAcc = createGeneratedAccount(formData.company, {
           accountOwner: formData.owner || currentUser?.name || 'Unassigned',
-          leadsCount: 1
+          leadsCount: 1,
+          industry: '',
+          companySize: '',
+          website: '',
+          location: '',
+          estimatedAccountValue: ''
         });
         setAccounts([newAcc, ...accounts]);
+        setNewCompanyPrompt({ companyName: formData.company, account: newAcc });
       }
     } else if (type === 'addNote') {
       const noteText = formData.notes || 'Note added to lead record';
@@ -559,10 +629,39 @@ export default function App() {
       const newStatus = formData.status || 'Contacted';
       const targetIds = formData.bulkLeadIds || (targetLead ? [targetLead.id] : []);
       const targetIdSet = new Set(targetIds);
-      const updatedLeads = leads.map(l => targetIdSet.has(l.id) ? { ...l, status: newStatus } : l);
+
+      const now = new Date();
+      const formattedDate = `${now.toISOString().split('T')[0]} • ${now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
+
+      const applyStatusWithHistory = (l) => {
+        const fromStage = l.status || 'New';
+        if (fromStage === newStatus) return l;
+        const existingHistory = Array.isArray(l.stageHistory) && l.stageHistory.length > 0
+          ? [...l.stageHistory]
+          : getInitialStageHistory(l);
+
+        const newHistoryItem = {
+          id: `STG-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+          type: 'stage_change',
+          fromStage,
+          toStage: newStatus,
+          title: `Lead status changed ${fromStage} → ${newStatus}`,
+          timestamp: now.toISOString(),
+          date: formattedDate,
+          updatedBy: currentUser?.name || l.leadOwner || 'Rajesh Sharma',
+          notes: `Pipeline stage transitioned from "${fromStage}" to "${newStatus}".`
+        };
+        return {
+          ...l,
+          status: newStatus,
+          stageHistory: [...existingHistory, newHistoryItem]
+        };
+      };
+
+      const updatedLeads = leads.map(l => targetIdSet.has(l.id) ? applyStatusWithHistory(l) : l);
       setLeads(updatedLeads);
       if (selectedLead && targetIdSet.has(selectedLead.id)) {
-        setSelectedLead({ ...selectedLead, status: newStatus });
+        setSelectedLead(applyStatusWithHistory(selectedLead));
       }
       const count = targetIds.length;
       const msg = count > 1 ? `Updated stage to "${newStatus}" for ${count} leads` : `Status for ${targetLead?.leadName || 'lead'} changed to "${newStatus}"`;
@@ -677,14 +776,18 @@ export default function App() {
 
       const newAct = {
         id: `ACT-${Date.now()}`,
-        type: 'Follow-up',
+        type: 'SMS / WhatsApp',
+        targetLeadId: targetLead.id,
+        leadId: targetLead.id,
         title: 'WhatsApp Message',
+        subject: 'WhatsApp Message',
         date: `${getTodayISO()} ${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`,
         owner: targetLead.leadOwner || currentUser?.name || 'Unassigned',
         company: targetLead.company,
         lead: targetLead.leadName,
         notes: smsNotes,
-        status: 'Completed',
+        shortPreview: smsNotes,
+        status: 'Delivered',
         isOverdue: false
       };
       setActivities([newAct, ...activities]);
@@ -852,6 +955,7 @@ export default function App() {
           ) : selectedLead ? (
             <LeadDetailView
               lead={selectedLead}
+              activities={activities}
               onBack={() => setSelectedLead(null)}
               onNavigateHome={() => {
                 setSelectedLead(null);
@@ -859,6 +963,7 @@ export default function App() {
                 setActiveModule('dashboard');
               }}
               onQuickAction={handleQuickAction}
+              onSaveAction={handleSaveAction}
               onNavigateToAccount={handleNavigateToCompanyAccount}
               navigationSource={leadNavSource}
               fromDashboard={fromDashboard}
@@ -882,6 +987,7 @@ export default function App() {
                 setSelectedAccount(null);
                 setActiveModule('opportunities');
               }}
+              onUpdateLeadStage={handleUpdateLeadStage}
             />
           ) : selectedAccount ? (
             /* Full Page Account Detail View with Breadcrumb Navigation */
@@ -899,6 +1005,7 @@ export default function App() {
               contacts={contacts}
               opportunities={opportunities}
               proposals={proposals}
+              onUpdateAccount={handleUpdateAccount}
               onSelectLead={(l) => {
                 setLeadNavSource('leads');
                 setSelectedAccount(null);
@@ -1139,6 +1246,20 @@ export default function App() {
                   selectedOwnerFilter={selectedOwnerFilter}
                 />
               )}
+
+              {activeModule === 'masterData' && (
+                <MasterDataView
+                  searchQuery={searchQuery}
+                  fromDashboard={fromDashboard}
+                  onBackToDashboard={() => {
+                    setFromDashboard(false);
+                    setActiveModule('dashboard');
+                  }}
+                  onTriggerToast={triggerToast}
+                  emailTemplates={emailTemplates}
+                  onUpdateEmailTemplates={setEmailTemplates}
+                />
+              )}
             </>
           )}
         </main>
@@ -1166,7 +1287,9 @@ export default function App() {
         selectedLead={modalTargetLead || selectedLead}
         bulkLeadIds={modalBulkLeadIds}
         leads={leads}
+        accounts={accounts}
         currentUser={currentUser}
+        emailTemplates={emailTemplates}
       />
 
       {/* Logout Confirmation Pop-up Modal with Smooth Animation */}
@@ -1175,6 +1298,23 @@ export default function App() {
         onClose={() => setIsLogoutModalOpen(false)}
         onConfirm={handleConfirmLogout}
         user={currentUser}
+      />
+
+      {/* New Company Details Prompt Modal */}
+      <NewCompanyPromptModal
+        isOpen={Boolean(newCompanyPrompt)}
+        companyName={newCompanyPrompt?.companyName || ''}
+        onClose={() => setNewCompanyPrompt(null)}
+        onConfirm={() => {
+          const targetAcc = newCompanyPrompt?.account;
+          setNewCompanyPrompt(null);
+          if (targetAcc) {
+            setSelectedLead(null);
+            setSelectedAccount(targetAcc);
+            setLeadNavSource('leads');
+            setActiveModule('accounts');
+          }
+        }}
       />
 
       {/* Toast Banner Container with Smooth Pop-Up Animation */}

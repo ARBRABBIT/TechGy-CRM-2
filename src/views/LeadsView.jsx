@@ -6,12 +6,18 @@ import {
   LuClock,
   LuTriangleAlert,
   LuChevronRight,
+  LuChevronLeft,
   LuUserPlus,
   LuMail,
   LuRefreshCw
 } from 'react-icons/lu';
 import { LEAD_SOURCES, INITIAL_OWNERS } from '../data/mockData';
 import { isDateInFilter } from '../utils/dateUtils';
+import MultiSelectFilter from '../components/MultiSelectFilter';
+
+const STATUS_OPTIONS = ['New', 'Contacted', 'Qualified', 'Discussion', 'Proposal', 'Negotiation'];
+const OWNER_OPTIONS = INITIAL_OWNERS.filter(o => o !== 'All Owners');
+const SOURCE_OPTIONS = LEAD_SOURCES;
 
 export default function LeadsView({
   leads = [],
@@ -32,16 +38,18 @@ export default function LeadsView({
   const effectiveInitialOverdue = propOverdueOnlyFilter || initialOverdueOnly;
 
   const [localSearch, setLocalSearch] = useState('');
-  const [sourceFilter, setSourceFilter] = useState(effectiveInitialSource);
-  const [statusFilter, setStatusFilter] = useState('All Statuses');
-  const [ownerFilter, setOwnerFilter] = useState('All Owners');
+  const [selectedSources, setSelectedSources] = useState(effectiveInitialSource ? [effectiveInitialSource] : []);
+  const [selectedStatuses, setSelectedStatuses] = useState([]);
+  const [selectedOwners, setSelectedOwners] = useState([]);
   const [overdueOnly, setOverdueOnly] = useState(effectiveInitialOverdue);
   const [selectedLeadIds, setSelectedLeadIds] = useState([]);
   const selectAllRef = useRef(null);
 
   useEffect(() => {
     const next = propSourceFilter || initialFilterSource;
-    setSourceFilter(prev => (prev !== next ? next : prev));
+    if (next) {
+      setSelectedSources([next]);
+    }
   }, [propSourceFilter, initialFilterSource]);
 
   useEffect(() => {
@@ -49,11 +57,18 @@ export default function LeadsView({
     setOverdueOnly(prev => (prev !== next ? next : prev));
   }, [propOverdueOnlyFilter, initialOverdueOnly]);
 
+  const [currentPage, setCurrentPage] = useState(1);
+  const PAGE_SIZE = 10;
+
   const effectiveSearch = (searchQuery || localSearch).toLowerCase().trim();
   const dateFilterKey = typeof selectedDateFilter === 'object' && selectedDateFilter !== null
     ? `${selectedDateFilter?.startDate}_${selectedDateFilter?.endDate}_${selectedDateFilter?.label}`
     : selectedDateFilter;
-  const filterKey = `${sourceFilter}_${statusFilter}_${ownerFilter}_${overdueOnly}_${localSearch}_${searchQuery}_${dateFilterKey}`;
+  const filterKey = `${selectedSources.join(',')}_${selectedStatuses.join(',')}_${selectedOwners.join(',')}_${overdueOnly}_${localSearch}_${searchQuery}_${dateFilterKey}`;
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [filterKey]);
 
   // Multi-field Lead filtering
   const filteredLeads = leads.filter((lead) => {
@@ -69,18 +84,18 @@ export default function LeadsView({
       }
     }
 
-    // 2. Lead Source
-    if (sourceFilter && sourceFilter !== 'All Sources' && lead.leadSource !== sourceFilter) {
+    // 2. Lead Source (Multi-Select)
+    if (selectedSources.length > 0 && !selectedSources.includes(lead.leadSource)) {
       return false;
     }
 
-    // 3. Status Pipeline
-    if (statusFilter && statusFilter !== 'All Statuses' && statusFilter !== 'All Status' && lead.status !== statusFilter) {
+    // 3. Status Pipeline (Multi-Select)
+    if (selectedStatuses.length > 0 && !selectedStatuses.includes(lead.status)) {
       return false;
     }
 
-    // 4. Owner
-    if (ownerFilter !== 'All Owners' && lead.leadOwner !== ownerFilter) {
+    // 4. Owner (Multi-Select)
+    if (selectedOwners.length > 0 && !selectedOwners.includes(lead.leadOwner)) {
       return false;
     }
 
@@ -90,8 +105,6 @@ export default function LeadsView({
     }
 
     // 6. Global Date Filter
-    // When filtered strictly for overdue records, don't drop active overdue records based on lead creation date;
-    // otherwise, filter leads by their creation date so lead-generation lists respond dynamically to date filters.
     if (!overdueOnly && selectedDateFilter && selectedDateFilter !== 'All Time') {
       const matchCreated = isDateInFilter(lead.createdDate, selectedDateFilter);
       if (!matchCreated) return false;
@@ -99,6 +112,14 @@ export default function LeadsView({
 
     return true;
   });
+
+  const totalLeads = filteredLeads.length;
+  const totalPages = Math.ceil(totalLeads / PAGE_SIZE) || 1;
+  const currentPageSafe = Math.min(currentPage, totalPages);
+  const startIndex = (currentPageSafe - 1) * PAGE_SIZE;
+  const displayedLeads = totalLeads > PAGE_SIZE
+    ? filteredLeads.slice(startIndex, startIndex + PAGE_SIZE)
+    : filteredLeads;
 
   const isAllSelected =
     filteredLeads.length > 0 &&
@@ -164,7 +185,7 @@ export default function LeadsView({
       )}
 
       {/* Filter & Control Bar */}
-      <div className="section-card" style={{ padding: '1rem' }}>
+      <div className="section-card" style={{ padding: '1rem', overflow: 'visible', position: 'relative', zIndex: 20 }}>
         <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between' }}>
 
           {/* Search Box */}
@@ -179,45 +200,34 @@ export default function LeadsView({
             />
           </div>
 
-          {/* Filter Dropdowns */}
+          {/* Multi-Select Filter Dropdowns */}
           <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', alignItems: 'center' }}>
-            {/* Source Filter */}
-            <select
-              className="select-filter"
-              value={sourceFilter}
-              onChange={(e) => setSourceFilter(e.target.value)}
-            >
-              <option value="">All Sources</option>
-              {LEAD_SOURCES.map((src) => (
-                <option key={src} value={src}>{src}</option>
-              ))}
-            </select>
+            {/* Source Multi-Select Filter */}
+            <MultiSelectFilter
+              label="Source"
+              allLabel="All Sources"
+              options={SOURCE_OPTIONS}
+              selected={selectedSources}
+              onChange={setSelectedSources}
+            />
 
-            {/* Status Filter */}
-            <select
-              className="select-filter"
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-            >
-              <option value="All Statuses">All Statuses</option>
-              <option value="New">New</option>
-              <option value="Contacted">Contacted</option>
-              <option value="Qualified">Qualified</option>
-              <option value="Discussion">Discussion</option>
-              <option value="Proposal">Proposal</option>
-              <option value="Negotiation">Negotiation</option>
-            </select>
+            {/* Status Multi-Select Filter */}
+            <MultiSelectFilter
+              label="Status"
+              allLabel="All Statuses"
+              options={STATUS_OPTIONS}
+              selected={selectedStatuses}
+              onChange={setSelectedStatuses}
+            />
 
-            {/* Owner Filter */}
-            <select
-              className="select-filter"
-              value={ownerFilter}
-              onChange={(e) => setOwnerFilter(e.target.value)}
-            >
-              {INITIAL_OWNERS.map((o) => (
-                <option key={o} value={o}>{o}</option>
-              ))}
-            </select>
+            {/* Owner Multi-Select Filter */}
+            <MultiSelectFilter
+              label="Owner"
+              allLabel="All Owners"
+              options={OWNER_OPTIONS}
+              selected={selectedOwners}
+              onChange={setSelectedOwners}
+            />
 
             {/* Overdue Alert Filter Toggle */}
             <button
@@ -230,7 +240,7 @@ export default function LeadsView({
 
             {/* Reset Filters */}
             <AnimatePresence>
-              {(sourceFilter || statusFilter !== 'All Statuses' || ownerFilter !== 'All Owners' || overdueOnly || localSearch) && (
+              {(selectedSources.length > 0 || selectedStatuses.length > 0 || selectedOwners.length > 0 || overdueOnly || localSearch) && (
                 <motion.button
                   initial={{ opacity: 0, scale: 0.9, x: -4 }}
                   animate={{ opacity: 1, scale: 1, x: 0 }}
@@ -239,9 +249,9 @@ export default function LeadsView({
                   className="btn-secondary"
                   style={{ fontSize: '0.75rem' }}
                   onClick={() => {
-                    setSourceFilter('');
-                    setStatusFilter('All Statuses');
-                    setOwnerFilter('All Owners');
+                    setSelectedSources([]);
+                    setSelectedStatuses([]);
+                    setSelectedOwners([]);
                     setOverdueOnly(false);
                     setLocalSearch('');
                     if (onClearFilters) onClearFilters();
@@ -363,7 +373,7 @@ export default function LeadsView({
           <button
             className="btn-primary"
             onClick={() => onOpenCreateModal('createLead')}
-            style={{ padding: '0.35rem 0.75rem', fontSize: '0.8rem' }}
+            style={{ padding: '0.55rem 1rem', fontSize: '0.825rem', borderRadius: '20px', display: 'inline-flex', alignItems: 'center', gap: '0.35rem', fontWeight: 600 }}
           >
             <LuPlus size={15} /> Create Lead
           </button>
@@ -394,12 +404,12 @@ export default function LeadsView({
               </tr>
             </thead>
             <motion.tbody
-              key={filterKey}
+              key={`${filterKey}_page_${currentPageSafe}`}
               initial={{ opacity: 0.35 }}
               animate={{ opacity: 1 }}
               transition={{ duration: 0.28, ease: [0.25, 1, 0.5, 1] }}
             >
-              {filteredLeads.length === 0 ? (
+              {displayedLeads.length === 0 ? (
                 <motion.tr
                   key="no-leads"
                   initial={{ opacity: 0, y: -4 }}
@@ -411,7 +421,7 @@ export default function LeadsView({
                   </td>
                 </motion.tr>
               ) : (
-                filteredLeads.map((lead, idx) => {
+                displayedLeads.map((lead, idx) => {
                   const isSelected = selectedLeadIds.includes(lead.id);
                   return (
                     <motion.tr
@@ -527,7 +537,7 @@ export default function LeadsView({
                             onSelectLead(lead);
                           }}
                         >
-                          Inspect <LuChevronRight size={12} />
+                          View <LuChevronRight size={12} />
                         </button>
                       </td>
                     </motion.tr>
@@ -537,6 +547,103 @@ export default function LeadsView({
             </motion.tbody>
           </table>
         </div>
+
+        {/* Table Footer & Pagination (shown only if leads exceed 10) */}
+        {totalLeads > PAGE_SIZE && (
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            paddingTop: '1.25rem',
+            marginTop: '0.75rem',
+            borderTop: '1px solid #F1F5F9',
+            flexWrap: 'wrap',
+            gap: '1rem'
+          }}>
+            {/* Left Counter Text */}
+            <div style={{ fontSize: '0.85rem', color: '#64748B', fontWeight: 500 }}>
+              Showing <strong style={{ color: '#063669' }}>{totalLeads > 0 ? startIndex + 1 : 0} – {Math.min(startIndex + PAGE_SIZE, totalLeads)}</strong> of <strong style={{ color: '#063669' }}>{totalLeads}</strong> Leads
+            </div>
+
+            {/* Right Pagination Buttons */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <button
+                type="button"
+                disabled={currentPageSafe <= 1}
+                onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '4px',
+                  padding: '6px 14px',
+                  borderRadius: '9999px',
+                  border: '1px solid #E2E8F0',
+                  background: '#FFFFFF',
+                  color: currentPageSafe <= 1 ? '#CBD5E1' : '#64748B',
+                  fontSize: '0.8rem',
+                  fontWeight: 500,
+                  cursor: currentPageSafe <= 1 ? 'not-allowed' : 'pointer',
+                  transition: 'all 0.15s ease'
+                }}
+              >
+                <LuChevronLeft size={14} />
+                Previous
+              </button>
+
+              {Array.from({ length: totalPages }).map((_, i) => {
+                const pageNum = i + 1;
+                const isActive = pageNum === currentPageSafe;
+                return (
+                  <button
+                    type="button"
+                    key={pageNum}
+                    onClick={() => setCurrentPage(pageNum)}
+                    style={{
+                      width: '28px',
+                      height: '28px',
+                      borderRadius: '50%',
+                      border: 'none',
+                      background: isActive ? '#063669' : 'transparent',
+                      color: isActive ? '#FFFFFF' : '#475569',
+                      fontSize: '0.8rem',
+                      fontWeight: isActive ? 700 : 500,
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      transition: 'all 0.15s ease'
+                    }}
+                  >
+                    {pageNum}
+                  </button>
+                );
+              })}
+
+              <button
+                type="button"
+                disabled={currentPageSafe >= totalPages}
+                onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '4px',
+                  padding: '6px 14px',
+                  borderRadius: '9999px',
+                  border: '1px solid #E2E8F0',
+                  background: '#FFFFFF',
+                  color: currentPageSafe >= totalPages ? '#CBD5E1' : '#64748B',
+                  fontSize: '0.8rem',
+                  fontWeight: 500,
+                  cursor: currentPageSafe >= totalPages ? 'not-allowed' : 'pointer',
+                  transition: 'all 0.15s ease'
+                }}
+              >
+                Next
+                <LuChevronRight size={14} />
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
