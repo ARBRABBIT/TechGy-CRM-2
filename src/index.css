@@ -2691,8 +2691,8 @@ button,
   color: #063669;
   padding: 0.85rem 1.15rem;
   border-radius: 14px;
-  border: 1px solid #E2E8F0;
-  box-shadow: 0 16px 36px -4px rgba(6, 54, 105, 0.16), 0 6px 14px -2px rgba(6, 54, 105, 0.06), 0 0 0 1px rgba(6, 54, 105, 0.03);
+  border: none;
+  box-shadow: 0 16px 36px -4px rgba(6, 54, 105, 0.16), 0 6px 14px -2px rgba(6, 54, 105, 0.06);
   display: flex;
   align-items: center;
   gap: 0.85rem;
@@ -3677,4 +3677,248 @@ div:has(> .action-table)::-webkit-scrollbar,
   background: #DC2626;
   box-shadow: none;
   transform: none;
+}
+
+/* ==========================================================================
+   INTERACTIVE CALL MANAGER & FLOATING CALL BAR STYLES
+   ========================================================================== */
+
+@keyframes callRingPulse {
+  0% {
+    transform: scale(0.95);
+    opacity: 0.8;
+  }
+  50% {
+    transform: scale(1.35);
+    opacity: 0.3;
+  }
+  100% {
+    transform: scale(1.7);
+    opacity: 0;
+  }
+}
+
+@keyframes callSoundWave {
+  0%, 100% {
+    height: 8px;
+  }
+  50% {
+    height: 32px;
+  }
+}
+
+@keyframes pulseGreenDot {
+  0% {
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+  }
+  70% {
+    box-shadow: 0 0 0 8px rgba(16, 185, 129, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
+  }
+}
+
+@keyframes pulseRingingDot {
+  0% {
+    box-shadow: 0 0 0 0 rgba(6, 54, 105, 0.6);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(6, 54, 105, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(6, 54, 105, 0);
+  }
+}
+
+.call-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(6, 54, 105, 0.45);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  padding: 1rem;
+}
+
+.call-modal-card {
+  background: #FFFFFF;
+  border-radius: 20px;
+  width: 100%;
+  max-width: 440px;
+  box-shadow: 0 25px 60px -12px rgba(6, 54, 105, 0.35), 0 0 0 1px rgba(6, 54, 105, 0.08);
+  overflow: hidden;
+  position: relative;
+}
+
+.call-avatar-wrap {
+  position: relative;
+  width: 96px;
+  height: 96px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.call-avatar-circle {
+  width: 88px;
+  height: 88px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #063669 0%, #1E5B99 100%);
+  color: #FFFFFF;
+  font-size: 2rem;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  z-index: 2;
+  box-shadow: 0 8px 24px rgba(6, 54, 105, 0.28);
+}
+
+.call-ripple-1,
+.call-ripple-2,
+.call-ripple-3 {
+  position: absolute;
+  inset: -6px;
+  border-radius: 50%;
+  border: 2px solid #063669;
+  z-index: 1;
+  pointer-events: none;
+  animation: callRingPulse 2.4s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
+}
+
+.call-ripple-2 {
+  animation-delay: 0.8s;
+}
+
+.call-ripple-3 {
+  animation-delay: 1.6s;
+}
+
+.call-action-btn-circle {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+}
+
+.call-action-btn-circle:hover {
+  transform: scale(1.1);
+}
+
+.call-action-btn-circle:active {
+  transform: scale(0.95);
+}
+
+.call-btn-hangup {
+  background: #DC2626;
+  color: #FFFFFF;
+  box-shadow: 0 8px 20px rgba(220, 38, 38, 0.35);
+}
+
+.call-btn-hangup:hover {
+  background: #B91C1C;
+  box-shadow: 0 10px 24px rgba(220, 38, 38, 0.45);
+}
+
+.call-btn-tool {
+  background: #F0F5FA;
+  color: #063669;
+  border: 1px solid #D5E2EE;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.18s ease;
+}
+
+.call-btn-tool:hover {
+  background: #E2ECF7;
+  color: #063669;
+  transform: translateY(-2px);
+}
+
+.call-btn-tool.active {
+  background: #063669;
+  color: #FFFFFF;
+  border-color: #063669;
+}
+
+.call-btn-tool.muted-active {
+  background: #DC2626;
+  color: #FFFFFF;
+  border-color: #DC2626;
+}
+
+/* Floating Minimized Call Bar */
+.floating-call-bar {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  background: #FFFFFF;
+  border: none;
+  border-radius: 16px;
+  padding: 0.75rem 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  box-shadow: 0 16px 40px rgba(6, 54, 105, 0.18), 0 4px 12px rgba(6, 54, 105, 0.08);
+  z-index: 9999;
+  min-width: 320px;
+  max-width: 420px;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.floating-call-bar:hover {
+  box-shadow: 0 20px 48px rgba(6, 54, 105, 0.24), 0 6px 16px rgba(6, 54, 105, 0.1);
+}
+
+.floating-avatar {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #063669 0%, #1E5B99 100%);
+  color: #FFFFFF;
+  font-weight: 700;
+  font-size: 0.95rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  flex-shrink: 0;
+}
+
+.floating-avatar-dot {
+  position: absolute;
+  bottom: -1px;
+  right: -1px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #10B981;
+  border: 2px solid #FFFFFF;
+  animation: pulseGreenDot 2s infinite;
+}
+
+.call-sound-bar {
+  width: 3px;
+  background: #063669;
+  border-radius: 2px;
+  animation: callSoundWave 1.2s ease-in-out infinite alternate;
 }

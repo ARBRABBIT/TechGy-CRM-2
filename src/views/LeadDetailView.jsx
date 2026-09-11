@@ -426,8 +426,21 @@ export default function LeadDetailView({
 
               <div className="drawer-field-group">
                 <div className="field-label">Phone Number</div>
-                <div className="field-value" style={{ fontWeight: 600 }}>
-                  <LuPhone size={14} style={{ color: '#557396' }} /> {lead.phoneNumber}
+                <div
+                  className="field-value"
+                  style={{
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '0.4rem',
+                    color: '#063669'
+                  }}
+                  onClick={() => onQuickAction && onQuickAction('call', lead)}
+                  title={`Click to call ${lead.leadName}`}
+                >
+                  <LuPhone size={14} style={{ color: '#063669' }} />
+                  <span style={{ textDecoration: 'underline' }}>{lead.phoneNumber}</span>
                 </div>
               </div>
               <div className="drawer-field-group">
@@ -558,12 +571,14 @@ export default function LeadDetailView({
                 style={{
                   display: 'inline-flex',
                   alignItems: 'center',
-                  gap: '0.4rem',
-                  fontSize: '0.8rem',
-                  padding: '0.45rem 0.95rem',
-                  borderRadius: '6px',
-                  fontWeight: 600,
-                  cursor: 'pointer'
+                  gap: '0.45rem',
+                  fontSize: '0.825rem',
+                  padding: '0.45rem 1.15rem',
+                  borderRadius: '9999px',
+                  fontWeight: 700,
+                  cursor: 'pointer',
+                  boxShadow: '0 2px 6px rgba(6, 54, 105, 0.15)',
+                  transition: 'all 0.18s ease'
                 }}
                 title={`${getLogCtaLabel(activeTab)} for ${lead.leadName}`}
               >

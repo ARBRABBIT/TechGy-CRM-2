@@ -6,6 +6,7 @@ import GlobalHeader from './components/GlobalHeader';
 import CommonActionsModal from './components/CommonActionsModal';
 import LogoutConfirmModal from './components/LogoutConfirmModal';
 import NewCompanyPromptModal from './components/NewCompanyPromptModal';
+import CallSessionModal from './components/CallSessionModal';
 
 // Views
 import DashboardView from './views/DashboardView';
@@ -214,6 +215,10 @@ export default function App() {
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
   const [newCompanyPrompt, setNewCompanyPrompt] = useState(null);
 
+  // Interactive Voice Calling Session State
+  const [callSession, setCallSession] = useState(null);
+  // { lead, status: 'confirming' | 'ringing' | 'connected', isMinimized, durationSeconds, isMuted, isOnHold, notes }
+
   // Interactive View Filter State
   const [leadsSourceFilter, setLeadsSourceFilter] = useState('');
   const [leadsOverdueOnly, setLeadsOverdueOnly] = useState(false);
@@ -391,6 +396,93 @@ export default function App() {
     }
   };
 
+  // Voice Calling Flow Handlers
+  const handleInitiateCall = (targetLead) => {
+    if (!targetLead) return;
+    setCallSession({
+      lead: targetLead,
+      status: 'confirming',
+      isMinimized: false,
+      durationSeconds: 0,
+      isMuted: false,
+      isOnHold: false,
+      notes: ''
+    });
+  };
+
+  const handleConfirmCall = () => {
+    setCallSession(prev => prev ? { ...prev, status: 'ringing' } : null);
+  };
+
+  const handleCancelCallConfirmation = () => {
+    setCallSession(null);
+  };
+
+  const handleSimulatePickup = () => {
+    setCallSession(prev => prev ? { ...prev, status: 'connected', durationSeconds: 0 } : null);
+  };
+
+  const handleToggleCallMinimize = () => {
+    setCallSession(prev => prev ? { ...prev, isMinimized: !prev.isMinimized } : null);
+  };
+
+  const handleToggleCallMute = () => {
+    setCallSession(prev => prev ? { ...prev, isMuted: !prev.isMuted } : null);
+  };
+
+  const handleToggleCallHold = () => {
+    setCallSession(prev => prev ? { ...prev, isOnHold: !prev.isOnHold } : null);
+  };
+
+  const handleUpdateCallNotes = (notes) => {
+    setCallSession(prev => prev ? { ...prev, notes } : null);
+  };
+
+  const handleEndCall = () => {
+    if (!callSession || !callSession.lead) {
+      setCallSession(null);
+      return;
+    }
+
+    const { lead, durationSeconds, notes } = callSession;
+    const mins = Math.floor(durationSeconds / 60);
+    const secs = durationSeconds % 60;
+    const formattedDuration = `${String(mins).padStart(2, '0')}m ${String(secs).padStart(2, '0')}s`;
+
+    // Save call to CRM activities
+    handleSaveAction('call', {
+      notes: notes || `Voice call completed (${formattedDuration}). Discussed requirements.`,
+      outcome: durationSeconds > 0 ? 'Connected - Discussion' : 'Attempted / No Answer',
+      duration: formattedDuration,
+      targetLeadId: lead.id
+    });
+
+    setCallSession(null);
+  };
+
+  // Ringing auto-pickup & live duration timer
+  useEffect(() => {
+    let timer = null;
+    let pickupTimer = null;
+
+    if (callSession?.status === 'ringing') {
+      pickupTimer = setTimeout(() => {
+        setCallSession(prev => prev ? { ...prev, status: 'connected', durationSeconds: 0 } : null);
+      }, 2600);
+    }
+
+    if (callSession?.status === 'connected' && !callSession.isOnHold) {
+      timer = setInterval(() => {
+        setCallSession(prev => prev ? { ...prev, durationSeconds: prev.durationSeconds + 1 } : null);
+      }, 1000);
+    }
+
+    return () => {
+      if (timer) clearInterval(timer);
+      if (pickupTimer) clearTimeout(pickupTimer);
+    };
+  }, [callSession?.status, callSession?.isOnHold]);
+
   // Quick Action Handler
   const handleQuickAction = (actionType, lead) => {
     if (actionType === 'convertOpportunity') {
@@ -411,6 +503,8 @@ export default function App() {
       pushNotification('Opportunity Converted', `Lead "${lead.leadName}" (${lead.company}) converted to Opportunity!`, 'Opportunity', 'opportunities');
       setSelectedLead(null);
       setActiveModule('opportunities');
+    } else if (actionType === 'call') {
+      handleInitiateCall(lead);
     } else {
       setModalInitialType(actionType);
       setSelectedLead(lead);
@@ -1077,6 +1171,10 @@ export default function App() {
                   }}
                   onSelectAccount={(comp) => handleSelectAccountByCompany(comp, 'leads', 'Leads')}
                   onOpenCreateModal={(type = 'createLead', targetLead = null, bulkIds = [], onComplete = null) => {
+                    if (type === 'call' && targetLead) {
+                      handleInitiateCall(targetLead);
+                      return;
+                    }
                     setModalInitialType(type);
                     setModalBulkLeadIds(bulkIds || []);
                     setModalTargetLead(targetLead);
@@ -1316,6 +1414,23 @@ export default function App() {
           }
         }}
       />
+
+      {/* Interactive Voice Calling Modal & Minimized Floating Right-Docked Bar */}
+      <AnimatePresence>
+        {callSession && (
+          <CallSessionModal
+            callSession={callSession}
+            onConfirmCall={handleConfirmCall}
+            onCancelConfirm={handleCancelCallConfirmation}
+            onSimulatePickup={handleSimulatePickup}
+            onToggleMinimize={handleToggleCallMinimize}
+            onToggleMute={handleToggleCallMute}
+            onToggleHold={handleToggleCallHold}
+            onUpdateNotes={handleUpdateCallNotes}
+            onEndCall={handleEndCall}
+          />
+        )}
+      </AnimatePresence>
 
       {/* Toast Banner Container with Smooth Pop-Up Animation */}
       <div className="toast-container" aria-live="polite" role="region">

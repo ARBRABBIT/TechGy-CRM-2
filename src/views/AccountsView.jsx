@@ -109,7 +109,7 @@ export default function AccountsView({
                     onSelectAccount(acc);
                   }}
                 >
-                  Inspect Account <LuChevronRight size={12} />
+                  View <LuChevronRight size={12} />
                 </button>
               </div>
             </div>

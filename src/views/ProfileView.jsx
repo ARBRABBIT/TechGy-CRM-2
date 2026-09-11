@@ -468,7 +468,7 @@ export default function ProfileView({
                       style={{ padding: '0.25rem 0.65rem', fontSize: '0.75rem' }}
                       onClick={() => onSelectAccount && onSelectAccount(acc)}
                     >
-                      Inspect Account
+                      View
                     </button>
                   </td>
                 </tr>
