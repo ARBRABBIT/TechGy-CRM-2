@@ -77,7 +77,6 @@ export function isDateInFilter(dateStr, filterValue) {
 
     const rawLower = (dateStr || '').toLowerCase();
     const now = new Date();
-    const nowTs = now.getTime();
     const currentYear = now.getFullYear();
     const currentMonth = now.getMonth(); // 0-11
     const currentQuarter = Math.floor(currentMonth / 3);

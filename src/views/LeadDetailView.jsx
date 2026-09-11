@@ -11,12 +11,16 @@ import {
   LuFileText,
   LuCalendar,
   LuArrowUpDown,
-  LuX
+  LuX,
+  LuPencil,
+  LuCheck
 } from 'react-icons/lu';
+import { LEAD_SOURCES, INITIAL_OWNERS, INITIAL_ACCOUNTS } from '../data/mockData';
 import StageConfirmModal from '../components/StageConfirmModal';
 import LeadCallHistory from '../components/LeadCallHistory';
 import LeadPipelineProgress from '../components/LeadPipelineProgress';
 import LeadChatHistory from '../components/LeadChatHistory';
+import FormDateSelector from '../components/FormDateSelector';
 
 export default function LeadDetailView({
   lead,
@@ -30,14 +34,98 @@ export default function LeadDetailView({
   onNavigateToActivities,
   onNavigateToProposals,
   onNavigateToContacts,
-  onUpdateLeadStage
+  onUpdateLeadStage,
+  onUpdateLead,
+  accounts = []
 }) {
-  const [hoveredStage, setHoveredStage] = useState(null);
   const [pendingStage, setPendingStage] = useState(null);
   const [isStageModalOpen, setIsStageModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [activeTab, setActiveTab] = useState('Activity');
   const [pipelineSortOrder, setPipelineSortOrder] = useState('desc');
   const [selectedActivityForModal, setSelectedActivityForModal] = useState(null);
+
+  const companyOptions = useMemo(() => {
+    const compSet = new Set();
+    if (accounts && Array.isArray(accounts)) {
+      accounts.forEach(a => {
+        const name = a.companyName || a.company;
+        if (name) compSet.add(name);
+      });
+    }
+    if (INITIAL_ACCOUNTS && Array.isArray(INITIAL_ACCOUNTS)) {
+      INITIAL_ACCOUNTS.forEach(a => {
+        const name = a.companyName || a.company;
+        if (name) compSet.add(name);
+      });
+    }
+    if (lead && lead.company) {
+      compSet.add(lead.company);
+    }
+    return Array.from(compSet).sort((a, b) => a.localeCompare(b));
+  }, [accounts, lead]);
+
+  const [editForm, setEditForm] = useState({
+    leadName: '',
+    company: '',
+    designation: '',
+    leadSource: 'Website',
+    phoneNumber: '',
+    emailId: '',
+    leadOwner: '',
+    priority: 'Medium',
+    followupDate: '',
+    followupTime: '10:30 AM'
+  });
+
+  const handleOpenEditModal = () => {
+    let initialDate = '';
+    let initialTime = '10:30 AM';
+    if (lead.nextFollowup) {
+      const parts = lead.nextFollowup.trim().split(/\s+/);
+      initialDate = parts[0] || '';
+      if (parts.length > 1) {
+        initialTime = parts.slice(1).join(' ');
+      }
+    }
+    const todayISO = new Date().toISOString().split('T')[0];
+    setEditForm({
+      leadName: lead.leadName || '',
+      company: lead.company || '',
+      designation: lead.designation || '',
+      leadSource: lead.leadSource || 'Website',
+      phoneNumber: lead.phoneNumber || '',
+      emailId: lead.emailId || '',
+      leadOwner: lead.leadOwner || 'Rajesh Sharma',
+      priority: lead.priority || 'Medium',
+      followupDate: initialDate || todayISO,
+      followupTime: initialTime || '10:30 AM'
+    });
+    setIsEditModalOpen(true);
+  };
+
+  const handleSaveEdit = (e) => {
+    e.preventDefault();
+    if (!editForm.leadName.trim()) return;
+    if (onUpdateLead) {
+      const combinedFollowup = editForm.followupDate
+        ? `${editForm.followupDate} ${editForm.followupTime}`.trim()
+        : lead.nextFollowup;
+
+      onUpdateLead(lead.id, {
+        leadName: editForm.leadName.trim(),
+        company: editForm.company.trim(),
+        designation: editForm.designation.trim(),
+        phoneNumber: editForm.phoneNumber.trim(),
+        emailId: editForm.emailId.trim(),
+        leadSource: editForm.leadSource,
+        leadOwner: editForm.leadOwner,
+        priority: editForm.priority,
+        nextFollowup: combinedFollowup
+      });
+    }
+    setIsEditModalOpen(false);
+  };
 
   const TABS = ['Activity', 'Calls', 'Chats', 'Enquiries', 'Followups', 'Mail', 'Notes'];
 
@@ -392,7 +480,37 @@ export default function LeadDetailView({
           {/* Key Contact Information Card */}
           <div className="section-card" style={{ marginBottom: 0 }}>
             <div className="section-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <h3 className="section-title">Lead Contact Information</h3>
+              <h3 className="section-title" style={{ margin: 0 }}>Lead Contact Information</h3>
+              <button
+                type="button"
+                onClick={handleOpenEditModal}
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '0.4rem',
+                  padding: '0.35rem 0.75rem',
+                  fontSize: '0.8rem',
+                  fontWeight: 600,
+                  color: '#063669',
+                  backgroundColor: '#F0F5FA',
+                  border: '1px solid #D5E2EE',
+                  borderRadius: '6px',
+                  cursor: 'pointer',
+                  transition: 'all 0.15s ease'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = '#E6EFF8';
+                  e.currentTarget.style.borderColor = '#063669';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = '#F0F5FA';
+                  e.currentTarget.style.borderColor = '#D5E2EE';
+                }}
+                title="Edit Lead Contact Details"
+              >
+                <LuPencil size={13} />
+                <span>Edit</span>
+              </button>
             </div>
 
             <div className="detail-fields-grid">
@@ -429,17 +547,29 @@ export default function LeadDetailView({
                 <div
                   className="field-value"
                   style={{
-                    fontWeight: 600,
+                    fontWeight: 700,
                     cursor: 'pointer',
                     display: 'inline-flex',
                     alignItems: 'center',
-                    gap: '0.4rem',
+                    gap: '0.5rem',
                     color: '#063669'
                   }}
                   onClick={() => onQuickAction && onQuickAction('call', lead)}
-                  title={`Click to call ${lead.leadName}`}
+                  title={`Click to call ${lead.leadName} (${lead.phoneNumber})`}
                 >
-                  <LuPhone size={14} style={{ color: '#063669' }} />
+                  <div style={{
+                    width: '24px',
+                    height: '24px',
+                    borderRadius: '50%',
+                    backgroundColor: '#E6EFF8',
+                    color: '#063669',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    flexShrink: 0
+                  }}>
+                    <LuPhone size={13} style={{ color: '#063669' }} />
+                  </div>
                   <span style={{ textDecoration: 'underline' }}>{lead.phoneNumber}</span>
                 </div>
               </div>
@@ -563,7 +693,7 @@ export default function LeadDetailView({
             </div>
           )}
 
-          {activeTab !== 'Chats' && activeTab !== 'Activity' && (
+          {activeTab !== 'Chats' && activeTab !== 'Activity' && activeTab !== 'Calls' && (
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
               <button
                 className="btn-primary"
@@ -582,11 +712,7 @@ export default function LeadDetailView({
                 }}
                 title={`${getLogCtaLabel(activeTab)} for ${lead.leadName}`}
               >
-                {activeTab === 'Calls' ? (
-                  <LuPhone size={14} />
-                ) : (
-                  <LuPlus size={15} />
-                )} {getLogCtaLabel(activeTab)}
+                <LuPlus size={15} /> {getLogCtaLabel(activeTab)}
               </button>
             </div>
           )}
@@ -607,7 +733,6 @@ export default function LeadDetailView({
                 onSaveAction('sms', { targetLeadId: lead.id, notes: msgText });
               }
             }}
-            onStartChat={() => handleLogAction('Chats')}
           />
         ) : activeTab === 'Activity' ? (
           <LeadPipelineProgress
@@ -1095,6 +1220,269 @@ export default function LeadDetailView({
         </div>
       )}
 
+
+      {/* Edit Lead Details Modal */}
+      {isEditModalOpen && (
+        <div
+          className="modal-overlay"
+          onClick={() => setIsEditModalOpen(false)}
+          style={{
+            position: 'fixed',
+            inset: 0,
+            backgroundColor: 'rgba(15, 23, 42, 0.65)',
+            backdropFilter: 'blur(4px)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 9999,
+            padding: '1rem'
+          }}
+        >
+          <div
+            className="modal-content"
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              backgroundColor: '#FFFFFF',
+              borderRadius: '12px',
+              width: '100%',
+              maxWidth: '560px',
+              maxHeight: '90vh',
+              display: 'flex',
+              flexDirection: 'column',
+              boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.2), 0 8px 10px -6px rgba(0, 0, 0, 0.2)',
+              overflow: 'hidden'
+            }}
+          >
+            {/* Modal Header */}
+            <div style={{
+              padding: '1.25rem 1.5rem',
+              borderBottom: '1px solid #E2E8F0',
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              backgroundColor: '#F8FAFC'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+                <div style={{
+                  width: '32px',
+                  height: '32px',
+                  borderRadius: '8px',
+                  backgroundColor: '#E6EFF8',
+                  color: '#063669',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}>
+                  <LuPencil size={16} />
+                </div>
+                <div>
+                  <h3 style={{ margin: 0, fontSize: '1.05rem', fontWeight: 800, color: '#063669' }}>
+                    Edit Lead Details
+                  </h3>
+                  <span style={{ fontSize: '0.75rem', color: '#64748B' }}>
+                    Update contact info and assignment for {lead.leadName}
+                  </span>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsEditModalOpen(false)}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  color: '#64748B',
+                  cursor: 'pointer',
+                  padding: '0.25rem',
+                  display: 'flex',
+                  alignItems: 'center',
+                  borderRadius: '4px'
+                }}
+              >
+                <LuX size={18} />
+              </button>
+            </div>
+
+            {/* Modal Body / Form */}
+            <form onSubmit={handleSaveEdit} style={{ display: 'flex', flexDirection: 'column', flex: 1, overflowY: 'auto' }}>
+              <div style={{ padding: '1.25rem 1.5rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                <div className="form-group" style={{ marginBottom: 0 }}>
+                  <label className="form-label">Full Name *</label>
+                  <input
+                    type="text"
+                    className="form-input"
+                    required
+                    value={editForm.leadName}
+                    onChange={(e) => setEditForm({ ...editForm, leadName: e.target.value })}
+                    placeholder="e.g. Aarav Sharma"
+                  />
+                </div>
+
+                <div className="form-grid-2">
+                  <div className="form-group" style={{ marginBottom: 0 }}>
+                    <label className="form-label">Company Name *</label>
+                    <select
+                      className="form-select"
+                      required
+                      value={editForm.company}
+                      onChange={(e) => setEditForm({ ...editForm, company: e.target.value })}
+                    >
+                      <option value="">-- Select Company Account --</option>
+                      {companyOptions.map(comp => (
+                        <option key={comp} value={comp}>{comp}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="form-group" style={{ marginBottom: 0 }}>
+                    <label className="form-label">Designation</label>
+                    <input
+                      type="text"
+                      className="form-input"
+                      value={editForm.designation}
+                      onChange={(e) => setEditForm({ ...editForm, designation: e.target.value })}
+                      placeholder="e.g. VP of Technology"
+                    />
+                  </div>
+                </div>
+
+                <div className="form-grid-2">
+                  <div className="form-group" style={{ marginBottom: 0 }}>
+                    <label className="form-label">Phone Number</label>
+                    <input
+                      type="tel"
+                      className="form-input"
+                      value={editForm.phoneNumber}
+                      onChange={(e) => setEditForm({ ...editForm, phoneNumber: e.target.value })}
+                      placeholder="+91 98765 43210"
+                    />
+                  </div>
+                  <div className="form-group" style={{ marginBottom: 0 }}>
+                    <label className="form-label">Email ID</label>
+                    <input
+                      type="email"
+                      className="form-input"
+                      value={editForm.emailId}
+                      onChange={(e) => setEditForm({ ...editForm, emailId: e.target.value })}
+                      placeholder="name@company.co.in"
+                    />
+                  </div>
+                </div>
+
+                <div className="form-grid-2">
+                  <div className="form-group" style={{ marginBottom: 0 }}>
+                    <label className="form-label">Lead Source</label>
+                    <select
+                      className="form-select"
+                      value={editForm.leadSource}
+                      onChange={(e) => setEditForm({ ...editForm, leadSource: e.target.value })}
+                    >
+                      {LEAD_SOURCES.map(src => (
+                        <option key={src} value={src}>{src}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="form-group" style={{ marginBottom: 0 }}>
+                    <label className="form-label">Assigned Owner</label>
+                    <select
+                      className="form-select"
+                      value={editForm.leadOwner}
+                      onChange={(e) => setEditForm({ ...editForm, leadOwner: e.target.value })}
+                    >
+                      {INITIAL_OWNERS.filter(o => o !== 'All Owners').map(o => (
+                        <option key={o} value={o}>{o}</option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
+                <div className="form-grid-2">
+                  <div className="form-group" style={{ marginBottom: 0 }}>
+                    <label className="form-label">Priority</label>
+                    <select
+                      className="form-select"
+                      value={editForm.priority}
+                      onChange={(e) => setEditForm({ ...editForm, priority: e.target.value })}
+                    >
+                      <option value="High">High</option>
+                      <option value="Medium">Medium</option>
+                      <option value="Low">Low</option>
+                    </select>
+                  </div>
+                  <div className="form-group" style={{ marginBottom: 0 }}>
+                    <label className="form-label">Next Scheduled Follow-up</label>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '0.65rem' }}>
+                      <FormDateSelector
+                        value={editForm.followupDate}
+                        onChange={(d) => setEditForm({ ...editForm, followupDate: d })}
+                        placement="top"
+                        align="right"
+                      />
+                      <select
+                        className="form-select"
+                        value={editForm.followupTime}
+                        onChange={(e) => setEditForm({ ...editForm, followupTime: e.target.value })}
+                      >
+                        <option value="09:00 AM">09:00 AM</option>
+                        <option value="09:30 AM">09:30 AM</option>
+                        <option value="10:00 AM">10:00 AM</option>
+                        <option value="10:30 AM">10:30 AM</option>
+                        <option value="11:00 AM">11:00 AM</option>
+                        <option value="11:30 AM">11:30 AM</option>
+                        <option value="12:00 PM">12:00 PM</option>
+                        <option value="01:30 PM">01:30 PM</option>
+                        <option value="02:00 PM">02:00 PM</option>
+                        <option value="02:30 PM">02:30 PM</option>
+                        <option value="03:00 PM">03:00 PM</option>
+                        <option value="03:30 PM">03:30 PM</option>
+                        <option value="04:00 PM">04:00 PM</option>
+                        <option value="04:30 PM">04:30 PM</option>
+                        <option value="05:00 PM">05:00 PM</option>
+                        <option value="05:30 PM">05:30 PM</option>
+                        <option value="06:00 PM">06:00 PM</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Modal Footer */}
+              <div style={{
+                padding: '1rem 1.5rem',
+                borderTop: '1px solid #E2E8F0',
+                display: 'flex',
+                justifyContent: 'flex-end',
+                gap: '0.75rem',
+                backgroundColor: '#F8FAFC'
+              }}>
+                <button
+                  type="button"
+                  className="btn-secondary"
+                  onClick={() => setIsEditModalOpen(false)}
+                  style={{ padding: '0.5rem 1.1rem', fontSize: '0.85rem' }}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="btn-primary"
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '0.4rem',
+                    padding: '0.5rem 1.25rem',
+                    fontSize: '0.85rem',
+                    fontWeight: 700,
+                    backgroundColor: '#063669',
+                    color: '#FFFFFF'
+                  }}
+                >
+                  <LuCheck size={14} />
+                  <span>Save Changes</span>
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
       {/* Stage Change Confirmation Pop-up Modal */}
       <StageConfirmModal

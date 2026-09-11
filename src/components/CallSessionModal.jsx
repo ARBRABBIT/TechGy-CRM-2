@@ -12,7 +12,6 @@ import {
   LuFileText,
   LuVolume2,
   LuVolumeX,
-  LuLayoutGrid,
   LuSparkles
 } from 'react-icons/lu';
 
@@ -77,20 +76,6 @@ const playTone = (type) => {
       osc.start();
       osc.stop(ctx.currentTime + 0.2);
     }
-
-    if (type === 'dtmf') {
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-      osc.type = 'sine';
-      osc.frequency.setValueAtTime(697, ctx.currentTime);
-      gain.gain.setValueAtTime(0.05, ctx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.08);
-
-      osc.connect(gain);
-      gain.connect(ctx.destination);
-      osc.start();
-      osc.stop(ctx.currentTime + 0.08);
-    }
   } catch {
     // Graceful fallback if user hasn't interacted or audio is muted
   }
@@ -107,9 +92,7 @@ export default function CallSessionModal({
   onUpdateNotes,
   onEndCall
 }) {
-  const [showKeypad, setShowKeypad] = useState(false);
   const [showNotesDrawer, setShowNotesDrawer] = useState(false);
-  const [dialedDigits, setDialedDigits] = useState('');
   const [audioEnabled, setAudioEnabled] = useState(true);
   const ringIntervalRef = useRef(null);
 
@@ -167,10 +150,6 @@ export default function CallSessionModal({
     .join('')
     .toUpperCase();
 
-  const handleKeypadPress = (val) => {
-    setDialedDigits(prev => prev + val);
-    playTone('dtmf');
-  };
 
   return (
     <AnimatePresence mode="wait">
@@ -576,42 +555,6 @@ export default function CallSessionModal({
               )}
             </div>
 
-            {/* DTMF Keypad Overlay */}
-            <AnimatePresence>
-              {showKeypad && status === 'connected' && (
-                <motion.div
-                  initial={{ opacity: 0, height: 0 }}
-                  animate={{ opacity: 1, height: 'auto' }}
-                  exit={{ opacity: 0, height: 0 }}
-                  style={{ overflow: 'hidden', background: '#F8FAFC', borderRadius: '12px', padding: '0.75rem', marginBottom: '1rem', border: '1px solid #E2E8F0' }}
-                >
-                  <div style={{ fontSize: '0.9rem', fontWeight: 700, color: '#063669', textAlign: 'center', minHeight: '22px', marginBottom: '0.5rem', letterSpacing: '0.15em' }}>
-                    {dialedDigits || 'Press keys'}
-                  </div>
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.4rem' }}>
-                    {['1', '2', '3', '4', '5', '6', '7', '8', '9', '*', '0', '#'].map(key => (
-                      <button
-                        key={key}
-                        type="button"
-                        onClick={() => handleKeypadPress(key)}
-                        style={{
-                          padding: '0.5rem',
-                          borderRadius: '8px',
-                          border: '1px solid #CBD5E1',
-                          background: '#FFFFFF',
-                          fontSize: '0.95rem',
-                          fontWeight: 700,
-                          color: '#063669',
-                          cursor: 'pointer'
-                        }}
-                      >
-                        {key}
-                      </button>
-                    ))}
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
 
             {/* Quick In-Call Notes Area */}
             <AnimatePresence>
@@ -667,15 +610,6 @@ export default function CallSessionModal({
                   title={isOnHold ? 'Resume Call' : 'Hold Call'}
                 >
                   {isOnHold ? <LuPlay size={18} /> : <LuPause size={18} />}
-                </button>
-
-                <button
-                  type="button"
-                  className={`call-btn-tool ${showKeypad ? 'active' : ''}`}
-                  onClick={() => setShowKeypad(!showKeypad)}
-                  title="Toggle Dialpad"
-                >
-                  <LuLayoutGrid size={18} />
                 </button>
 
                 <button

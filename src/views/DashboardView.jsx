@@ -169,11 +169,7 @@ export default function DashboardView({
     <div className="dashboard-view" ref={dashboardRef}>
       {/* Top 3 Revenue KPI Cards */}
       <div className="revenue-grid">
-        <div
-          className="kpi-card"
-          onClick={() => onNavigateToLeads()}
-          title="Click to view revenue records in Leads"
-        >
+        <div className="kpi-card">
           <div className="kpi-header">
             <span className="kpi-title">Monthly Revenue</span>
             <div className="kpi-icon-wrap">
@@ -186,11 +182,7 @@ export default function DashboardView({
           </div>
         </div>
 
-        <div
-          className="kpi-card"
-          onClick={() => onNavigateToLeads()}
-          title="Click to view quarterly revenue details"
-        >
+        <div className="kpi-card">
           <div className="kpi-header">
             <span className="kpi-title">Quarterly Revenue</span>
             <div className="kpi-icon-wrap">
@@ -203,11 +195,7 @@ export default function DashboardView({
           </div>
         </div>
 
-        <div
-          className="kpi-card"
-          onClick={() => onNavigateToLeads()}
-          title="Click to view Financial Year revenue details"
-        >
+        <div className="kpi-card">
           <div className="kpi-header">
             <span className="kpi-title">FY Revenue</span>
             <div className="kpi-icon-wrap">

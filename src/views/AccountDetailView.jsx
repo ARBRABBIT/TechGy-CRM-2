@@ -16,43 +16,31 @@ export default function AccountDetailView({
   onBack,
   onNavigateHome,
   leads = [],
-  contacts: _contacts = [],
-  opportunities: _opportunities = [],
-  proposals: _proposals = [],
   onSelectLead,
   onOpenCreateModal,
   onUpdateAccount,
   navigationSource = 'accounts',
-  initialTab: _initialTab,
   fromDashboard = false,
   onNavigateToActivities,
-  onNavigateToProposals: _onNavigateToProposals,
-  onNavigateToContacts: _onNavigateToContacts,
-  onNavigateToOpportunities: _onNavigateToOpportunities,
+  onNavigateToProposals,
+  onNavigateToContacts,
+  onNavigateToOpportunities,
   onNavigateToLeads
 }) {
-  if (!account) {
-    return (
-      <div className="account-detail-page" style={{ padding: '2rem', textAlign: 'center' }}>
-        <h2>Account Not Found</h2>
-        <button className="btn-primary" onClick={onBack || onNavigateHome}>Back to Directory</button>
-      </div>
-    );
-  }
-
-  const isBlankAccount = !account.industry && !account.website && !account.location;
+  const isBlankAccount = !account?.industry && !account?.website && !account?.location;
   const [isEditing, setIsEditing] = useState(isBlankAccount);
   const [formData, setFormData] = useState({
-    companyName: account.companyName || account.company || '',
-    industry: account.industry || '',
-    companySize: account.companySize || '',
-    estimatedAccountValue: account.estimatedAccountValue || '',
-    website: account.website || '',
-    location: account.location || '',
-    accountOwner: account.accountOwner || 'Rajesh Sharma'
+    companyName: account?.companyName || account?.company || '',
+    industry: account?.industry || '',
+    companySize: account?.companySize || '',
+    estimatedAccountValue: account?.estimatedAccountValue || '',
+    website: account?.website || '',
+    location: account?.location || '',
+    accountOwner: account?.accountOwner || 'Rajesh Sharma'
   });
 
   useEffect(() => {
+    if (!account) return;
     setFormData({
       companyName: account.companyName || account.company || '',
       industry: account.industry || '',
@@ -66,6 +54,15 @@ export default function AccountDetailView({
       setIsEditing(true);
     }
   }, [account]);
+
+  if (!account) {
+    return (
+      <div className="account-detail-page" style={{ padding: '2rem', textAlign: 'center' }}>
+        <h2>Account Not Found</h2>
+        <button className="btn-primary" onClick={onBack || onNavigateHome}>Back to Directory</button>
+      </div>
+    );
+  }
 
   const handleSaveProfile = (e) => {
     if (e) e.preventDefault();
@@ -436,7 +433,7 @@ export default function AccountDetailView({
             </h3>
             <button
               className="btn-primary"
-              onClick={() => onOpenCreateModal && onOpenCreateModal('createLead')}
+              onClick={() => onOpenCreateModal && onOpenCreateModal('createLead', account)}
               style={{
                 display: 'inline-flex',
                 alignItems: 'center',

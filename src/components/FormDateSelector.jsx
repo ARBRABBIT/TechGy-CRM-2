@@ -20,10 +20,30 @@ export default function FormDateSelector({
   value = '',
   onChange,
   placement = 'top',
+  align = 'auto',
   placeholder = 'Select Date'
 }) {
   const [isOpen, setIsOpen] = useState(false);
+  const [effectiveAlign, setEffectiveAlign] = useState(align === 'right' ? 'right' : 'left');
   const containerRef = useRef(null);
+
+  // Auto-detect left/right alignment so popover never overflows modal boundaries
+  useEffect(() => {
+    if (isOpen && containerRef.current) {
+      if (align === 'right') {
+        setEffectiveAlign('right');
+      } else if (align === 'left') {
+        setEffectiveAlign('left');
+      } else {
+        const rect = containerRef.current.getBoundingClientRect();
+        if (rect.left + 310 > window.innerWidth || (rect.right > window.innerWidth - 120)) {
+          setEffectiveAlign('right');
+        } else {
+          setEffectiveAlign('left');
+        }
+      }
+    }
+  }, [isOpen, align]);
 
   // Parse initial view from value or fallback to current/default
   const initialDate = parseISOToDate(value) || new Date();
@@ -165,7 +185,7 @@ export default function FormDateSelector({
       </button>
 
       {isOpen && (
-        <div className={`form-date-popover placement-${placement}`}>
+        <div className={`form-date-popover placement-${placement} align-${effectiveAlign}`}>
           {/* Month Navigation Header */}
           <div className="apple-month-nav">
             <span className="month-title">

@@ -1,16 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
 import {
   LuX,
-  LuStar,
-  LuCornerUpLeft,
-  LuExternalLink,
-  LuMail,
-  LuPaperclip,
   LuFileText,
-  LuBuilding2
+  LuBuilding2,
+  LuPaperclip
 } from 'react-icons/lu';
 import { animateModalEnter } from '../utils/animations';
-import { INITIAL_OWNERS, LEAD_SOURCES, INITIAL_ACCOUNTS } from '../data/mockData';
+import { INITIAL_OWNERS, LEAD_SOURCES, INITIAL_ACCOUNTS, INITIAL_EMAIL_TEMPLATES } from '../data/mockData';
 import { getTodayISO, getFutureISO } from '../utils/dateUtils';
 import FormDateSelector from './FormDateSelector';
 
@@ -205,14 +201,13 @@ const STAGE_DEFAULT_PROBABILITIES = {
   'Lost': '0%'
 };
 
-import { INITIAL_EMAIL_TEMPLATES } from '../data/mockData';
-
 export default function CommonActionsModal({
   isOpen,
   onClose,
   onSave,
   initialType = 'createLead',
   selectedLead = null,
+  selectedAccount = null,
   bulkLeadIds = [],
   leads = [],
   accounts = [],
@@ -223,6 +218,8 @@ export default function CommonActionsModal({
   const [targetLeadId, setTargetLeadId] = useState('');
   const [emailAttachments, setEmailAttachments] = useState([]);
   const [selectedEmailTemplate, setSelectedEmailTemplate] = useState('');
+  const [ccEmails, setCcEmails] = useState([]);
+  const [ccInput, setCcInput] = useState('');
 
   const availableEmailTemplates = (emailTemplates && emailTemplates.length > 0 ? emailTemplates : INITIAL_EMAIL_TEMPLATES);
 
@@ -307,10 +304,13 @@ export default function CommonActionsModal({
         if (type === 'email') {
           setEmailAttachments([]);
           setSelectedEmailTemplate('');
+          setCcEmails([]);
+          setCcInput('');
           setFormData(prev => ({
             ...prev,
             subject: '',
-            notes: ''
+            notes: '',
+            cc: ''
           }));
         }
 
@@ -342,17 +342,23 @@ export default function CommonActionsModal({
         }
       } else {
         // Entity creation actions (createLead, createOpportunity, createContact, etc.)
-        // Fields must remain blank so clean placeholder text is shown to the user
+        // Pre-fill company name if an account is selected or active
+        const prefilledCompany = selectedAccount
+          ? (selectedAccount.companyName || selectedAccount.company || '')
+          : (selectedLead ? (selectedLead.company || '') : '');
+
+        const prefilledOwner = selectedAccount?.accountOwner || selectedLead?.leadOwner || currentUser?.name || 'Rajesh Sharma';
+
         setTargetLeadId('');
         setFormData(prev => ({
           ...prev,
           leadName: '',
-          company: '',
+          company: prefilledCompany,
           phone: '',
           email: '',
           designation: '',
           leadSource: 'Website',
-          owner: currentUser?.name || 'Rajesh Sharma',
+          owner: prefilledOwner,
           status: 'New',
           priority: 'Medium',
           notes: '',
@@ -363,7 +369,7 @@ export default function CommonActionsModal({
           nextAction: '',
           dueDate: getTodayISO(),
           followupTime: '10:30 AM',
-          opportunityName: '',
+          opportunityName: prefilledCompany ? `${prefilledCompany} Opportunity` : '',
           estimatedValue: '',
           currentStage: 'Qualified',
           probability: '60%',
@@ -371,7 +377,7 @@ export default function CommonActionsModal({
         }));
       }
     }
-  }, [isOpen, initialType, selectedLead, leads, currentUser]);
+  }, [isOpen, initialType, selectedLead, selectedAccount, leads, currentUser]);
 
 
   if (!isOpen) return null;
@@ -441,6 +447,41 @@ export default function CommonActionsModal({
   };
 
 
+  const handleAddCcEmail = (rawText) => {
+    if (!rawText) return;
+    const parts = rawText
+      .split(/[,;\s]+/)
+      .map(s => s.trim())
+      .filter(s => s.length > 0 && s.includes('@'));
+
+    if (parts.length > 0) {
+      setCcEmails(prev => {
+        const set = new Set([...prev, ...parts]);
+        return Array.from(set);
+      });
+      setCcInput('');
+    }
+  };
+
+  const handleCcKeyDown = (e) => {
+    if (e.key === 'Enter' || e.key === ',' || e.key === ';') {
+      e.preventDefault();
+      handleAddCcEmail(ccInput);
+    } else if (e.key === 'Backspace' && !ccInput && ccEmails.length > 0) {
+      setCcEmails(prev => prev.slice(0, -1));
+    }
+  };
+
+  const handleCcBlur = () => {
+    if (ccInput.trim()) {
+      handleAddCcEmail(ccInput);
+    }
+  };
+
+  const handleRemoveCcEmail = (indexToRemove) => {
+    setCcEmails(prev => prev.filter((_, idx) => idx !== indexToRemove));
+  };
+
   const isBulk = bulkLeadIds && bulkLeadIds.length > 1;
   const bulkCount = bulkLeadIds ? bulkLeadIds.length : 0;
 
@@ -450,6 +491,10 @@ export default function CommonActionsModal({
     if (actionType === 'scheduleFollowup' && formData.followupTime) {
       submissionData.dueTime = `${formData.dueDate} ${formData.followupTime}`;
       submissionData.date = `${formData.dueDate} ${formData.followupTime}`;
+    }
+    if (actionType === 'email') {
+      submissionData.cc = ccEmails.join(', ');
+      submissionData.ccEmails = ccEmails;
     }
     onSave(actionType, {
       ...submissionData,
@@ -997,6 +1042,74 @@ export default function CommonActionsModal({
                     />
                   </div>
 
+                  {/* Multi-Email CC Field */}
+                  <div className="form-group" style={{ marginBottom: 0 }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.25rem' }}>
+                      <label className="form-label" style={{ margin: 0 }}>CC (Carbon Copy)</label>
+                      {ccEmails.length > 0 && (
+                        <span style={{ fontSize: '0.7rem', color: '#0284C7', fontWeight: 600 }}>
+                          {ccEmails.length} {ccEmails.length === 1 ? 'recipient' : 'recipients'}
+                        </span>
+                      )}
+                    </div>
+                    <div style={{
+                      display: 'flex',
+                      flexWrap: 'wrap',
+                      alignItems: 'center',
+                      gap: '0.35rem',
+                      padding: '0.35rem 0.6rem',
+                      border: '1px solid #CBD5E1',
+                      borderRadius: '8px',
+                      backgroundColor: '#FFFFFF',
+                      minHeight: '38px',
+                      boxShadow: '0 1px 2px rgba(6, 54, 105, 0.03)'
+                    }}>
+                      {ccEmails.map((email, idx) => (
+                        <span
+                          key={idx}
+                          style={{
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '0.3rem',
+                            backgroundColor: '#E0F2FE',
+                            color: '#0369A1',
+                            border: '1px solid #BAE6FD',
+                            borderRadius: '6px',
+                            padding: '0.15rem 0.45rem',
+                            fontSize: '0.75rem',
+                            fontWeight: 600
+                          }}
+                        >
+                          <span>{email}</span>
+                          <LuX
+                            size={12}
+                            style={{ cursor: 'pointer', opacity: 0.8 }}
+                            onClick={() => handleRemoveCcEmail(idx)}
+                            title="Remove email"
+                          />
+                        </span>
+                      ))}
+                      <input
+                        type="text"
+                        placeholder={ccEmails.length === 0 ? "Add CC emails (type and press Enter or comma)..." : "Add more..."}
+                        value={ccInput}
+                        onChange={(e) => setCcInput(e.target.value)}
+                        onKeyDown={handleCcKeyDown}
+                        onBlur={handleCcBlur}
+                        style={{
+                          flex: 1,
+                          minWidth: '150px',
+                          border: 'none',
+                          outline: 'none',
+                          fontSize: '0.825rem',
+                          color: '#1E293B',
+                          padding: '0.2rem 0',
+                          backgroundColor: 'transparent'
+                        }}
+                      />
+                    </div>
+                  </div>
+
                   <div className="form-group" style={{ marginBottom: 0 }}>
                     <label className="form-label">Subject *</label>
                     <input
@@ -1267,6 +1380,13 @@ export default function CommonActionsModal({
                             {formData.email.trim() || (selectedLead?.emailId || 'recipient@company.co.in')}
                           </span>
                         </div>
+                        {ccEmails.length > 0 && (
+                          <div style={{ fontSize: '0.735rem', color: '#64748B', marginTop: '0.15rem' }}>
+                            cc: <span style={{ fontWeight: 600, color: '#0369A1' }}>
+                              {ccEmails.join(', ')}
+                            </span>
+                          </div>
+                        )}
                       </div>
                     </div>
 

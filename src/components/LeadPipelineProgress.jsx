@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo } from 'react';
 import {
   LuCalendar,
   LuArrowRight
@@ -7,12 +7,8 @@ import { getInitialStageHistory, formatStageDateTime, PIPELINE_STAGES } from '..
 
 export default function LeadPipelineProgress({
   lead,
-  sortOrder: propSortOrder,
-  onSelectStage: _onSelectStage,
-  onUpdateStage: _onUpdateStage
+  sortOrder = 'desc'
 }) {
-  const [internalSortOrder, setInternalSortOrder] = useState('desc');
-  const sortOrder = propSortOrder || internalSortOrder;
 
   // Retrieve existing recorded stageHistory on the lead, or generate dynamic baseline
   const historyEvents = useMemo(() => {

@@ -76,7 +76,6 @@ function saveToStorage(key, data) {
 
 function createGeneratedAccount(companyName, overrides = {}) {
   const comp = companyName || 'Enterprise Account';
-  const sanitized = comp.toLowerCase().replace(/[^a-z0-9]/g, '');
   return {
     id: `ACC-GEN-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
     companyName: comp,
@@ -211,6 +210,7 @@ export default function App() {
   const [modalInitialType, setModalInitialType] = useState('createLead');
   const [modalBulkLeadIds, setModalBulkLeadIds] = useState([]);
   const [modalTargetLead, setModalTargetLead] = useState(null);
+  const [modalTargetAccount, setModalTargetAccount] = useState(null);
   const [modalBulkCallback, setModalBulkCallback] = useState(null);
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
   const [newCompanyPrompt, setNewCompanyPrompt] = useState(null);
@@ -552,6 +552,24 @@ export default function App() {
     pushNotification('Lead Stage Updated', `Lead status updated to ${newStage}`, 'Lead', 'leads');
   };
 
+  const handleUpdateLead = (leadId, updatedFields) => {
+    setLeads(prev => prev.map(l => {
+      if (l.id === leadId) {
+        return { ...l, ...updatedFields };
+      }
+      return l;
+    }));
+    if (selectedLead && selectedLead.id === leadId) {
+      setSelectedLead(prev => ({ ...prev, ...updatedFields }));
+    }
+    triggerToast({
+      title: 'Lead Details Updated',
+      description: `Details for "${updatedFields.leadName || selectedLead?.leadName || 'Lead'}" saved successfully.`,
+      type: 'success'
+    });
+    pushNotification('Lead Details Updated', `Updated information for lead "${updatedFields.leadName || selectedLead?.leadName}"`, 'Lead', 'leads');
+  };
+
   const handleUpdateAccount = (accountId, updatedFields) => {
     setAccounts(prev => prev.map(acc => {
       if (acc.id === accountId) {
@@ -849,6 +867,7 @@ export default function App() {
         company: tl.company,
         lead: tl.leadName,
         notes: emailNotes,
+        cc: formData.cc || '',
         status: 'Completed',
         isOverdue: false
       }));
@@ -1003,6 +1022,7 @@ export default function App() {
           setMobileOpen={setMobileOpen}
           onOpenCreateModal={(type = (activeModule === 'opportunities' ? 'createOpportunity' : 'createLead')) => {
             setModalInitialType(type);
+            setModalTargetAccount(selectedAccount);
             setIsCreateModalOpen(true);
           }}
           leads={leads}
@@ -1082,6 +1102,8 @@ export default function App() {
                 setActiveModule('opportunities');
               }}
               onUpdateLeadStage={handleUpdateLeadStage}
+              onUpdateLead={handleUpdateLead}
+              accounts={accounts}
             />
           ) : selectedAccount ? (
             /* Full Page Account Detail View with Breadcrumb Navigation */
@@ -1106,8 +1128,9 @@ export default function App() {
                 setSelectedLead(l);
                 setActiveModule('leads');
               }}
-              onOpenCreateModal={(type) => {
+              onOpenCreateModal={(type, acc = null) => {
                 setModalInitialType(type);
+                setModalTargetAccount(acc || selectedAccount);
                 setIsCreateModalOpen(true);
               }}
               navigationSource={leadNavSource}
@@ -1370,6 +1393,7 @@ export default function App() {
           setIsCreateModalOpen(false);
           setModalBulkLeadIds([]);
           setModalTargetLead(null);
+          setModalTargetAccount(null);
           setModalBulkCallback(null);
         }}
         onSave={(type, data) => {
@@ -1380,9 +1404,11 @@ export default function App() {
           }
           setModalBulkLeadIds([]);
           setModalTargetLead(null);
+          setModalTargetAccount(null);
         }}
         initialType={modalInitialType}
         selectedLead={modalTargetLead || selectedLead}
+        selectedAccount={modalTargetAccount || selectedAccount}
         bulkLeadIds={modalBulkLeadIds}
         leads={leads}
         accounts={accounts}

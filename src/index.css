@@ -1141,6 +1141,7 @@ body {
 .form-date-popover {
   position: absolute;
   width: 300px;
+  max-width: min(300px, calc(100vw - 2rem));
   background: rgba(255, 255, 255, 0.98);
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
@@ -1150,16 +1151,25 @@ body {
   padding: 1rem;
   z-index: 1050;
   animation: applePopIn 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+  box-sizing: border-box;
 }
 
 .form-date-popover.placement-top {
   bottom: calc(100% + 8px);
-  left: 0;
 }
 
 .form-date-popover.placement-bottom {
   top: calc(100% + 8px);
+}
+
+.form-date-popover.align-left {
   left: 0;
+  right: auto;
+}
+
+.form-date-popover.align-right {
+  left: auto;
+  right: 0;
 }
 
 
@@ -1725,11 +1735,6 @@ body {
   border: none;
   background-color: #F9F9F9;
   color: #063669;
-  transition: transform 0.15s;
-}
-
-.status-chip:hover {
-  transform: scale(1.04);
 }
 
 .status-chip.qualified,
@@ -3921,4 +3926,102 @@ div:has(> .action-table)::-webkit-scrollbar,
   background: #063669;
   border-radius: 2px;
   animation: callSoundWave 1.2s ease-in-out infinite alternate;
+}
+
+/* ==========================================================================
+   MASTER DATA HUB & CARD GRID STYLES
+   ========================================================================== */
+
+.master-data-hub-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1.5rem;
+  margin-top: 1.5rem;
+}
+
+@media (max-width: 1200px) {
+  .master-data-hub-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1.25rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .master-data-hub-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+}
+
+.master-hub-card {
+  background: #FFFFFF;
+  border-radius: 20px;
+  padding: 1.75rem 1.65rem;
+  box-shadow: 0 4px 16px rgba(6, 54, 105, 0.04);
+  border: 1px solid rgba(226, 232, 240, 0.85);
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 180px;
+  position: relative;
+  overflow: hidden;
+}
+
+.master-hub-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 16px 36px rgba(6, 54, 105, 0.09);
+  border-color: #CBD5E1;
+}
+
+.master-hub-card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.15rem;
+}
+
+.master-hub-icon-wrap {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s ease;
+}
+
+.master-hub-card:hover .master-hub-icon-wrap {
+  transform: scale(1.08);
+}
+
+.master-hub-view-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.825rem;
+  font-weight: 700;
+  color: #063669;
+  transition: gap 0.2s ease, color 0.2s ease;
+}
+
+.master-hub-card:hover .master-hub-view-link {
+  color: #04264A;
+  gap: 0.55rem;
+}
+
+.master-hub-title {
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: #063669;
+  margin: 0 0 0.45rem 0;
+  letter-spacing: -0.015em;
+}
+
+.master-hub-desc {
+  font-size: 0.845rem;
+  color: #557396;
+  line-height: 1.55;
+  margin: 0;
 }

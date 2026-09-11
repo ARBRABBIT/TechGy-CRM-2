@@ -17,28 +17,6 @@ const extractMessageTime = (dateStr) => {
   return dateStr;
 };
 
-// Subtle, gentle micro-sound on dropdown/dock opening
-const playAccordionTick = (willOpen) => {
-  try {
-    const AudioCtx = window.AudioContext || window.webkitAudioContext;
-    if (!AudioCtx) return;
-    const ctx = new AudioCtx();
-    const osc = ctx.createOscillator();
-    const gain = ctx.createGain();
-    osc.connect(gain);
-    gain.connect(ctx.destination);
-    osc.type = 'sine';
-    osc.frequency.setValueAtTime(willOpen ? 540 : 360, ctx.currentTime);
-    osc.frequency.exponentialRampToValueAtTime(willOpen ? 680 : 260, ctx.currentTime + 0.035);
-    gain.gain.setValueAtTime(0.03, ctx.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.035);
-    osc.start();
-    osc.stop(ctx.currentTime + 0.04);
-  } catch {
-    // Graceful fallback if audio context is blocked
-  }
-};
-
 // Official WhatsApp Double Tick Vector Component matching user's image exactly
 const DoubleTickIcon = ({ color = '#53BDEB', size = 15, style = {} }) => (
   <svg
@@ -123,8 +101,7 @@ const renderMessageTextWithLinks = (text, explicitLink) => {
   });
 };
 
-export default function LeadChatHistory({ lead, activities = [], onSendMessage, onStartChat }) {
-  const [isChatActive, setIsChatActive] = useState(false);
+export default function LeadChatHistory({ lead, activities = [], onSendMessage }) {
   const [inputText, setInputText] = useState('');
   const [showTemplatePicker, setShowTemplatePicker] = useState(false);
   const [localMessages, setLocalMessages] = useState([]);
@@ -237,33 +214,12 @@ export default function LeadChatHistory({ lead, activities = [], onSendMessage, 
     return [...extraFromProps, ...uniqueLocals];
   }, [activities, localMessages]);
 
-  // Smoothly scroll down whenever new messages are added or input activated
+  // Smoothly scroll down whenever new messages are added
   useEffect(() => {
     if (messagesEndRef.current) {
       messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
     }
-  }, [messages.length, isChatActive]);
-
-  // Close template menu on click outside
-  useEffect(() => {
-    const handleClickOutside = (e) => {
-      if (templateMenuRef.current && !templateMenuRef.current.contains(e.target)) {
-        setShowTemplatePicker(false);
-      }
-    };
-    if (showTemplatePicker) {
-      document.addEventListener('mousedown', handleClickOutside);
-    }
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [showTemplatePicker]);
-
-  const handleActivateChat = () => {
-    playAccordionTick(true);
-    setIsChatActive(true);
-    setTimeout(() => {
-      inputRef.current?.focus();
-    }, 150);
-  };
+  }, [messages.length]);
 
   const handleSend = () => {
     const trimmed = inputText.trim();
@@ -284,8 +240,6 @@ export default function LeadChatHistory({ lead, activities = [], onSendMessage, 
     // Persist to parent / CRM activities
     if (onSendMessage) {
       onSendMessage(trimmed);
-    } else if (onStartChat) {
-      onStartChat();
     }
   };
 
@@ -557,281 +511,209 @@ export default function LeadChatHistory({ lead, activities = [], onSendMessage, 
           Interaction logged from Official WhatsApp Business API
         </div>
 
-        {/* In-Canvas WhatsApp Reply / Template Input Dock with Smooth Animation */}
+        {/* In-Canvas WhatsApp Reply / Template Input Dock */}
         <div
           style={{
-            display: 'grid',
-            gridTemplateRows: isChatActive ? '1fr' : '0fr',
-            transition: 'grid-template-rows 0.35s cubic-bezier(0.16, 1, 0.3, 1)'
-          }}
-        >
-          <div
-            style={{
-              overflow: isChatActive ? 'visible' : 'hidden',
-              minHeight: 0,
-              opacity: isChatActive ? 1 : 0,
-              transform: isChatActive ? 'translateY(0)' : 'translateY(14px)',
-              transition: 'opacity 0.28s cubic-bezier(0.16, 1, 0.3, 1), transform 0.35s cubic-bezier(0.16, 1, 0.3, 1)'
-            }}
-          >
-            <div
-              style={{
-                backgroundColor: '#F0F2F5',
-                borderTop: '1px solid #E2E8F0',
-                padding: '0.65rem 1rem',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.75rem',
-                position: 'relative'
-              }}
-            >
-            {/* Hidden File Input */}
-            <input
-              ref={fileInputRef}
-              type="file"
-              style={{ display: 'none' }}
-              onChange={handleFileSelect}
-              multiple
-              accept="*/*"
-            />
-
-            {/* Clip / Attachment Button */}
-            <button
-              type="button"
-              onClick={() => fileInputRef.current?.click()}
-              style={{
-                background: 'none',
-                border: 'none',
-                cursor: 'pointer',
-                color: '#54656F',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                padding: '0.35rem',
-                borderRadius: '50%',
-                transition: 'background-color 0.15s ease'
-              }}
-              onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = 'rgba(0,0,0,0.05)'; }}
-              onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'transparent'; }}
-              title="Attach files from computer"
-            >
-              <LuPaperclip size={20} />
-            </button>
-
-            {/* Master Data / Template Picker Button */}
-            <button
-              type="button"
-              onClick={() => setShowTemplatePicker(!showTemplatePicker)}
-              style={{
-                background: showTemplatePicker ? '#E2E8F0' : 'none',
-                border: 'none',
-                cursor: 'pointer',
-                color: showTemplatePicker ? '#00A884' : '#54656F',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                padding: '0.35rem',
-                borderRadius: '6px',
-                transition: 'all 0.15s ease'
-              }}
-              onMouseEnter={(e) => { if (!showTemplatePicker) e.currentTarget.style.backgroundColor = 'rgba(0,0,0,0.05)'; }}
-              onMouseLeave={(e) => { if (!showTemplatePicker) e.currentTarget.style.backgroundColor = 'transparent'; }}
-              title="Select Master Data / WhatsApp Template"
-            >
-              <LuDatabase size={19} />
-            </button>
-
-            {/* Template Selector Dropdown Popover */}
-            {showTemplatePicker && (
-              <div
-                ref={templateMenuRef}
-                style={{
-                  position: 'absolute',
-                  bottom: '100%',
-                  left: '1rem',
-                  marginBottom: '0.5rem',
-                  width: '360px',
-                  maxWidth: 'calc(100% - 2rem)',
-                  backgroundColor: '#FFFFFF',
-                  borderRadius: '10px',
-                  boxShadow: '0 4px 16px rgba(0, 0, 0, 0.15)',
-                  border: '1px solid #E2E8F0',
-                  padding: '0.65rem 0',
-                  zIndex: 20,
-                  animation: 'fadeIn 0.15s ease-out'
-                }}
-              >
-                <div
-                  style={{
-                    padding: '0.35rem 1rem 0.5rem 1rem',
-                    fontSize: '0.725rem',
-                    fontWeight: 700,
-                    color: '#64748B',
-                    textTransform: 'uppercase',
-                    letterSpacing: '0.04em',
-                    borderBottom: '1px solid #F1F5F9'
-                  }}
-                >
-                  Official WhatsApp Templates
-                </div>
-
-                <div style={{ maxHeight: '240px', overflowY: 'auto' }}>
-                  {templates.map((tpl) => (
-                    <div
-                      key={tpl.id}
-                      onClick={() => handleSelectTemplate(tpl.text)}
-                      style={{
-                        padding: '0.65rem 1rem',
-                        cursor: 'pointer',
-                        transition: 'background-color 0.15s ease',
-                        borderBottom: '1px solid #F8FAFC'
-                      }}
-                      onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#F0FDF4'; }}
-                      onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'transparent'; }}
-                    >
-                      <div style={{ fontSize: '0.825rem', fontWeight: 600, color: '#063669' }}>
-                        {tpl.title}
-                      </div>
-                      <div
-                        style={{
-                          fontSize: '0.75rem',
-                          color: '#64748B',
-                          marginTop: '0.15rem',
-                          whiteSpace: 'nowrap',
-                          overflow: 'hidden',
-                          textOverflow: 'ellipsis'
-                        }}
-                      >
-                        {tpl.text}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Input Field */}
-            <div style={{ flex: 1, position: 'relative' }}>
-              <input
-                ref={inputRef}
-                type="text"
-                value={inputText}
-                onChange={(e) => setInputText(e.target.value)}
-                onKeyDown={handleKeyDown}
-                placeholder="Select a template above to reply"
-                style={{
-                  width: '100%',
-                  backgroundColor: '#FFFFFF',
-                  border: '1px solid #E2E8F0',
-                  borderRadius: '8px',
-                  padding: '0.6rem 0.95rem',
-                  fontSize: '0.875rem',
-                  color: '#111827',
-                  outline: 'none',
-                  boxSizing: 'border-box',
-                  boxShadow: 'inset 0 1px 2px rgba(0, 0, 0, 0.02)'
-                }}
-                onFocus={(e) => { e.target.style.borderColor = '#7AC7A5'; }}
-                onBlur={(e) => { e.target.style.borderColor = '#E2E8F0'; }}
-              />
-            </div>
-
-            {/* Send Button: Mint green when empty, switches to Dark Green (#075E54) when typing */}
-            {(() => {
-              const hasText = inputText.trim().length > 0;
-              const activeBg = hasText ? '#075E54' : '#7AC7A5';
-              const hoverBg = hasText ? '#054840' : '#62B892';
-
-              return (
-                <button
-                  type="button"
-                  onClick={handleSend}
-                  style={{
-                    width: '36px',
-                    height: '36px',
-                    borderRadius: '50%',
-                    backgroundColor: activeBg,
-                    color: '#FFFFFF',
-                    border: 'none',
-                    padding: 0,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    cursor: hasText ? 'pointer' : 'default',
-                    flexShrink: 0,
-                    boxShadow: hasText ? '0 2px 4px rgba(7, 94, 84, 0.3)' : '0 1px 3px rgba(0, 0, 0, 0.12)',
-                    transition: 'background-color 0.2s ease, transform 0.15s ease'
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.backgroundColor = hoverBg;
-                    if (hasText) e.currentTarget.style.transform = 'scale(1.05)';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.backgroundColor = activeBg;
-                    e.currentTarget.style.transform = 'scale(1)';
-                  }}
-                  title={hasText ? 'Send message' : 'Type a message to send'}
-                >
-                  <LuSend size={16} style={{ display: 'block', transform: 'translate(-1.5px, 1px)' }} />
-                </button>
-              );
-            })()}
-          </div>
-        </div>
-      </div>
-      </div>
-
-      {/* Action Row: START CHAT button on bottom right with Smooth Transition */}
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateRows: !isChatActive ? '1fr' : '0fr',
-          transition: 'grid-template-rows 0.32s cubic-bezier(0.16, 1, 0.3, 1), margin-top 0.28s ease',
-          marginTop: !isChatActive ? '0' : '-0.75rem'
-        }}
-      >
-        <div
-          style={{
-            overflow: 'hidden',
-            minHeight: 0,
-            opacity: !isChatActive ? 1 : 0,
-            transform: !isChatActive ? 'translateY(0) scale(1)' : 'translateY(-6px) scale(0.96)',
-            transition: 'opacity 0.22s ease, transform 0.28s cubic-bezier(0.16, 1, 0.3, 1)',
-            pointerEvents: !isChatActive ? 'auto' : 'none',
+            backgroundColor: '#F0F2F5',
+            borderTop: '1px solid #E2E8F0',
+            padding: '0.65rem 1rem',
             display: 'flex',
-            justifyContent: 'flex-end'
+            alignItems: 'center',
+            gap: '0.75rem',
+            position: 'relative'
           }}
         >
+          {/* Hidden File Input */}
+          <input
+            ref={fileInputRef}
+            type="file"
+            style={{ display: 'none' }}
+            onChange={handleFileSelect}
+            multiple
+            accept="*/*"
+          />
+
+          {/* Clip / Attachment Button */}
           <button
             type="button"
-            onClick={handleActivateChat}
+            onClick={() => fileInputRef.current?.click()}
             style={{
-              backgroundColor: '#075E54',
-              color: '#FFFFFF',
+              background: 'none',
               border: 'none',
-              borderRadius: '6px',
-              padding: '0.6rem 1.35rem',
-              fontSize: '0.8rem',
-              fontWeight: 700,
-              letterSpacing: '0.04em',
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '0.5rem',
               cursor: 'pointer',
-              boxShadow: '0 2px 4px rgba(7, 94, 84, 0.25)',
-              transition: 'background-color 0.15s ease, transform 0.1s ease'
+              color: '#54656F',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: '0.35rem',
+              borderRadius: '50%',
+              transition: 'background-color 0.15s ease'
             }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = '#054840';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = '#075E54';
-            }}
-            title={`Start official WhatsApp conversation with ${lead?.leadName || 'lead'}`}
+            onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = 'rgba(0,0,0,0.05)'; }}
+            onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'transparent'; }}
+            title="Attach files from computer"
           >
-            <LuMessageSquare size={16} />
-            START CHAT
+            <LuPaperclip size={20} />
           </button>
+
+          {/* Master Data / Template Picker Button */}
+          <button
+            type="button"
+            onClick={() => setShowTemplatePicker(!showTemplatePicker)}
+            style={{
+              background: showTemplatePicker ? '#E2E8F0' : 'none',
+              border: 'none',
+              cursor: 'pointer',
+              color: showTemplatePicker ? '#00A884' : '#54656F',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: '0.35rem',
+              borderRadius: '6px',
+              transition: 'all 0.15s ease'
+            }}
+            onMouseEnter={(e) => { if (!showTemplatePicker) e.currentTarget.style.backgroundColor = 'rgba(0,0,0,0.05)'; }}
+            onMouseLeave={(e) => { if (!showTemplatePicker) e.currentTarget.style.backgroundColor = 'transparent'; }}
+            title="Select Master Data / WhatsApp Template"
+          >
+            <LuDatabase size={19} />
+          </button>
+
+          {/* Template Selector Dropdown Popover */}
+          {showTemplatePicker && (
+            <div
+              ref={templateMenuRef}
+              style={{
+                position: 'absolute',
+                bottom: '100%',
+                left: '1rem',
+                marginBottom: '0.5rem',
+                width: '360px',
+                maxWidth: 'calc(100% - 2rem)',
+                backgroundColor: '#FFFFFF',
+                borderRadius: '10px',
+                boxShadow: '0 4px 16px rgba(0, 0, 0, 0.15)',
+                border: '1px solid #E2E8F0',
+                padding: '0.65rem 0',
+                zIndex: 20,
+                animation: 'fadeIn 0.15s ease-out'
+              }}
+            >
+              <div
+                style={{
+                  padding: '0.35rem 1rem 0.5rem 1rem',
+                  fontSize: '0.725rem',
+                  fontWeight: 700,
+                  color: '#64748B',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.04em',
+                  borderBottom: '1px solid #F1F5F9'
+                }}
+              >
+                Official WhatsApp Templates
+              </div>
+
+              <div style={{ maxHeight: '240px', overflowY: 'auto' }}>
+                {templates.map((tpl) => (
+                  <div
+                    key={tpl.id}
+                    onClick={() => handleSelectTemplate(tpl.text)}
+                    style={{
+                      padding: '0.65rem 1rem',
+                      cursor: 'pointer',
+                      transition: 'background-color 0.15s ease',
+                      borderBottom: '1px solid #F8FAFC'
+                    }}
+                    onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#F0FDF4'; }}
+                    onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'transparent'; }}
+                  >
+                    <div style={{ fontSize: '0.825rem', fontWeight: 600, color: '#063669' }}>
+                      {tpl.title}
+                    </div>
+                    <div
+                      style={{
+                        fontSize: '0.75rem',
+                        color: '#64748B',
+                        marginTop: '0.15rem',
+                        whiteSpace: 'nowrap',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis'
+                      }}
+                    >
+                      {tpl.text}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Input Field */}
+          <div style={{ flex: 1, position: 'relative' }}>
+            <input
+              ref={inputRef}
+              type="text"
+              value={inputText}
+              onChange={(e) => setInputText(e.target.value)}
+              onKeyDown={handleKeyDown}
+              placeholder="Type a message or select a template..."
+              style={{
+                width: '100%',
+                backgroundColor: '#FFFFFF',
+                border: '1px solid #E2E8F0',
+                borderRadius: '8px',
+                padding: '0.6rem 0.95rem',
+                fontSize: '0.875rem',
+                color: '#111827',
+                outline: 'none',
+                boxSizing: 'border-box',
+                boxShadow: 'inset 0 1px 2px rgba(0, 0, 0, 0.02)'
+              }}
+              onFocus={(e) => { e.target.style.borderColor = '#7AC7A5'; }}
+              onBlur={(e) => { e.target.style.borderColor = '#E2E8F0'; }}
+            />
+          </div>
+
+          {/* Send Button */}
+          {(() => {
+            const hasText = inputText.trim().length > 0;
+            const activeBg = hasText ? '#075E54' : '#7AC7A5';
+            const hoverBg = hasText ? '#054840' : '#62B892';
+
+            return (
+              <button
+                type="button"
+                onClick={handleSend}
+                style={{
+                  width: '36px',
+                  height: '36px',
+                  borderRadius: '50%',
+                  backgroundColor: activeBg,
+                  color: '#FFFFFF',
+                  border: 'none',
+                  padding: 0,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  cursor: hasText ? 'pointer' : 'default',
+                  flexShrink: 0,
+                  boxShadow: hasText ? '0 2px 4px rgba(7, 94, 84, 0.3)' : '0 1px 3px rgba(0, 0, 0, 0.12)',
+                  transition: 'background-color 0.2s ease, transform 0.15s ease'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = hoverBg;
+                  if (hasText) e.currentTarget.style.transform = 'scale(1.05)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = activeBg;
+                  e.currentTarget.style.transform = 'scale(1)';
+                }}
+                title={hasText ? 'Send message' : 'Type a message to send'}
+              >
+                <LuSend size={16} style={{ display: 'block', transform: 'translate(-1.5px, 1px)' }} />
+              </button>
+            );
+          })()}
         </div>
       </div>
     </div>
