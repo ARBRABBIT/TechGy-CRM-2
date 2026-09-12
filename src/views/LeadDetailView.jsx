@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef, useEffect } from 'react';
 import {
   LuChevronRight,
   LuChevronDown,
@@ -44,6 +44,29 @@ export default function LeadDetailView({
   const [activeTab, setActiveTab] = useState('Activity');
   const [pipelineSortOrder, setPipelineSortOrder] = useState('desc');
   const [selectedActivityForModal, setSelectedActivityForModal] = useState(null);
+  const [isStatusDropdownOpen, setIsStatusDropdownOpen] = useState(false);
+  const statusDropdownRef = useRef(null);
+
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (statusDropdownRef.current && !statusDropdownRef.current.contains(event.target)) {
+        setIsStatusDropdownOpen(false);
+      }
+    }
+    function handleKeyDown(event) {
+      if (event.key === 'Escape') {
+        setIsStatusDropdownOpen(false);
+      }
+    }
+    if (isStatusDropdownOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+      document.addEventListener('keydown', handleKeyDown);
+    }
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isStatusDropdownOpen]);
 
   const companyOptions = useMemo(() => {
     const compSet = new Set();
@@ -423,50 +446,159 @@ export default function LeadDetailView({
             </div>
           </div>
 
-          {/* Lead Status Dropdown — top-right of header card */}
+          {/* Lead Status Custom Dropdown UI — top-right of header card */}
           <div style={{
             display: 'flex',
             alignItems: 'center',
             gap: '0.6rem',
-            padding: '0.5rem 0.75rem',
+            padding: '0.45rem 0.75rem',
             backgroundColor: '#F0F5FA',
             borderRadius: '10px',
             border: '1px solid #D5E2EE'
           }}>
             <span style={{ fontSize: '0.75rem', fontWeight: 600, color: '#557396', whiteSpace: 'nowrap' }}>Lead Status</span>
-            <div style={{ position: 'relative', display: 'inline-flex', alignItems: 'center' }}>
-              <select
-                value={lead.status}
-                onChange={(e) => handleStageClick(e.target.value)}
+            <div ref={statusDropdownRef} style={{ position: 'relative', display: 'inline-flex', alignItems: 'center' }}>
+              <button
+                type="button"
+                onClick={() => setIsStatusDropdownOpen(prev => !prev)}
                 style={{
-                  border: '1px solid #CBD5E1',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  gap: '0.5rem',
+                  border: `1px solid ${isStatusDropdownOpen ? '#063669' : '#CBD5E1'}`,
                   borderRadius: '7px',
-                  padding: '0.3rem 2rem 0.3rem 0.65rem',
+                  padding: '0.32rem 0.65rem',
                   fontSize: '0.82rem',
                   fontWeight: 700,
                   color: '#063669',
                   backgroundColor: '#FFFFFF',
                   cursor: 'pointer',
                   outline: 'none',
-                  minWidth: '120px',
-                  appearance: 'none',
-                  WebkitAppearance: 'none',
-                  MozAppearance: 'none'
+                  minWidth: '135px',
+                  boxShadow: isStatusDropdownOpen
+                    ? '0 0 0 3px rgba(6, 54, 105, 0.12)'
+                    : '0 1px 2px rgba(0, 0, 0, 0.04)',
+                  transition: 'all 0.15s ease'
                 }}
+                aria-haspopup="listbox"
+                aria-expanded={isStatusDropdownOpen}
               >
-                {stages.map(s => (
-                  <option key={s} value={s}>{s}</option>
-                ))}
-              </select>
-              <LuChevronDown
-                size={14}
-                style={{
-                  position: 'absolute',
-                  right: '0.5rem',
-                  pointerEvents: 'none',
-                  color: '#063669'
-                }}
-              />
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.45rem' }}>
+                  <span
+                    style={{
+                      width: '8px',
+                      height: '8px',
+                      borderRadius: '50%',
+                      backgroundColor: {
+                        'New': '#3B82F6',
+                        'Contacted': '#8B5CF6',
+                        'Qualified': '#10B981',
+                        'Discussion': '#F59E0B',
+                        'Proposal': '#6366F1',
+                        'Negotiation': '#EC4899'
+                      }[lead.status] || '#063669',
+                      flexShrink: 0
+                    }}
+                  />
+                  <span>{lead.status || 'New'}</span>
+                </span>
+                <LuChevronDown
+                  size={14}
+                  style={{
+                    color: '#063669',
+                    transform: isStatusDropdownOpen ? 'rotate(180deg)' : 'rotate(0deg)',
+                    transition: 'transform 0.2s cubic-bezier(0.4, 0, 0.2, 1)'
+                  }}
+                />
+              </button>
+
+              {/* Custom Dropdown Menu UI */}
+              {isStatusDropdownOpen && (
+                <div
+                  role="listbox"
+                  style={{
+                    position: 'absolute',
+                    top: 'calc(100% + 6px)',
+                    right: 0,
+                    minWidth: '165px',
+                    backgroundColor: '#FFFFFF',
+                    border: '1px solid #D5E2EE',
+                    borderRadius: '10px',
+                    boxShadow: '0 12px 28px -4px rgba(6, 54, 105, 0.16), 0 6px 12px -4px rgba(6, 54, 105, 0.08)',
+                    padding: '0.35rem',
+                    zIndex: 1000,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '2px',
+                    animation: 'applePopIn 0.18s cubic-bezier(0.16, 1, 0.3, 1)'
+                  }}
+                >
+                  {stages.map(s => {
+                    const isSelected = s === lead.status;
+                    const stageColor = {
+                      'New': '#3B82F6',
+                      'Contacted': '#8B5CF6',
+                      'Qualified': '#10B981',
+                      'Discussion': '#F59E0B',
+                      'Proposal': '#6366F1',
+                      'Negotiation': '#EC4899'
+                    }[s] || '#063669';
+
+                    return (
+                      <button
+                        key={s}
+                        type="button"
+                        role="option"
+                        aria-selected={isSelected}
+                        onClick={() => {
+                          setIsStatusDropdownOpen(false);
+                          handleStageClick(s);
+                        }}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'space-between',
+                          gap: '0.5rem',
+                          width: '100%',
+                          padding: '0.45rem 0.65rem',
+                          borderRadius: '6px',
+                          border: 'none',
+                          backgroundColor: isSelected ? '#EBF3FA' : 'transparent',
+                          color: isSelected ? '#063669' : '#334155',
+                          fontSize: '0.82rem',
+                          fontWeight: isSelected ? 700 : 500,
+                          cursor: 'pointer',
+                          textAlign: 'left',
+                          transition: 'background-color 0.15s ease, color 0.15s ease'
+                        }}
+                        onMouseEnter={(e) => {
+                          if (!isSelected) e.currentTarget.style.backgroundColor = '#F8FAFC';
+                        }}
+                        onMouseLeave={(e) => {
+                          if (!isSelected) e.currentTarget.style.backgroundColor = 'transparent';
+                        }}
+                      >
+                        <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}>
+                          <span
+                            style={{
+                              width: '8px',
+                              height: '8px',
+                              borderRadius: '50%',
+                              backgroundColor: stageColor,
+                              flexShrink: 0
+                            }}
+                          />
+                          <span>{s}</span>
+                        </span>
+                        {isSelected && (
+                          <LuCheck size={14} color="#063669" style={{ strokeWidth: 2.5, flexShrink: 0 }} />
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
             </div>
           </div>
         </div>

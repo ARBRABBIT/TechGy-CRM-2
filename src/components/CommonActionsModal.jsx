@@ -3,8 +3,65 @@ import {
   LuX,
   LuFileText,
   LuBuilding2,
-  LuPaperclip
+  LuPaperclip,
+  LuChevronDown,
+  LuCheck,
+  LuUser,
+  LuBriefcase,
+  LuUsers,
+  LuCalendar
 } from 'react-icons/lu';
+
+export const CREATABLE_ENTITY_TYPES = [
+  {
+    id: 'createLead',
+    label: 'Lead',
+    icon: <LuUser size={15} />,
+    bgColor: '#EFF6FF',
+    color: '#2563EB',
+    description: 'Prospective customer or sales inquiry'
+  },
+  {
+    id: 'createAccount',
+    label: 'Company / Account',
+    icon: <LuBuilding2 size={15} />,
+    bgColor: '#F0FDF4',
+    color: '#16A34A',
+    description: 'Enterprise organization or corporate client'
+  },
+  {
+    id: 'createOpportunity',
+    label: 'Opportunity / Deal',
+    icon: <LuBriefcase size={15} />,
+    bgColor: '#FAF5FF',
+    color: '#9333EA',
+    description: 'Pipeline sales opportunity or deal'
+  },
+  {
+    id: 'createContact',
+    label: 'Contact Person',
+    icon: <LuUsers size={15} />,
+    bgColor: '#FFF7ED',
+    color: '#EA580C',
+    description: 'Key decision-maker or company point of contact'
+  },
+  {
+    id: 'createActivity',
+    label: 'Activity / Task',
+    icon: <LuCalendar size={15} />,
+    bgColor: '#FEF2F2',
+    color: '#DC2626',
+    description: 'Scheduled meeting, task, or call'
+  },
+  {
+    id: 'createProposal',
+    label: 'Commercial Proposal',
+    icon: <LuFileText size={15} />,
+    bgColor: '#F0FDFA',
+    color: '#0D9488',
+    description: 'Formal commercial proposal draft'
+  }
+];
 import { animateModalEnter } from '../utils/animations';
 import { INITIAL_OWNERS, LEAD_SOURCES, INITIAL_ACCOUNTS, INITIAL_EMAIL_TEMPLATES } from '../data/mockData';
 import { getTodayISO, getFutureISO } from '../utils/dateUtils';
@@ -215,17 +272,48 @@ export default function CommonActionsModal({
   emailTemplates = []
 }) {
   const [actionType, setActionType] = useState(initialType);
+  const [isTypeDropdownOpen, setIsTypeDropdownOpen] = useState(false);
+  const typeDropdownRef = useRef(null);
   const [targetLeadId, setTargetLeadId] = useState('');
   const [emailAttachments, setEmailAttachments] = useState([]);
   const [selectedEmailTemplate, setSelectedEmailTemplate] = useState('');
   const [ccEmails, setCcEmails] = useState([]);
   const [ccInput, setCcInput] = useState('');
 
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (typeDropdownRef.current && !typeDropdownRef.current.contains(event.target)) {
+        setIsTypeDropdownOpen(false);
+      }
+    }
+    function handleKeyDown(event) {
+      if (event.key === 'Escape') {
+        setIsTypeDropdownOpen(false);
+      }
+    }
+    if (isTypeDropdownOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+      document.addEventListener('keydown', handleKeyDown);
+    }
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isTypeDropdownOpen]);
+
   const availableEmailTemplates = (emailTemplates && emailTemplates.length > 0 ? emailTemplates : INITIAL_EMAIL_TEMPLATES);
 
   const [formData, setFormData] = useState({
     leadName: '',
     company: '',
+    companyName: '',
+    industry: 'Technology & IT Services',
+    companySize: '51-200 employees',
+    website: '',
+    location: 'Mumbai, Maharashtra',
+    estimatedAccountValue: '₹50,00,000',
+    primaryContact: '',
+    tier: 'Strategic Enterprise',
     phone: '',
     email: '',
     designation: '',
@@ -509,6 +597,7 @@ export default function CommonActionsModal({
       case 'call': return 'Log Call';
       case 'email': return isBulk ? `Send Email (${bulkCount} Leads)` : 'Send / Log Email';
       case 'sms': return 'Log WhatsApp Message';
+      case 'createAccount': return 'Create Company Account';
       case 'createOpportunity': return 'Create Pipeline Opportunity';
       case 'createLead': return 'Create New Lead';
       case 'createActivity': return 'Log Activity / Task';
@@ -621,7 +710,248 @@ export default function CommonActionsModal({
               )
             )}
 
+            {/* Record Type Dropdown Selector inside popup for creatable entities */}
+            {CREATABLE_ENTITY_TYPES.some(t => t.id === actionType) && (
+              <div className="form-group">
+                <label className="form-label">What would you like to create? *</label>
+                <div ref={typeDropdownRef} style={{ position: 'relative', width: '100%' }}>
+                  {(() => {
+                    const currentOpt = CREATABLE_ENTITY_TYPES.find(t => t.id === actionType) || CREATABLE_ENTITY_TYPES[0];
+                    return (
+                      <>
+                        <button
+                          type="button"
+                          onClick={() => setIsTypeDropdownOpen(prev => !prev)}
+                          className="form-input"
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'space-between',
+                            cursor: 'pointer',
+                            textAlign: 'left',
+                            backgroundColor: isTypeDropdownOpen ? '#FFFFFF' : '#F8FAFC',
+                            boxShadow: isTypeDropdownOpen ? '0 0 0 2px rgba(6, 54, 105, 0.15)' : 'none',
+                            color: '#063669',
+                            fontWeight: 500,
+                            fontSize: '0.875rem',
+                            padding: '0.65rem 0.85rem',
+                            borderRadius: '4px'
+                          }}
+                          aria-haspopup="listbox"
+                          aria-expanded={isTypeDropdownOpen}
+                        >
+                          <span>{currentOpt.label}</span>
+                          <LuChevronDown
+                            size={16}
+                            style={{
+                              color: '#063669',
+                              transform: isTypeDropdownOpen ? 'rotate(180deg)' : 'rotate(0deg)',
+                              transition: 'transform 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+                              flexShrink: 0
+                            }}
+                          />
+                        </button>
+
+                        {isTypeDropdownOpen && (
+                          <div
+                            role="listbox"
+                            style={{
+                              position: 'absolute',
+                              top: 'calc(100% + 6px)',
+                              left: 0,
+                              right: 0,
+                              backgroundColor: '#FFFFFF',
+                              border: '1px solid #D5E2EE',
+                              borderRadius: '6px',
+                              boxShadow: '0 12px 28px -4px rgba(6, 54, 105, 0.16), 0 6px 12px -4px rgba(6, 54, 105, 0.08)',
+                              padding: '0.35rem',
+                              zIndex: 1050,
+                              display: 'flex',
+                              flexDirection: 'column',
+                              gap: '2px',
+                              animation: 'applePopIn 0.18s cubic-bezier(0.16, 1, 0.3, 1)'
+                            }}
+                          >
+                            {CREATABLE_ENTITY_TYPES.map(opt => {
+                              const isSelected = opt.id === actionType;
+                              return (
+                                <button
+                                  key={opt.id}
+                                  type="button"
+                                  role="option"
+                                  aria-selected={isSelected}
+                                  onClick={() => {
+                                    setActionType(opt.id);
+                                    setIsTypeDropdownOpen(false);
+                                  }}
+                                  style={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'space-between',
+                                    padding: '0.55rem 0.85rem',
+                                    borderRadius: '5px',
+                                    border: 'none',
+                                    backgroundColor: isSelected ? '#EBF3FA' : 'transparent',
+                                    color: isSelected ? '#063669' : '#334155',
+                                    fontSize: '0.875rem',
+                                    fontWeight: isSelected ? 700 : 500,
+                                    cursor: 'pointer',
+                                    textAlign: 'left',
+                                    transition: 'background-color 0.15s ease, color 0.15s ease'
+                                  }}
+                                  onMouseEnter={(e) => {
+                                    if (!isSelected) e.currentTarget.style.backgroundColor = '#F8FAFC';
+                                  }}
+                                  onMouseLeave={(e) => {
+                                    if (!isSelected) e.currentTarget.style.backgroundColor = 'transparent';
+                                  }}
+                                >
+                                  <span>{opt.label}</span>
+                                  {isSelected && (
+                                    <LuCheck size={16} color="#063669" style={{ strokeWidth: 2.5, flexShrink: 0 }} />
+                                  )}
+                                </button>
+                              );
+                            })}
+                          </div>
+                        )}
+                      </>
+                    );
+                  })()}
+                </div>
+              </div>
+            )}
+
             {/* Dynamic Form Fields */}
+            {actionType === 'createAccount' && (
+              <>
+                <div className="form-group">
+                  <label className="form-label">Company / Account Name *</label>
+                  <input
+                    type="text"
+                    className="form-input"
+                    required
+                    placeholder="e.g. Tata Consultancy Tech Ltd"
+                    value={formData.companyName || formData.company}
+                    onChange={(e) => setFormData({ ...formData, companyName: e.target.value, company: e.target.value })}
+                  />
+                </div>
+                <div className="form-grid-2">
+                  <div className="form-group">
+                    <label className="form-label">Industry *</label>
+                    <select
+                      className="form-select"
+                      value={formData.industry || 'Technology & IT Services'}
+                      onChange={(e) => setFormData({ ...formData, industry: e.target.value })}
+                    >
+                      <option value="Technology & IT Services">Technology & IT Services</option>
+                      <option value="Finance & Banking">Finance & Banking</option>
+                      <option value="Healthcare & Pharma">Healthcare & Pharma</option>
+                      <option value="Manufacturing & Industrial">Manufacturing & Industrial</option>
+                      <option value="Retail & E-commerce">Retail & E-commerce</option>
+                      <option value="Energy & CleanTech">Energy & CleanTech</option>
+                      <option value="Consulting & Services">Consulting & Services</option>
+                      <option value="Telecom & Media">Telecom & Media</option>
+                    </select>
+                  </div>
+                  <div className="form-group">
+                    <label className="form-label">Company Size</label>
+                    <select
+                      className="form-select"
+                      value={formData.companySize || '51-200 employees'}
+                      onChange={(e) => setFormData({ ...formData, companySize: e.target.value })}
+                    >
+                      <option value="1-10 employees">1-10 employees (Startup)</option>
+                      <option value="11-50 employees">11-50 employees (Small)</option>
+                      <option value="51-200 employees">51-200 employees (Mid-market)</option>
+                      <option value="201-500 employees">201-500 employees (Commercial)</option>
+                      <option value="500+ employees">500+ employees (Enterprise)</option>
+                    </select>
+                  </div>
+                </div>
+                <div className="form-grid-2">
+                  <div className="form-group">
+                    <label className="form-label">Location / Headquarters</label>
+                    <input
+                      type="text"
+                      className="form-input"
+                      placeholder="e.g. Mumbai, Maharashtra"
+                      value={formData.location || ''}
+                      onChange={(e) => setFormData({ ...formData, location: e.target.value })}
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label className="form-label">Website URL</label>
+                    <input
+                      type="text"
+                      className="form-input"
+                      placeholder="e.g. https://www.tataconsultancy.com"
+                      value={formData.website || ''}
+                      onChange={(e) => setFormData({ ...formData, website: e.target.value })}
+                    />
+                  </div>
+                </div>
+                <div className="form-grid-2">
+                  <div className="form-group">
+                    <label className="form-label">Account Owner</label>
+                    <select
+                      className="form-select"
+                      value={formData.owner}
+                      onChange={(e) => setFormData({ ...formData, owner: e.target.value })}
+                    >
+                      {INITIAL_OWNERS.filter(o => o !== 'All Owners').map(o => (
+                        <option key={o} value={o}>{o}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="form-group">
+                    <label className="form-label">Account Tier</label>
+                    <select
+                      className="form-select"
+                      value={formData.tier || 'Strategic Enterprise'}
+                      onChange={(e) => setFormData({ ...formData, tier: e.target.value })}
+                    >
+                      <option value="Strategic Enterprise">Strategic Enterprise</option>
+                      <option value="High Priority">High Priority</option>
+                      <option value="Standard Account">Standard Account</option>
+                      <option value="Growth Tier">Growth Tier</option>
+                    </select>
+                  </div>
+                </div>
+                <div className="form-grid-2">
+                  <div className="form-group">
+                    <label className="form-label">Estimated Annual Value</label>
+                    <input
+                      type="text"
+                      className="form-input"
+                      placeholder="e.g. ₹75,00,000"
+                      value={formData.estimatedAccountValue || ''}
+                      onChange={(e) => setFormData({ ...formData, estimatedAccountValue: e.target.value })}
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label className="form-label">Primary Contact Person</label>
+                    <input
+                      type="text"
+                      className="form-input"
+                      placeholder="e.g. Rajiv Menon"
+                      value={formData.primaryContact || ''}
+                      onChange={(e) => setFormData({ ...formData, primaryContact: e.target.value })}
+                    />
+                  </div>
+                </div>
+                <div className="form-group">
+                  <label className="form-label">Company Overview / Notes</label>
+                  <textarea
+                    className="form-input"
+                    rows={2}
+                    placeholder="Key strategic background, tech stack, or account notes..."
+                    value={formData.notes || ''}
+                    onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+                  />
+                </div>
+              </>
+            )}
             {actionType === 'createOpportunity' && (
               <>
                 <div className="form-group">
@@ -1798,7 +2128,15 @@ export default function CommonActionsModal({
               Cancel
             </button>
             <button type="submit" className="btn-primary">
-              {isBulk ? `Apply to ${bulkCount} Leads` : 'Confirm Action'}
+              {isBulk ? `Apply to ${bulkCount} Leads` : (
+                actionType === 'createLead' ? 'Create Lead' :
+                actionType === 'createAccount' ? 'Create Company Account' :
+                actionType === 'createOpportunity' ? 'Create Opportunity' :
+                actionType === 'createContact' ? 'Add Contact' :
+                actionType === 'createActivity' ? 'Schedule Activity' :
+                actionType === 'createProposal' ? 'Draft Proposal' :
+                'Confirm Action'
+              )}
             </button>
           </div>
         </form>

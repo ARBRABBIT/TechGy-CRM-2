@@ -670,6 +670,28 @@ export default function App() {
       } else {
         setAccounts(accounts.map(a => a.id === existingAcc.id ? { ...a, oppsCount: (a.oppsCount || 0) + 1 } : a));
       }
+    } else if (type === 'createAccount') {
+      const compName = formData.companyName || formData.company || 'Enterprise Client';
+      const existingAcc = accounts.find(a => a.companyName.toLowerCase() === compName.toLowerCase());
+      if (existingAcc) {
+        triggerToast(`Company account "${compName}" already exists`, 'info');
+        return;
+      }
+      const newAcc = createGeneratedAccount(compName, {
+        accountOwner: formData.owner || currentUser?.name || 'Unassigned',
+        industry: formData.industry || 'Technology & IT Services',
+        companySize: formData.companySize || '51-200 employees',
+        website: formData.website || `https://www.${compName.toLowerCase().replace(/[^a-z0-9]/g, '')}.com`,
+        location: formData.location || 'Mumbai, Maharashtra',
+        estimatedAccountValue: formData.estimatedAccountValue || '₹50,00,000',
+        primaryContact: formData.primaryContact || formData.leadName || 'Corporate Officer',
+        tier: formData.tier || 'Strategic Enterprise',
+        status: 'Active',
+        notes: formData.notes || ''
+      });
+      setAccounts([newAcc, ...accounts]);
+      pushNotification('New Company Account Created', `Company account "${compName}" registered in CRM`, 'Account', 'accounts');
+      triggerToast(`Company account "${compName}" created`, 'success');
     } else if (type === 'createLead') {
       const dueDateVal = formData.dueDate || getTodayISO();
       const followupTs = new Date(`${dueDateVal} 10:00`.replace(' ', 'T')).getTime();
@@ -1020,7 +1042,13 @@ export default function App() {
           selectedOwnerFilter={selectedOwnerFilter}
           setSelectedOwnerFilter={setSelectedOwnerFilter}
           setMobileOpen={setMobileOpen}
-          onOpenCreateModal={(type = (activeModule === 'opportunities' ? 'createOpportunity' : 'createLead')) => {
+          onOpenCreateModal={(type = (
+            activeModule === 'accounts' ? 'createAccount' :
+            activeModule === 'opportunities' ? 'createOpportunity' :
+            activeModule === 'contacts' ? 'createContact' :
+            activeModule === 'activities' ? 'createActivity' :
+            activeModule === 'proposals' ? 'createProposal' : 'createLead'
+          )) => {
             setModalInitialType(type);
             setModalTargetAccount(selectedAccount);
             setIsCreateModalOpen(true);
