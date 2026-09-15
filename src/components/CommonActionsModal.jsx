@@ -263,6 +263,7 @@ export default function CommonActionsModal({
   onClose,
   onSave,
   initialType = 'createLead',
+  lockType = false,
   selectedLead = null,
   selectedAccount = null,
   bulkLeadIds = [],
@@ -711,7 +712,7 @@ export default function CommonActionsModal({
             )}
 
             {/* Record Type Dropdown Selector inside popup for creatable entities */}
-            {CREATABLE_ENTITY_TYPES.some(t => t.id === actionType) && (
+            {!lockType && CREATABLE_ENTITY_TYPES.some(t => t.id === actionType) && (
               <div className="form-group">
                 <label className="form-label">What would you like to create? *</label>
                 <div ref={typeDropdownRef} style={{ position: 'relative', width: '100%' }}>

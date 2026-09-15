@@ -212,6 +212,7 @@ export default function App() {
   const [modalTargetLead, setModalTargetLead] = useState(null);
   const [modalTargetAccount, setModalTargetAccount] = useState(null);
   const [modalBulkCallback, setModalBulkCallback] = useState(null);
+  const [modalLockType, setModalLockType] = useState(false);
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
   const [newCompanyPrompt, setNewCompanyPrompt] = useState(null);
 
@@ -1051,6 +1052,7 @@ export default function App() {
           )) => {
             setModalInitialType(type);
             setModalTargetAccount(selectedAccount);
+            setModalLockType(false);
             setIsCreateModalOpen(true);
           }}
           leads={leads}
@@ -1221,7 +1223,7 @@ export default function App() {
                     setSelectedLead(lead);
                   }}
                   onSelectAccount={(comp) => handleSelectAccountByCompany(comp, 'leads', 'Leads')}
-                  onOpenCreateModal={(type = 'createLead', targetLead = null, bulkIds = [], onComplete = null) => {
+                  onOpenCreateModal={(type = 'createLead', targetLead = null, bulkIds = [], onComplete = null, lockType = true) => {
                     if (type === 'call' && targetLead) {
                       handleInitiateCall(targetLead);
                       return;
@@ -1230,6 +1232,7 @@ export default function App() {
                     setModalBulkLeadIds(bulkIds || []);
                     setModalTargetLead(targetLead);
                     setModalBulkCallback(() => onComplete);
+                    setModalLockType(lockType);
                     setIsCreateModalOpen(true);
                   }}
                   searchQuery={searchQuery}
@@ -1423,6 +1426,7 @@ export default function App() {
           setModalTargetLead(null);
           setModalTargetAccount(null);
           setModalBulkCallback(null);
+          setModalLockType(false);
         }}
         onSave={(type, data) => {
           handleSaveAction(type, data);
@@ -1433,8 +1437,10 @@ export default function App() {
           setModalBulkLeadIds([]);
           setModalTargetLead(null);
           setModalTargetAccount(null);
+          setModalLockType(false);
         }}
         initialType={modalInitialType}
+        lockType={modalLockType}
         selectedLead={modalTargetLead || selectedLead}
         selectedAccount={modalTargetAccount || selectedAccount}
         bulkLeadIds={modalBulkLeadIds}

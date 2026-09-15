@@ -372,7 +372,7 @@ export default function LeadsView({
           </div>
           <button
             className="btn-primary"
-            onClick={() => onOpenCreateModal('createLead')}
+            onClick={() => onOpenCreateModal && onOpenCreateModal('createLead', null, [], null, true)}
             style={{ padding: '0.55rem 1rem', fontSize: '0.825rem', borderRadius: '20px', display: 'inline-flex', alignItems: 'center', gap: '0.35rem', fontWeight: 600 }}
           >
             <LuPlus size={15} /> Create Lead
