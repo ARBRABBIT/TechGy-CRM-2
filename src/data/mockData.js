@@ -947,40 +947,35 @@ export const INITIAL_EMAIL_TEMPLATES = [
     name: 'Introduction & Capabilities Overview',
     category: 'Sales Outreach',
     subject: 'Introduction: TechGy Enterprise CRM Overview for {company}',
-    body: `Hi {leadName},\n\nThank you for connecting with TechGy. We specialize in modern enterprise CRM solutions designed to streamline sales workflows, accelerate lead conversions, and centralize omnichannel interactions.\n\nI've attached our capabilities overview and solution brochure for your review. Would you be open for a brief 15-minute introductory call this week to explore how we can support {company}?\n\nBest regards,\nRajesh Sharma\nTechGy Solutions`,
-    status: 'Active'
+    body: `Hi {leadName},\n\nThank you for connecting with TechGy. We specialize in modern enterprise CRM solutions designed to streamline sales workflows, accelerate lead conversions, and centralize omnichannel interactions.\n\nI've attached our capabilities overview and solution brochure for your review. Would you be open for a brief 15-minute introductory call this week to explore how we can support {company}?\n\nBest regards,\nRajesh Sharma\nTechGy Solutions`
   },
   {
     id: 'TPL-002',
     name: 'Meeting Follow-up & Commercials',
     category: 'Follow-up',
     subject: 'Follow-up: TechGy CRM Solution Overview & Commercials',
-    body: `Hi {leadName},\n\nThank you for your time during our discussion today regarding {company}'s requirements.\n\nAs discussed, I have outlined our proposed solution architecture and commercial terms. Please find the detailed summary and next milestones attached.\n\nLooking forward to hearing your thoughts.\n\nBest regards,\nRajesh Sharma\nTechGy Solutions`,
-    status: 'Active'
+    body: `Hi {leadName},\n\nThank you for your time during our discussion today regarding {company}'s requirements.\n\nAs discussed, I have outlined our proposed solution architecture and commercial terms. Please find the detailed summary and next milestones attached.\n\nLooking forward to hearing your thoughts.\n\nBest regards,\nRajesh Sharma\nTechGy Solutions`
   },
   {
     id: 'TPL-003',
     name: 'Interactive Product Demo Invitation',
     category: 'Demo & Pitch',
     subject: 'Interactive Demo Invitation: TechGy CRM for {company}',
-    body: `Hi {leadName},\n\nFollowing up on our conversation, I would like to invite you and your team to an interactive walkthrough of the TechGy CRM platform tailored to {company}.\n\nDuring this session, we will demonstrate key capabilities including pipeline automation, activity logging, and intelligent reporting.\n\nPlease let me know a convenient time slot that works best for your schedule.\n\nBest regards,\nRajesh Sharma\nTechGy Solutions`,
-    status: 'Active'
+    body: `Hi {leadName},\n\nFollowing up on our conversation, I would like to invite you and your team to an interactive walkthrough of the TechGy CRM platform tailored to {company}.\n\nDuring this session, we will demonstrate key capabilities including pipeline automation, activity logging, and intelligent reporting.\n\nPlease let me know a convenient time slot that works best for your schedule.\n\nBest regards,\nRajesh Sharma\nTechGy Solutions`
   },
   {
     id: 'TPL-004',
     name: 'Proposal & Scope Review',
     category: 'Commercials',
     subject: 'TechGy CRM Proposal Review & Next Steps for {company}',
-    body: `Hi {leadName},\n\nI hope you are having a productive week.\n\nI wanted to follow up on the commercial proposal shared for {company}. Please let me know if your team had a chance to review the scope or if you would like us to clarify any specific details.\n\nBest regards,\nRajesh Sharma\nTechGy Solutions`,
-    status: 'Active'
+    body: `Hi {leadName},\n\nI hope you are having a productive week.\n\nI wanted to follow up on the commercial proposal shared for {company}. Please let me know if your team had a chance to review the scope or if you would like us to clarify any specific details.\n\nBest regards,\nRajesh Sharma\nTechGy Solutions`
   },
   {
     id: 'TPL-005',
     name: 'Pipeline Check-in / Re-engagement',
     category: 'Lead Nurture',
     subject: 'Checking in: Sales Workflow Optimization at {company}',
-    body: `Hi {leadName},\n\nI wanted to quickly check in and see how your sales automation initiatives are progressing at {company}.\n\nWe recently introduced several enhancements to our platform that could bring immediate value to your sales pipeline.\n\nWould you be open for a quick catch-up this week?\n\nBest regards,\nRajesh Sharma\nTechGy Solutions`,
-    status: 'Active'
+    body: `Hi {leadName},\n\nI wanted to quickly check in and see how your sales automation initiatives are progressing at {company}.\n\nWe recently introduced several enhancements to our platform that could bring immediate value to your sales pipeline.\n\nWould you be open for a quick catch-up this week?\n\nBest regards,\nRajesh Sharma\nTechGy Solutions`
   }
 ];
 
