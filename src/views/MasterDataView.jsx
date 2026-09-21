@@ -12,132 +12,315 @@ import {
   LuArrowRight,
   LuPencil,
   LuShieldAlert,
-  LuClock,
-  LuSparkles
+  LuLayers,
+  LuPhoneCall,
+  LuCircleCheck,
+  LuClipboardCheck
 } from 'react-icons/lu';
 import { INITIAL_EMAIL_TEMPLATES } from '../data/mockData';
+import { STORAGE_KEYS } from '../constants/storageKeys';
 
-const INITIAL_MASTER_DATA = {
-  products: [
-    { id: 'PRD-001', name: 'Enterprise Cloud Suite', sku: 'TGY-ECS-01', category: 'Software', price: '₹15,00,000 / yr', billing: 'Annual Subscription' },
-    { id: 'PRD-002', name: 'TechGy Security Gateway', sku: 'TGY-SEC-02', category: 'Security', price: '₹8,50,000 / yr', billing: 'Annual Subscription' },
-    { id: 'PRD-003', name: 'AI Process Automation Engine', sku: 'TGY-AIP-03', category: 'Artificial Intelligence', price: '₹22,00,000 / yr', billing: 'Annual Subscription' },
-    { id: 'PRD-004', name: 'Custom API Connectors & Middleware', sku: 'TGY-API-04', category: 'Integration', price: '₹4,50,000 / unit', billing: 'One-time License' },
-    { id: 'PRD-005', name: 'Dedicated 24/7 Enterprise SLA Support', sku: 'TGY-SUP-05', category: 'Services', price: '₹6,00,000 / yr', billing: 'Annual Support' },
-    { id: 'PRD-006', name: 'Legacy Database Migration Kit', sku: 'TGY-MIG-06', category: 'Services', price: '₹7,50,000 / project', billing: 'Professional Services' }
-  ],
-  sources: [
-    { id: 'SRC-001', name: 'Website', type: 'Inbound Digital', weight: 'High (37.5%)', costPerLead: '₹1,200' },
-    { id: 'SRC-002', name: 'Inbound Call', type: 'Direct Voice', weight: 'Medium (9.4%)', costPerLead: '₹850' },
-    { id: 'SRC-003', name: 'Referral', type: 'Partner / Client', weight: 'High (25.0%)', costPerLead: '₹0 (Organic)' },
-    { id: 'SRC-004', name: 'LinkedIn', type: 'Social B2B', weight: 'High (18.8%)', costPerLead: '₹2,400' },
-    { id: 'SRC-005', name: 'Campaign', type: 'Paid Media', weight: 'Medium (6.3%)', costPerLead: '₹3,100' },
-    { id: 'SRC-006', name: 'Partner', type: 'Channel Alliance', weight: 'Medium (3.1%)', costPerLead: 'Revenue Share' }
-  ],
-  industries: [
-    { id: 'IND-001', name: 'Enterprise Software', code: 'IT-SOFT', standardMargin: '42%' },
-    { id: 'IND-002', name: 'Cloud Infrastructure', code: 'IT-CLD', standardMargin: '38%' },
-    { id: 'IND-003', name: 'Fintech & Banking', code: 'BFSI-FIN', standardMargin: '45%' },
-    { id: 'IND-004', name: 'Healthcare & MedTech', code: 'HLTH-MED', standardMargin: '35%' },
-    { id: 'IND-005', name: 'Manufacturing & Supply Chain', code: 'MFG-SCM', standardMargin: '28%' },
-    { id: 'IND-006', name: 'E-Commerce & Retail', code: 'RET-ECOM', standardMargin: '30%' }
-  ],
-  stages: [
-    { id: 'STG-001', name: 'New Lead', order: 1, probability: '10%', slaDays: 2 },
-    { id: 'STG-002', name: 'Contacted', order: 2, probability: '25%', slaDays: 5 },
-    { id: 'STG-003', name: 'Qualified', order: 3, probability: '40%', slaDays: 7 },
-    { id: 'STG-004', name: 'Discussion', order: 4, probability: '60%', slaDays: 10 },
-    { id: 'STG-005', name: 'Proposal Sent', order: 5, probability: '75%', slaDays: 14 },
-    { id: 'STG-006', name: 'Negotiation', order: 6, probability: '90%', slaDays: 7 },
-    { id: 'STG-007', name: 'Closed Won', order: 7, probability: '100%', slaDays: 0 },
-    { id: 'STG-008', name: 'Closed Lost', order: 8, probability: '0%', slaDays: 0 }
+export const INITIAL_MASTER_DATA = {
+  // 1. Content Types
+  contentTypes: [
+    { id: 'CNT-001', name: 'Email Outreach & Pitch' },
+    { id: 'CNT-002', name: 'WhatsApp Business Template' },
+    { id: 'CNT-003', name: 'Product Brochure & Spec Sheet' },
+    { id: 'CNT-004', name: 'Commercial Proposal & Service Contract' },
+    { id: 'CNT-005', name: 'Inbound Web Inquiry & Form' },
+    { id: 'CNT-006', name: 'SMS Alert & Verification OTP' },
+    { id: 'CNT-007', name: 'Interactive Product Demo Deck' }
   ],
 
+  // 2. Lead Follow-up Types
+  followupTypes: [
+    { id: 'FUT-001', name: 'Discovery Follow-up' },
+    { id: 'FUT-002', name: 'Architecture & Demo Walkthrough' },
+    { id: 'FUT-003', name: 'Proposal & Commercials Review' },
+    { id: 'FUT-004', name: 'WhatsApp Milestone Check-in' },
+    { id: 'FUT-005', name: 'Executive Decision Alignment' },
+    { id: 'FUT-006', name: 'Re-engagement / Nurture Touchpoint' }
+  ],
+
+  // 3. Lead Follow-up Status
+  followupStatuses: [
+    { id: 'FUS-001', description: 'Immediate Callback Scheduled' },
+    { id: 'FUS-002', description: 'Pending Technical Architecture Review' },
+    { id: 'FUS-003', description: 'Executive Pitch Deck Dispatched' },
+    { id: 'FUS-004', description: 'Commercial Proposal Under Review' },
+    { id: 'FUS-005', description: 'Follow-up Cadence Paused / Delayed' },
+    { id: 'FUS-006', description: 'Contact Reached & Milestone Completed' }
+  ],
+
+  // 4. Lead Status
+  leadStatuses: [
+    { id: 'LST-001', name: 'New' },
+    { id: 'LST-002', name: 'Contacted' },
+    { id: 'LST-003', name: 'Qualified' },
+    { id: 'LST-004', name: 'Discussion' },
+    { id: 'LST-005', name: 'Proposal' },
+    { id: 'LST-006', name: 'Negotiation' },
+    { id: 'LST-007', name: 'Won' },
+    { id: 'LST-008', name: 'Lost' }
+  ],
+
+  // 5. Objections
   objections: [
-    { id: 'OBJ-001', name: 'Budgetary Constraints', category: 'Pricing', rebuttal: 'Offer milestone billing (50/50) or showcase 14-month ROI case study.', severity: 'High' },
-    { id: 'OBJ-002', name: 'Competitor Multi-Year Contract', category: 'Incumbent', rebuttal: 'Provide side-by-side migration roadmap and buyout transition credits.', severity: 'High' },
-    { id: 'OBJ-003', name: 'Data Security & Compliance', category: 'Technical', rebuttal: 'Share SOC 2 Type II, ISO 27001 certificates & on-premise connector specs.', severity: 'Critical' },
-    { id: 'OBJ-004', name: 'Internal Implementation Bandwidth', category: 'Operations', rebuttal: 'Include dedicated TechGy implementation manager and 14-day go-live guarantee.', severity: 'Medium' }
+    {
+      id: 'OBJ-001',
+      name: 'Budgetary Constraints & Pricing'
+    },
+    {
+      id: 'OBJ-002',
+      name: 'Competitor Multi-Year Contract Lock-in'
+    },
+    {
+      id: 'OBJ-003',
+      name: 'Data Security & SOC 2 / ISO Compliance'
+    },
+    {
+      id: 'OBJ-004',
+      name: 'Internal Implementation Bandwidth'
+    },
+    {
+      id: 'OBJ-005',
+      name: 'Legacy CRM Database Migration Risk'
+    }
   ],
-  cadences: [
-    { id: 'CAD-001', name: 'Day 1 Rapid Response', timing: 'Within 2 Hours', channel: 'Direct Call + WhatsApp Intro', mandatoryAction: 'Validate qualification criteria' },
-    { id: 'CAD-002', name: 'Day 3 Discovery Follow-up', timing: '72 Hours Post-First Contact', channel: 'Customized Pitch Email', mandatoryAction: 'Schedule technical solution demo' },
-    { id: 'CAD-003', name: 'Day 7 Proposal Review', timing: '1 Week Post-Quote', channel: 'Executive Follow-up Call', mandatoryAction: 'Confirm procurement decision makers' },
-    { id: 'CAD-004', name: 'Day 14 Re-engagement', timing: '2 Weeks Inactive', channel: 'Value-add Whitepaper / Case Study', mandatoryAction: 'Send CEO benchmark report' }
+
+  // 6. Agent Checklist (Mapped to Lead Status with Points to Talk)
+  agentChecklist: [
+    {
+      id: 'CHK-001',
+      leadStatus: 'New',
+      pointsToTalk: 'Introduce TechGy enterprise positioning and validate primary business challenge and company scale.',
+      name: 'Introduce TechGy enterprise positioning and validate primary business challenge and company scale.',
+      description: 'Introduce TechGy enterprise positioning and validate primary business challenge and company scale.'
+    },
+    {
+      id: 'CHK-002',
+      leadStatus: 'New',
+      pointsToTalk: 'Confirm current CRM or toolstack being used and primary pain points or renewal timeline.',
+      name: 'Confirm current CRM or toolstack being used and primary pain points or renewal timeline.',
+      description: 'Confirm current CRM or toolstack being used and primary pain points or renewal timeline.'
+    },
+    {
+      id: 'CHK-003',
+      leadStatus: 'Contacted',
+      pointsToTalk: 'Demonstrate API architecture connectors, key features & 99.95% enterprise uptime guarantee.',
+      name: 'Demonstrate API architecture connectors, key features & 99.95% enterprise uptime guarantee.',
+      description: 'Demonstrate API architecture connectors, key features & 99.95% enterprise uptime guarantee.'
+    },
+    {
+      id: 'CHK-004',
+      leadStatus: 'Contacted',
+      pointsToTalk: 'Identify operational champions, daily user seat headcount, and key workflow bottlenecks.',
+      name: 'Identify operational champions, daily user seat headcount, and key workflow bottlenecks.',
+      description: 'Identify operational champions, daily user seat headcount, and key workflow bottlenecks.'
+    },
+    {
+      id: 'CHK-005',
+      leadStatus: 'Qualified',
+      pointsToTalk: 'Identify budget authority & procurement stakeholder sign-off process and budget cycle timeline.',
+      name: 'Identify budget authority & procurement stakeholder sign-off process and budget cycle timeline.',
+      description: 'Identify budget authority & procurement stakeholder sign-off process and budget cycle timeline.'
+    },
+    {
+      id: 'CHK-006',
+      leadStatus: 'Qualified',
+      pointsToTalk: 'Validate client data security, ISO 27001 / SOC 2 compliance, and cloud hosting preferences.',
+      name: 'Validate client data security, ISO 27001 / SOC 2 compliance, and cloud hosting preferences.',
+      description: 'Validate client data security, ISO 27001 / SOC 2 compliance, and cloud hosting preferences.'
+    },
+    {
+      id: 'CHK-007',
+      leadStatus: 'Discussion',
+      pointsToTalk: 'Present customized live solution demo matching discovered business pain points.',
+      name: 'Present customized live solution demo matching discovered business pain points.',
+      description: 'Present customized live solution demo matching discovered business pain points.'
+    },
+    {
+      id: 'CHK-008',
+      leadStatus: 'Discussion',
+      pointsToTalk: 'Lock in agreed follow-up milestone for technical proof-of-concept (PoC) evaluation.',
+      name: 'Lock in agreed follow-up milestone for technical proof-of-concept (PoC) evaluation.',
+      description: 'Lock in agreed follow-up milestone for technical proof-of-concept (PoC) evaluation.'
+    },
+    {
+      id: 'CHK-009',
+      leadStatus: 'Proposal',
+      pointsToTalk: 'Dispatch comprehensive commercial proposal, user tier options, and custom implementation scope.',
+      name: 'Dispatch comprehensive commercial proposal, user tier options, and custom implementation scope.',
+      description: 'Dispatch comprehensive commercial proposal, user tier options, and custom implementation scope.'
+    },
+    {
+      id: 'CHK-010',
+      leadStatus: 'Proposal',
+      pointsToTalk: 'Address procurement queries, software billing terms, and deliver customer ROI case studies.',
+      name: 'Address procurement queries, software billing terms, and deliver customer ROI case studies.',
+      description: 'Address procurement queries, software billing terms, and deliver customer ROI case studies.'
+    },
+    {
+      id: 'CHK-011',
+      leadStatus: 'Negotiation',
+      pointsToTalk: 'Finalize SLA guarantees, dedicated customer success tier, and multi-year licensing terms.',
+      name: 'Finalize SLA guarantees, dedicated customer success tier, and multi-year licensing terms.',
+      description: 'Finalize SLA guarantees, dedicated customer success tier, and multi-year licensing terms.'
+    },
+    {
+      id: 'CHK-012',
+      leadStatus: 'Negotiation',
+      pointsToTalk: 'Confirm Master Services Agreement (MSA) review turnaround with legal and procurement leads.',
+      name: 'Confirm Master Services Agreement (MSA) review turnaround with legal and procurement leads.',
+      description: 'Confirm Master Services Agreement (MSA) review turnaround with legal and procurement leads.'
+    },
+    {
+      id: 'CHK-013',
+      leadStatus: 'Won',
+      pointsToTalk: 'Conduct transition kickoff call with Customer Success and establish implementation timeline.',
+      name: 'Conduct transition kickoff call with Customer Success and establish implementation timeline.',
+      description: 'Conduct transition kickoff call with Customer Success and establish implementation timeline.'
+    },
+    {
+      id: 'CHK-014',
+      leadStatus: 'Lost',
+      pointsToTalk: 'Document detailed loss root cause (budget, competitor, timing) and schedule follow-up in 6 months.',
+      name: 'Document detailed loss root cause (budget, competitor, timing) and schedule follow-up in 6 months.',
+      description: 'Document detailed loss root cause (budget, competitor, timing) and schedule follow-up in 6 months.'
+    }
   ],
-  aiRules: [
-    { id: 'RUL-001', name: 'C-Suite Title Multiplier', factor: 'Designation Match (CXO, VP, Founder)', weight: '+25 Points', autoTrigger: 'Route to Senior Account Executive' },
-    { id: 'RUL-002', name: 'High Company Size Weight', factor: 'Employee Count > 250', weight: '+20 Points', autoTrigger: 'Tag as Enterprise Tier' },
-    { id: 'RUL-003', name: 'Direct Inbound Intent', factor: 'Website Demo Request / Pricing Calculator', weight: '+30 Points', autoTrigger: 'Trigger instant 15-min SLA alert' },
-    { id: 'RUL-004', name: 'Email Engagement Signal', factor: 'Email Proposal Opened > 3 Times', weight: '+15 Points', autoTrigger: 'Schedule automatic call task' }
+
+  // 7. Email Templates (Category Removed)
+  emailTemplates: [
+    ...INITIAL_EMAIL_TEMPLATES.map(t => ({
+      id: t.id,
+      name: t.name,
+      subject: t.subject,
+      body: t.body
+    })),
+    {
+      id: 'TPL-006',
+      name: 'Enterprise Service & Security Architecture Brief',
+      subject: 'Enterprise Service Terms & Compliance Standards for {company}',
+      body: `Hi {leadName},\n\nFollowing our discussion regarding data governance, I've compiled our complete ISO 27001, SOC 2 Type II compliance pack and 99.95% uptime documentation for {company}.\n\nPlease let me know if your IT security team requires an architectural alignment call.\n\nBest regards,\nRajesh Sharma\nTechGy Solutions`
+    }
+  ],
+
+  // 8. Industries (Standard Margin & Domain Focus Area Removed)
+  industries: [
+    { id: 'IND-001', name: 'Enterprise Software', code: 'IT-SOFT' },
+    { id: 'IND-002', name: 'Cloud Infrastructure & DevOps', code: 'IT-CLD' },
+    { id: 'IND-003', name: 'Financial Services & Banking', code: 'BFSI-FIN' },
+    { id: 'IND-004', name: 'Healthcare & Pharma', code: 'HLTH-MED' },
+    { id: 'IND-005', name: 'Manufacturing & Supply Chain', code: 'MFG-SCM' },
+    { id: 'IND-006', name: 'Retail & Consumer Goods', code: 'RET-ECOM' },
+    { id: 'IND-007', name: 'Renewable Energy & CleanTech', code: 'ENG-CLN' },
+    { id: 'IND-008', name: 'Consulting & Professional Services', code: 'CNS-SERV' }
+  ],
+
+  // Supporting Master Catalogs
+  // Products & Services (Cleaned: Category, Standard Pricing, Billing Model Removed)
+  products: [
+    { id: 'PRD-001', name: 'TechGy CRM Enterprise Suite' },
+    { id: 'PRD-002', name: 'Omnichannel Voice & AI Dialer' },
+    { id: 'PRD-003', name: 'Field Sales Mobility & Geofencing' },
+    { id: 'PRD-004', name: 'Enterprise Data Migration & Onboarding' },
+    { id: 'PRD-005', name: 'Custom ERP & WhatsApp Gateway Integration' },
+    { id: 'PRD-006', name: 'Cloud Infrastructure & Security Solutions' },
+    { id: 'PRD-007', name: 'Dedicated Support & AMC' }
+  ],
+
+  // Sources (Cleaned: Channel Type, Attribution Weight, Cost per Lead Removed)
+  sources: [
+    { id: 'SRC-001', name: 'Website' },
+    { id: 'SRC-002', name: 'Inbound Call' },
+    { id: 'SRC-003', name: 'Referral' },
+    { id: 'SRC-004', name: 'LinkedIn' },
+    { id: 'SRC-005', name: 'Campaign' },
+    { id: 'SRC-006', name: 'Partner' }
   ]
 };
 
-const MASTER_CATEGORIES = [
+export const MASTER_CATEGORIES = [
   {
-    id: 'products',
-    title: 'Products & Services',
-    desc: 'Define and manage the catalog of software suites, enterprise licenses, cloud modules, pricing tiers, and professional services.',
-    icon: LuPackage,
+    id: 'contentTypes',
+    title: 'Content Types',
+    desc: 'Configure message formats, collateral types, marketing assets, and outbound delivery channels.',
+    icon: LuLayers,
     iconBg: '#EFF6FF',
-    iconColor: '#1D4ED8'
+    iconColor: '#2563EB'
   },
   {
-    id: 'sources',
-    title: 'Lead Sources',
-    desc: 'Configure lead acquisition channels, inbound digital sources, partner attribution weights, and cost per lead tracking metrics.',
-    icon: LuShare2,
-    iconBg: '#F0FDF4',
-    iconColor: '#15803D'
-  },
-  {
-    id: 'industries',
-    title: 'Industry Sectors',
-    desc: 'Standardize client industry classifications, margin benchmarks, and vertical sector codes.',
-    icon: LuFactory,
-    iconBg: '#FEF3C7',
-    iconColor: '#B45309'
-  },
-  {
-    id: 'stages',
-    title: 'Pipeline Stages',
-    desc: 'Define and customize the distinct stages of your sales funnel, SLA breach thresholds, and deal win probabilities.',
-    icon: LuGitCommitVertical,
+    id: 'followupTypes',
+    title: 'Lead Follow-up Types',
+    desc: 'Standardize communication methods, recommended timeframes, and priority levels for lead follow-up activities.',
+    icon: LuPhoneCall,
     iconBg: '#F5F3FF',
-    iconColor: '#6D28D9'
+    iconColor: '#7C3AED'
   },
-
   {
-    id: 'emailTemplates',
-    title: 'Email Templates',
-    desc: 'Centralize standardized sales outreach copy, proposal emails, follow-up cadences, and dynamic merge tags.',
-    icon: LuMail,
-    iconBg: '#FFF1F2',
-    iconColor: '#BE123C'
+    id: 'followupStatuses',
+    title: 'Lead Follow-up Status',
+    desc: 'Manage follow-up activity lifecycles, escalation triggers, and resolution states.',
+    icon: LuCircleCheck,
+    iconBg: '#ECFDF5',
+    iconColor: '#059669'
+  },
+  {
+    id: 'leadStatuses',
+    title: 'Lead Status',
+    desc: 'Standardize sales funnel stages and pipeline progression criteria.',
+    icon: LuGitCommitVertical,
+    iconBg: '#F0F4F9',
+    iconColor: '#063669'
   },
   {
     id: 'objections',
     title: 'Sales Objections',
-    desc: 'Maintain a central directory of common buyer concerns, pricing hesitations, and recommended objection scripts.',
+    desc: 'Maintain a central directory of common buyer concerns, pricing hesitations, and objection scenarios.',
     icon: LuShieldAlert,
     iconBg: '#FEF2F2',
     iconColor: '#DC2626'
   },
   {
-    id: 'cadences',
-    title: 'Lead Follow-up Cadences',
-    desc: 'Configure standard communication cadences, SLA escalation parameters, and mandatory next-action triggers.',
-    icon: LuClock,
+    id: 'agentChecklist',
+    title: 'Agent Checklist',
+    desc: 'Configure talking points and call guidance for each lead status to steer buyer interactions.',
+    icon: LuClipboardCheck,
+    iconBg: '#FEF3C7',
+    iconColor: '#D97706'
+  },
+  {
+    id: 'emailTemplates',
+    title: 'Email Templates',
+    desc: 'Centralize standardized sales outreach copy, proposal emails, follow-up messages, and dynamic merge tags.',
+    icon: LuMail,
+    iconBg: '#FFF1F2',
+    iconColor: '#BE123C'
+  },
+  {
+    id: 'industries',
+    title: 'Industry Sectors',
+    desc: 'Standardize client industry classifications, domain focus areas, and sector codes.',
+    icon: LuFactory,
+    iconBg: '#F0FDF4',
+    iconColor: '#15803D'
+  },
+  {
+    id: 'products',
+    title: 'Products & Services',
+    desc: 'Define and manage the catalog of software suites, enterprise solutions, and client services.',
+    icon: LuPackage,
     iconBg: '#F1F5F9',
     iconColor: '#334155'
   },
   {
-    id: 'aiRules',
-    title: 'Lead Scoring & Intent Rules',
-    desc: 'Adjust the algorithmic weightings, demographic criteria, and intent signals the AI uses to score inbound leads.',
-    icon: LuSparkles,
-    iconBg: '#FDF4FF',
-    iconColor: '#A21CAF'
+    id: 'sources',
+    title: 'Lead Sources',
+    desc: 'Configure lead acquisition channels and source attribution names.',
+    icon: LuShare2,
+    iconBg: '#E0F2FE',
+    iconColor: '#0284C7'
   }
 ];
 
@@ -151,54 +334,44 @@ export default function MasterDataView({
 }) {
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [localSearch, setLocalSearch] = useState('');
+  const [checklistStatusFilter, setChecklistStatusFilter] = useState('All');
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-  const [hubAddCategory, setHubAddCategory] = useState('products');
+  const [hubAddCategory, setHubAddCategory] = useState('contentTypes');
   const [editingTemplate, setEditingTemplate] = useState(null);
   const [editingRecord, setEditingRecord] = useState(null);
   const [editRecordFormData, setEditRecordFormData] = useState({});
 
   const initialSectionFormData = {
-    products: {
-      name: '',
-      sku: '',
-      category: 'Software',
-      price: '',
-      billing: 'Annual Subscription'
+    contentTypes: {
+      name: ''
     },
-    sources: {
+    followupTypes: {
+      name: ''
+    },
+    followupStatuses: {
+      description: ''
+    },
+    leadStatuses: {
+      name: ''
+    },
+    objections: {
+      name: ''
+    },
+    agentChecklist: {
+      leadStatus: 'New',
+      pointsToTalk: '',
       name: '',
-      type: 'Inbound Digital',
-      weight: 'High (25.0%)',
-      costPerLead: ''
+      description: ''
     },
     industries: {
       name: '',
-      code: '',
-      standardMargin: ''
+      code: ''
     },
-    stages: {
-      name: '',
-      order: '',
-      probability: '',
-      slaDays: ''
+    products: {
+      name: ''
     },
-    objections: {
-      name: '',
-      category: 'Pricing',
-      severity: 'High',
-      rebuttal: ''
-    },
-    cadences: {
-      name: '',
-      timing: '',
-      channel: 'Direct Call + WhatsApp Intro',
-      mandatoryAction: ''
-    },
-    aiRules: {
-      name: '',
-      factor: '',
-      weight: '+20 Points',
-      autoTrigger: ''
+    sources: {
+      name: ''
     }
   };
 
@@ -221,20 +394,41 @@ export default function MasterDataView({
     }));
   };
 
-  // Form state for adding/editing email templates
+  // Form state for adding/editing email templates (Category removed)
   const [templateFormData, setTemplateFormData] = useState({
     name: '',
-    category: 'Sales Outreach',
     subject: '',
     body: ''
   });
 
-  // Master Data state loaded from localStorage
+  const MASTER_STORAGE_KEY = STORAGE_KEYS?.MASTER_DATA || 'techgy_master_data_v13';
+
+  // Master Data state loaded from localStorage with full schema merging (v13 = agentChecklist with leadStatus and pointsToTalk)
   const [masterData, setMasterData] = useState(() => {
     if (typeof window !== 'undefined') {
       try {
-        const stored = localStorage.getItem('techgy_master_data_v3');
-        if (stored) return JSON.parse(stored);
+        const stored = localStorage.getItem(MASTER_STORAGE_KEY);
+        if (stored) {
+          const parsed = JSON.parse(stored);
+          return {
+            ...INITIAL_MASTER_DATA,
+            ...parsed,
+            contentTypes: parsed.contentTypes || INITIAL_MASTER_DATA.contentTypes,
+            followupTypes: parsed.followupTypes || INITIAL_MASTER_DATA.followupTypes,
+            followupStatuses: parsed.followupStatuses || INITIAL_MASTER_DATA.followupStatuses,
+            leadStatuses: parsed.leadStatuses || INITIAL_MASTER_DATA.leadStatuses,
+            agentChecklist: (parsed.agentChecklist || INITIAL_MASTER_DATA.agentChecklist).map(item => ({
+              ...item,
+              leadStatus: item.leadStatus || 'New',
+              pointsToTalk: item.pointsToTalk || item.name || item.description || ''
+            })),
+            objections: parsed.objections || INITIAL_MASTER_DATA.objections,
+            industries: parsed.industries || INITIAL_MASTER_DATA.industries,
+            emailTemplates: parsed.emailTemplates || INITIAL_MASTER_DATA.emailTemplates,
+            products: parsed.products || INITIAL_MASTER_DATA.products,
+            sources: parsed.sources || INITIAL_MASTER_DATA.sources
+          };
+        }
       } catch {}
     }
     return INITIAL_MASTER_DATA;
@@ -243,20 +437,28 @@ export default function MasterDataView({
   useEffect(() => {
     if (typeof window !== 'undefined') {
       try {
-        localStorage.setItem('techgy_master_data_v3', JSON.stringify(masterData));
+        localStorage.setItem(MASTER_STORAGE_KEY, JSON.stringify(masterData));
       } catch {}
     }
-  }, [masterData]);
+  }, [masterData, MASTER_STORAGE_KEY]);
 
   // Local fallback templates state if onUpdateEmailTemplates is not provided
   const [localTemplates, setLocalTemplates] = useState(() => {
     if (typeof window !== 'undefined') {
       try {
         const stored = localStorage.getItem('techgy_email_templates');
-        if (stored) return JSON.parse(stored);
+        if (stored) {
+          const parsed = JSON.parse(stored);
+          return parsed.map(t => ({
+            id: t.id,
+            name: t.name,
+            subject: t.subject,
+            body: t.body
+          }));
+        }
       } catch {}
     }
-    return INITIAL_EMAIL_TEMPLATES;
+    return INITIAL_MASTER_DATA.emailTemplates;
   });
 
   const activeEmailTemplates = emailTemplates && emailTemplates.length > 0 ? emailTemplates : localTemplates;
@@ -266,6 +468,10 @@ export default function MasterDataView({
       onUpdateEmailTemplates(newTemplates);
     }
     setLocalTemplates(newTemplates);
+    setMasterData(prev => ({
+      ...prev,
+      emailTemplates: newTemplates
+    }));
     if (typeof window !== 'undefined') {
       try {
         localStorage.setItem('techgy_email_templates', JSON.stringify(newTemplates));
@@ -281,45 +487,75 @@ export default function MasterDataView({
     : (selectedCategory ? (masterData[selectedCategory] || []) : []);
 
   const filteredList = currentList.filter(item => {
-    if (selectedCategory === 'emailTemplates') {
-      return !effectiveSearch ||
-        (item.name && item.name.toLowerCase().includes(effectiveSearch)) ||
-        (item.subject && item.subject.toLowerCase().includes(effectiveSearch)) ||
-        (item.category && item.category.toLowerCase().includes(effectiveSearch)) ||
-        (item.body && item.body.toLowerCase().includes(effectiveSearch));
+    if (selectedCategory === 'agentChecklist') {
+      if (checklistStatusFilter !== 'All' && item.leadStatus !== checklistStatusFilter) {
+        return false;
+      }
     }
 
-    return !effectiveSearch ||
+    if (!effectiveSearch) return true;
+
+    if (selectedCategory === 'emailTemplates') {
+      return (
+        (item.id && item.id.toLowerCase().includes(effectiveSearch)) ||
+        (item.name && item.name.toLowerCase().includes(effectiveSearch)) ||
+        (item.subject && item.subject.toLowerCase().includes(effectiveSearch)) ||
+        (item.body && item.body.toLowerCase().includes(effectiveSearch))
+      );
+    }
+
+    return (
+      (item.id && item.id.toLowerCase().includes(effectiveSearch)) ||
       (item.name && item.name.toLowerCase().includes(effectiveSearch)) ||
-      (item.sku && item.sku.toLowerCase().includes(effectiveSearch)) ||
-      (item.code && item.code.toLowerCase().includes(effectiveSearch)) ||
+      (item.leadStatus && item.leadStatus.toLowerCase().includes(effectiveSearch)) ||
+      (item.pointsToTalk && item.pointsToTalk.toLowerCase().includes(effectiveSearch)) ||
       (item.category && item.category.toLowerCase().includes(effectiveSearch)) ||
-      (item.regionalLead && item.regionalLead.toLowerCase().includes(effectiveSearch)) ||
-      (item.hub && item.hub.toLowerCase().includes(effectiveSearch)) ||
-      (item.factor && item.factor.toLowerCase().includes(effectiveSearch)) ||
-      (item.timing && item.timing.toLowerCase().includes(effectiveSearch));
+      (item.format && item.format.toLowerCase().includes(effectiveSearch)) ||
+      (item.channel && item.channel.toLowerCase().includes(effectiveSearch)) ||
+      (item.description && item.description.toLowerCase().includes(effectiveSearch)) ||
+      (item.timeframe && item.timeframe.toLowerCase().includes(effectiveSearch)) ||
+      (item.priority && item.priority.toLowerCase().includes(effectiveSearch)) ||
+      (item.phase && item.phase.toLowerCase().includes(effectiveSearch)) ||
+      (item.guidelines && item.guidelines.toLowerCase().includes(effectiveSearch)) ||
+      (item.rebuttal && item.rebuttal.toLowerCase().includes(effectiveSearch)) ||
+      (item.severity && item.severity.toLowerCase().includes(effectiveSearch)) ||
+      (item.code && item.code.toLowerCase().includes(effectiveSearch)) ||
+      (item.sku && item.sku.toLowerCase().includes(effectiveSearch))
+    );
   });
 
   const handleOpenEditRecord = (item) => {
     setEditingRecord(item);
-    setEditRecordFormData({ ...item });
+    setEditRecordFormData({
+      ...item,
+      leadStatus: item.leadStatus || (masterData.leadStatuses[0]?.name || 'New'),
+      pointsToTalk: item.pointsToTalk || item.name || item.description || ''
+    });
   };
 
   const handleSaveEditRecord = (e) => {
     e.preventDefault();
-    if (!editingRecord || !editRecordFormData.name?.trim()) return;
+    const primaryField = editRecordFormData.pointsToTalk || editRecordFormData.name || editRecordFormData.description || editRecordFormData.code;
+    if (!editingRecord || !primaryField?.trim()) return;
 
     setMasterData(prev => ({
       ...prev,
       [selectedCategory]: (prev[selectedCategory] || []).map(item =>
-        item.id === editingRecord.id ? { ...item, ...editRecordFormData } : item
+        item.id === editingRecord.id ? {
+          ...item,
+          ...editRecordFormData,
+          pointsToTalk: editRecordFormData.pointsToTalk || editRecordFormData.name || editRecordFormData.description,
+          name: editRecordFormData.pointsToTalk || editRecordFormData.name || editRecordFormData.description,
+          description: editRecordFormData.pointsToTalk || editRecordFormData.description || editRecordFormData.name,
+          leadStatus: editRecordFormData.leadStatus || item.leadStatus || 'New'
+        } : item
       )
     }));
 
     if (onTriggerToast) {
       onTriggerToast({
         title: 'Record Updated',
-        description: `Successfully updated "${editRecordFormData.name}".`,
+        description: `Successfully updated "${primaryField.slice(0, 40)}${primaryField.length > 40 ? '...' : ''}".`,
         type: 'success'
       });
     }
@@ -331,10 +567,8 @@ export default function MasterDataView({
     setEditingTemplate(tpl);
     setTemplateFormData({
       name: tpl.name || '',
-      category: tpl.category || 'Sales Outreach',
       subject: tpl.subject || '',
-      body: tpl.body || '',
-      status: tpl.status || 'Active'
+      body: tpl.body || ''
     });
   };
 
@@ -347,7 +581,6 @@ export default function MasterDataView({
         return {
           ...tpl,
           name: templateFormData.name.trim(),
-          category: templateFormData.category,
           subject: templateFormData.subject.trim(),
           body: templateFormData.body
         };
@@ -360,8 +593,8 @@ export default function MasterDataView({
 
     if (onTriggerToast) {
       onTriggerToast({
-        title: 'Email Template Saved',
-        description: `Template "${templateFormData.name}" updated successfully.`,
+        title: 'Email Template Updated',
+        description: `Successfully updated "${templateFormData.name.trim()}".`,
         type: 'success'
       });
     }
@@ -369,7 +602,7 @@ export default function MasterDataView({
 
   const handleCreateRecord = (e) => {
     e.preventDefault();
-    const targetCategory = selectedCategory || hubAddCategory || 'products';
+    const targetCategory = selectedCategory || hubAddCategory || 'contentTypes';
     const targetMeta = MASTER_CATEGORIES.find(c => c.id === targetCategory);
 
     if (targetCategory === 'emailTemplates') {
@@ -378,7 +611,6 @@ export default function MasterDataView({
       const newTpl = {
         id: `TPL-${String(activeEmailTemplates.length + 1).padStart(3, '0')}`,
         name: templateFormData.name.trim(),
-        category: templateFormData.category || 'Sales Outreach',
         subject: templateFormData.subject.trim(),
         body: templateFormData.body || ''
       };
@@ -394,63 +626,49 @@ export default function MasterDataView({
         });
       }
 
-      setTemplateFormData({ name: '', category: 'Sales Outreach', subject: '', body: '' });
+      setTemplateFormData({ name: '', subject: '', body: '' });
       setIsAddModalOpen(false);
       return;
     }
 
     const currentForm = sectionFormData[targetCategory] || {};
-    if (!currentForm.name || !currentForm.name.trim()) return;
+    const primaryVal = currentForm.pointsToTalk || currentForm.name || currentForm.description;
+    if (!primaryVal || !primaryVal.trim()) return;
 
-    let newRecord = { ...currentForm, name: currentForm.name.trim() };
+    let newRecord = { ...currentForm };
+    if (newRecord.name) newRecord.name = newRecord.name.trim();
+    if (newRecord.description) newRecord.description = newRecord.description.trim();
+    if (newRecord.pointsToTalk) newRecord.pointsToTalk = newRecord.pointsToTalk.trim();
+    if (targetCategory === 'followupStatuses') {
+      newRecord.name = newRecord.description;
+    }
+    const nextNum = (masterData[targetCategory]?.length || 0) + 1;
 
-    if (targetCategory === 'products') {
-      const nextNum = (masterData.products?.length || 0) + 1;
-      newRecord.id = `PRD-${String(nextNum).padStart(3, '0')}`;
-      if (!newRecord.sku?.trim()) {
-        newRecord.sku = `TGY-${newRecord.name.slice(0, 3).toUpperCase()}-${String(nextNum).padStart(2, '0')}`;
-      }
-      if (!newRecord.price?.trim()) newRecord.price = '₹10,00,000 / yr';
-      if (!newRecord.billing) newRecord.billing = 'Annual Subscription';
-      if (!newRecord.category) newRecord.category = 'Software';
-    } else if (targetCategory === 'sources') {
-      const nextNum = (masterData.sources?.length || 0) + 1;
-      newRecord.id = `SRC-${String(nextNum).padStart(3, '0')}`;
-      if (!newRecord.type) newRecord.type = 'Inbound Digital';
-      if (!newRecord.weight) newRecord.weight = 'Medium (15.0%)';
-      if (!newRecord.costPerLead?.trim()) newRecord.costPerLead = '₹1,500';
+    if (targetCategory === 'contentTypes') {
+      newRecord.id = `CNT-${String(nextNum).padStart(3, '0')}`;
+    } else if (targetCategory === 'followupTypes') {
+      newRecord.id = `FUT-${String(nextNum).padStart(3, '0')}`;
+    } else if (targetCategory === 'followupStatuses') {
+      newRecord.id = `FUS-${String(nextNum).padStart(3, '0')}`;
+    } else if (targetCategory === 'leadStatuses') {
+      newRecord.id = `LST-${String(nextNum).padStart(3, '0')}`;
+    } else if (targetCategory === 'objections') {
+      newRecord.id = `OBJ-${String(nextNum).padStart(3, '0')}`;
+    } else if (targetCategory === 'agentChecklist') {
+      newRecord.id = `CHK-${String(nextNum).padStart(3, '0')}`;
+      newRecord.leadStatus = newRecord.leadStatus || (checklistStatusFilter !== 'All' ? checklistStatusFilter : (masterData.leadStatuses[0]?.name || 'New'));
+      newRecord.pointsToTalk = newRecord.pointsToTalk || newRecord.name || newRecord.description || '';
+      newRecord.name = newRecord.pointsToTalk;
+      newRecord.description = newRecord.pointsToTalk;
     } else if (targetCategory === 'industries') {
-      const nextNum = (masterData.industries?.length || 0) + 1;
       newRecord.id = `IND-${String(nextNum).padStart(3, '0')}`;
       if (!newRecord.code?.trim()) {
         newRecord.code = newRecord.name.replace(/[^a-zA-Z]/g, '').slice(0, 4).toUpperCase();
       }
-      if (!newRecord.standardMargin?.trim()) newRecord.standardMargin = '35%';
-    } else if (targetCategory === 'stages') {
-      const nextNum = (masterData.stages?.length || 0) + 1;
-      newRecord.id = `STG-${String(nextNum).padStart(3, '0')}`;
-      newRecord.order = Number(newRecord.order) || nextNum;
-      if (!newRecord.probability?.trim()) newRecord.probability = '50%';
-      if (!newRecord.probability.includes('%')) newRecord.probability = `${newRecord.probability}%`;
-      newRecord.slaDays = Number(newRecord.slaDays) || 7;
-    } else if (targetCategory === 'objections') {
-      const nextNum = (masterData.objections?.length || 0) + 1;
-      newRecord.id = `OBJ-${String(nextNum).padStart(3, '0')}`;
-      if (!newRecord.category) newRecord.category = 'Pricing';
-      if (!newRecord.severity) newRecord.severity = 'High';
-      if (!newRecord.rebuttal?.trim()) newRecord.rebuttal = 'Standard objection rebuttal.';
-    } else if (targetCategory === 'cadences') {
-      const nextNum = (masterData.cadences?.length || 0) + 1;
-      newRecord.id = `CAD-${String(nextNum).padStart(3, '0')}`;
-      if (!newRecord.timing?.trim()) newRecord.timing = 'Within 24 Hours';
-      if (!newRecord.channel) newRecord.channel = 'Direct Call + WhatsApp Intro';
-      if (!newRecord.mandatoryAction?.trim()) newRecord.mandatoryAction = 'Follow up with key decision maker.';
-    } else if (targetCategory === 'aiRules') {
-      const nextNum = (masterData.aiRules?.length || 0) + 1;
-      newRecord.id = `RUL-${String(nextNum).padStart(3, '0')}`;
-      if (!newRecord.factor?.trim()) newRecord.factor = 'Key Intent Indicator';
-      if (!newRecord.weight?.trim()) newRecord.weight = '+20 Points';
-      if (!newRecord.autoTrigger?.trim()) newRecord.autoTrigger = 'Flag for account executive review';
+    } else if (targetCategory === 'products') {
+      newRecord.id = `PRD-${String(nextNum).padStart(3, '0')}`;
+    } else if (targetCategory === 'sources') {
+      newRecord.id = `SRC-${String(nextNum).padStart(3, '0')}`;
     }
 
     setMasterData(prev => ({
@@ -460,8 +678,8 @@ export default function MasterDataView({
 
     if (onTriggerToast) {
       onTriggerToast({
-        title: `${targetMeta?.title.slice(0, -1) || 'Record'} Added`,
-        description: `Successfully added "${newRecord.name}" to ${targetMeta?.title || 'Master Data'}`,
+        title: 'Record Added',
+        description: `Successfully added "${primaryVal.slice(0, 40)}${primaryVal.length > 40 ? '...' : ''}" to ${targetMeta?.title || targetCategory}`,
         type: 'success'
       });
     }
@@ -473,7 +691,7 @@ export default function MasterDataView({
   const selectedCategoryMeta = MASTER_CATEGORIES.find(c => c.id === selectedCategory);
 
   // ---------------------------------------------------------------------------
-  // 1. OVERVIEW SCREEN: 3-COLUMN CARD GRID (Inspired by Screenshot)
+  // 1. OVERVIEW SCREEN: 3-COLUMN CARD GRID
   // ---------------------------------------------------------------------------
   if (!selectedCategory) {
     return (
@@ -496,7 +714,6 @@ export default function MasterDataView({
             </nav>
           </div>
         )}
-
 
         {/* 3-Column Card Grid */}
         <div className="master-data-hub-grid">
@@ -564,7 +781,7 @@ export default function MasterDataView({
   }
 
   // ---------------------------------------------------------------------------
-  // 2. CATEGORY DETAIL PAGE (With Breadcrumbs, Table, Search & Add Record)
+  // 2. CATEGORY DETAIL PAGE (Table, Search, Add & Edit Record)
   // ---------------------------------------------------------------------------
   const DetailIcon = selectedCategoryMeta?.icon || LuPackage;
 
@@ -648,7 +865,7 @@ export default function MasterDataView({
               className="btn-primary"
               onClick={() => {
                 if (selectedCategory === 'emailTemplates') {
-                  setTemplateFormData({ name: '', category: 'Sales Outreach', subject: '', body: '' });
+                  setTemplateFormData({ name: '', subject: '', body: '' });
                 }
                 setIsAddModalOpen(true);
               }}
@@ -668,115 +885,207 @@ export default function MasterDataView({
           </div>
         </div>
 
-        {/* Search Bar */}
+        {/* Search Bar & Filter Toolbar */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.75rem', marginBottom: '1.25rem', padding: '0.75rem 1rem', background: '#F8FAFC', borderRadius: '10px', border: '1px solid #E2E8F0' }}>
-          <div style={{ position: 'relative', width: '320px', maxWidth: '100%' }}>
-            <LuSearch size={15} style={{ position: 'absolute', left: '0.75rem', top: '50%', transform: 'translateY(-50%)', color: '#94A3B8' }} />
-            <input
-              type="text"
-              placeholder={`Search in ${selectedCategoryMeta?.title}...`}
-              value={localSearch}
-              onChange={(e) => setLocalSearch(e.target.value)}
-              style={{
-                width: '100%',
-                padding: '0.45rem 0.75rem 0.45rem 2.2rem',
-                fontSize: '0.825rem',
-                border: '1px solid #CBD5E1',
-                borderRadius: '6px',
-                background: '#FFFFFF',
-                color: '#063669',
-                outline: 'none'
-              }}
-            />
+          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap', flex: 1 }}>
+            <div style={{ position: 'relative', width: '300px', maxWidth: '100%' }}>
+              <LuSearch size={15} style={{ position: 'absolute', left: '0.85rem', top: '50%', transform: 'translateY(-50%)', color: '#94A3B8' }} />
+              <input
+                type="text"
+                placeholder={`Search in ${selectedCategoryMeta?.title}...`}
+                value={localSearch}
+                onChange={(e) => setLocalSearch(e.target.value)}
+                style={{
+                  width: '100%',
+                  height: '38px',
+                  boxSizing: 'border-box',
+                  padding: '0 0.85rem 0 2.35rem',
+                  fontSize: '0.825rem',
+                  border: '1px solid #CBD5E1',
+                  borderRadius: '7px',
+                  background: '#FFFFFF',
+                  color: '#063669',
+                  outline: 'none',
+                  display: 'flex',
+                  alignItems: 'center'
+                }}
+              />
+            </div>
+
+            {/* Agent Checklist: Lead Status drop-down */}
+            {selectedCategory === 'agentChecklist' && (
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.55rem' }}>
+                <label htmlFor="agent-checklist-status-select" style={{ fontSize: '0.825rem', fontWeight: 700, color: '#063669', whiteSpace: 'nowrap' }}>
+                  Lead status:
+                </label>
+                <select
+                  id="agent-checklist-status-select"
+                  value={checklistStatusFilter}
+                  onChange={(e) => setChecklistStatusFilter(e.target.value)}
+                  style={{
+                    height: '38px',
+                    boxSizing: 'border-box',
+                    padding: '0 2.25rem 0 0.85rem',
+                    fontSize: '0.825rem',
+                    fontWeight: 600,
+                    border: '1px solid #CBD5E1',
+                    borderRadius: '7px',
+                    background: '#FFFFFF',
+                    color: '#063669',
+                    cursor: 'pointer',
+                    outline: 'none',
+                    minWidth: '200px',
+                    appearance: 'none',
+                    WebkitAppearance: 'none',
+                    MozAppearance: 'none',
+                    backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23063669' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E")`,
+                    backgroundRepeat: 'no-repeat',
+                    backgroundPosition: 'right 0.85rem center',
+                    display: 'inline-flex',
+                    alignItems: 'center'
+                  }}
+                >
+                  <option value="All">All Lead Statuses ({masterData.agentChecklist?.length || 0})</option>
+                  {masterData.leadStatuses.map(ls => {
+                    const count = (masterData.agentChecklist || []).filter(item => item.leadStatus === ls.name).length;
+                    return (
+                      <option key={ls.id} value={ls.name}>
+                        {ls.name} ({count})
+                      </option>
+                    );
+                  })}
+                </select>
+              </div>
+            )}
           </div>
         </div>
+
+        {/* Selected Status Indicator Banner for Agent Checklist */}
+        {selectedCategory === 'agentChecklist' && checklistStatusFilter !== 'All' && (
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            padding: '0.65rem 1rem',
+            background: '#F0F7FF',
+            border: '1px solid #BAE6FD',
+            borderRadius: '8px',
+            marginBottom: '1rem'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <span style={{ fontSize: '0.825rem', fontWeight: 700, color: '#063669' }}>
+                Points to talk for status:
+              </span>
+              <span style={{
+                fontSize: '0.75rem',
+                fontWeight: 700,
+                padding: '0.2rem 0.6rem',
+                borderRadius: '9999px',
+                background: '#063669',
+                color: '#FFFFFF'
+              }}>
+                {checklistStatusFilter}
+              </span>
+            </div>
+            <span style={{ fontSize: '0.785rem', color: '#557396', fontWeight: 600 }}>
+              {filteredList.length} {filteredList.length === 1 ? 'talking point' : 'talking points'}
+            </span>
+          </div>
+        )}
 
         {/* Data Table */}
         <div style={{ overflowX: 'auto' }}>
           <table className="crm-table" style={{ width: '100%', borderCollapse: 'collapse' }}>
             <thead>
               <tr style={{ background: '#F8FAFC', borderBottom: '1px solid #E2E8F0', color: '#557396', fontSize: '0.785rem', textAlign: 'left' }}>
-                {selectedCategory === 'products' && (
+                {/* 1. Content Types */}
+                {selectedCategory === 'contentTypes' && (
                   <>
-                    <th style={{ padding: '0.75rem 1rem' }}>SKU</th>
-                    <th style={{ padding: '0.75rem 1rem' }}>Product / Service Name</th>
-                    <th style={{ padding: '0.75rem 1rem' }}>Category</th>
-                    <th style={{ padding: '0.75rem 1rem' }}>Standard Pricing</th>
-                    <th style={{ padding: '0.75rem 1rem' }}>Billing Model</th>
+                    <th style={{ padding: '0.75rem 1rem' }}>ID</th>
+                    <th style={{ padding: '0.75rem 1rem' }}>Content Type Name</th>
                     <th style={{ padding: '0.75rem 1rem', textAlign: 'right' }}>Actions</th>
                   </>
                 )}
 
-                {selectedCategory === 'sources' && (
+                {/* 2. Lead Follow-up Types */}
+                {selectedCategory === 'followupTypes' && (
                   <>
-                    <th style={{ padding: '0.75rem 1rem' }}>Source ID</th>
-                    <th style={{ padding: '0.75rem 1rem' }}>Channel Name</th>
-                    <th style={{ padding: '0.75rem 1rem' }}>Channel Type</th>
-                    <th style={{ padding: '0.75rem 1rem' }}>Attribution Weight</th>
-                    <th style={{ padding: '0.75rem 1rem' }}>Cost per Lead</th>
+                    <th style={{ padding: '0.75rem 1rem' }}>ID</th>
+                    <th style={{ padding: '0.75rem 1rem' }}>Follow-up Type</th>
                     <th style={{ padding: '0.75rem 1rem', textAlign: 'right' }}>Actions</th>
                   </>
                 )}
 
-                {selectedCategory === 'industries' && (
+                {/* 3. Lead Follow-up Status */}
+                {selectedCategory === 'followupStatuses' && (
                   <>
-                    <th style={{ padding: '0.75rem 1rem' }}>Code</th>
-                    <th style={{ padding: '0.75rem 1rem' }}>Industry Sector</th>
-                    <th style={{ padding: '0.75rem 1rem' }}>Standard Margin</th>
+                    <th style={{ padding: '0.75rem 1rem' }}>ID</th>
+                    <th style={{ padding: '0.75rem 1rem' }}>Description</th>
                     <th style={{ padding: '0.75rem 1rem', textAlign: 'right' }}>Actions</th>
                   </>
                 )}
 
-                {selectedCategory === 'stages' && (
+                {/* 4. Lead Status (Cleaned of Win Probability & Description - First column strictly ID) */}
+                {selectedCategory === 'leadStatuses' && (
                   <>
-                    <th style={{ padding: '0.75rem 1rem' }}>Order</th>
-                    <th style={{ padding: '0.75rem 1rem' }}>Pipeline Stage Name</th>
-                    <th style={{ padding: '0.75rem 1rem' }}>Win Probability</th>
-                    <th style={{ padding: '0.75rem 1rem' }}>SLA Target</th>
+                    <th style={{ padding: '0.75rem 1rem' }}>ID</th>
+                    <th style={{ padding: '0.75rem 1rem' }}>Lead Status Name</th>
                     <th style={{ padding: '0.75rem 1rem', textAlign: 'right' }}>Actions</th>
                   </>
                 )}
 
+                {/* 5. Sales Objections */}
+                {selectedCategory === 'objections' && (
+                  <>
+                    <th style={{ padding: '0.75rem 1rem' }}>ID</th>
+                    <th style={{ padding: '0.75rem 1rem' }}>Objection Concern</th>
+                    <th style={{ padding: '0.75rem 1rem', textAlign: 'right' }}>Actions</th>
+                  </>
+                )}
 
+                {/* 6. Agent Checklist */}
+                {selectedCategory === 'agentChecklist' && (
+                  <>
+                    <th style={{ padding: '0.75rem 1rem' }}>ID</th>
+                    <th style={{ padding: '0.75rem 1rem' }}>Lead Status</th>
+                    <th style={{ padding: '0.75rem 1rem' }}>Points to Talk</th>
+                    <th style={{ padding: '0.75rem 1rem', textAlign: 'right' }}>Actions</th>
+                  </>
+                )}
+
+                {/* 7. Email Templates (Category Removed - First column strictly ID) */}
                 {selectedCategory === 'emailTemplates' && (
                   <>
                     <th style={{ padding: '0.75rem 1rem' }}>ID</th>
                     <th style={{ padding: '0.75rem 1rem' }}>Template Name</th>
-                    <th style={{ padding: '0.75rem 1rem' }}>Category</th>
                     <th style={{ padding: '0.75rem 1rem' }}>Subject Line</th>
                     <th style={{ padding: '0.75rem 1rem', textAlign: 'right' }}>Actions</th>
                   </>
                 )}
 
-                {selectedCategory === 'objections' && (
+                {/* 8. Industry Sectors (Standard Margin & Domain Focus Area Removed - First column strictly ID) */}
+                {selectedCategory === 'industries' && (
                   <>
                     <th style={{ padding: '0.75rem 1rem' }}>ID</th>
-                    <th style={{ padding: '0.75rem 1rem' }}>Objection Title</th>
-                    <th style={{ padding: '0.75rem 1rem' }}>Category</th>
-                    <th style={{ padding: '0.75rem 1rem' }}>Recommended Rebuttal / Script</th>
-                    <th style={{ padding: '0.75rem 1rem' }}>Severity</th>
+                    <th style={{ padding: '0.75rem 1rem' }}>Industry Sector</th>
                     <th style={{ padding: '0.75rem 1rem', textAlign: 'right' }}>Actions</th>
                   </>
                 )}
 
-                {selectedCategory === 'cadences' && (
+                {/* Products (Only ID and Product / Service Name - First column strictly ID) */}
+                {selectedCategory === 'products' && (
                   <>
                     <th style={{ padding: '0.75rem 1rem' }}>ID</th>
-                    <th style={{ padding: '0.75rem 1rem' }}>Cadence Name</th>
-                    <th style={{ padding: '0.75rem 1rem' }}>Timing Window</th>
-                    <th style={{ padding: '0.75rem 1rem' }}>Channel Mode</th>
-                    <th style={{ padding: '0.75rem 1rem' }}>Mandatory Action</th>
+                    <th style={{ padding: '0.75rem 1rem' }}>Product / Service Name</th>
                     <th style={{ padding: '0.75rem 1rem', textAlign: 'right' }}>Actions</th>
                   </>
                 )}
 
-                {selectedCategory === 'aiRules' && (
+                {/* Sources (Channel Type, Attribution Weight, Cost per Lead Removed - First column strictly ID) */}
+                {selectedCategory === 'sources' && (
                   <>
                     <th style={{ padding: '0.75rem 1rem' }}>ID</th>
-                    <th style={{ padding: '0.75rem 1rem' }}>Scoring Rule</th>
-                    <th style={{ padding: '0.75rem 1rem' }}>Intent / Profile Factor</th>
-                    <th style={{ padding: '0.75rem 1rem' }}>Score Weight</th>
-                    <th style={{ padding: '0.75rem 1rem' }}>Automated Trigger</th>
+                    <th style={{ padding: '0.75rem 1rem' }}>Channel Name</th>
                     <th style={{ padding: '0.75rem 1rem', textAlign: 'right' }}>Actions</th>
                   </>
                 )}
@@ -786,94 +1095,124 @@ export default function MasterDataView({
             <tbody>
               {filteredList.map((item) => (
                 <tr key={item.id} style={{ borderBottom: '1px solid #F1F5F9', fontSize: '0.825rem' }}>
-                  {selectedCategory === 'products' && (
-                    <>
-                      <td style={{ padding: '0.75rem 1rem', fontFamily: 'monospace', fontWeight: 600, color: '#557396' }}>{item.sku}</td>
-                      <td style={{ padding: '0.75rem 1rem', fontWeight: 700, color: '#063669' }}>{item.name}</td>
-                      <td style={{ padding: '0.75rem 1rem' }}><span className="status-chip new" style={{ fontSize: '0.72rem' }}>{item.category}</span></td>
-                      <td style={{ padding: '0.75rem 1rem', fontWeight: 700, color: '#063669' }}>{item.price}</td>
-                      <td style={{ padding: '0.75rem 1rem', color: '#557396' }}>{item.billing}</td>
-                    </>
-                  )}
-
-                  {selectedCategory === 'sources' && (
+                  {/* 1. Content Types */}
+                  {selectedCategory === 'contentTypes' && (
                     <>
                       <td style={{ padding: '0.75rem 1rem', fontFamily: 'monospace', fontWeight: 600, color: '#557396' }}>{item.id}</td>
                       <td style={{ padding: '0.75rem 1rem', fontWeight: 700, color: '#063669' }}>{item.name}</td>
-                      <td style={{ padding: '0.75rem 1rem', color: '#557396' }}>{item.type}</td>
-                      <td style={{ padding: '0.75rem 1rem', fontWeight: 600, color: '#063669' }}>{item.weight}</td>
-                      <td style={{ padding: '0.75rem 1rem', fontWeight: 700, color: '#059669' }}>{item.costPerLead}</td>
                     </>
                   )}
 
-                  {selectedCategory === 'industries' && (
-                    <>
-                      <td style={{ padding: '0.75rem 1rem', fontFamily: 'monospace', fontWeight: 600, color: '#557396' }}>{item.code}</td>
-                      <td style={{ padding: '0.75rem 1rem', fontWeight: 700, color: '#063669' }}>{item.name}</td>
-                      <td style={{ padding: '0.75rem 1rem', fontWeight: 700, color: '#063669' }}>{item.standardMargin}</td>
-                    </>
-                  )}
-
-                  {selectedCategory === 'stages' && (
-                    <>
-                      <td style={{ padding: '0.75rem 1rem', fontWeight: 700, color: '#557396' }}>#{item.order}</td>
-                      <td style={{ padding: '0.75rem 1rem', fontWeight: 700, color: '#063669' }}>{item.name}</td>
-                      <td style={{ padding: '0.75rem 1rem', fontWeight: 700, color: '#059669' }}>{item.probability}</td>
-                      <td style={{ padding: '0.75rem 1rem', color: '#557396' }}>{item.slaDays ? `${item.slaDays} Days` : 'N/A'}</td>
-                    </>
-                  )}
-
-
-                  {selectedCategory === 'emailTemplates' && (
+                  {/* 2. Lead Follow-up Types */}
+                  {selectedCategory === 'followupTypes' && (
                     <>
                       <td style={{ padding: '0.75rem 1rem', fontFamily: 'monospace', fontWeight: 600, color: '#557396' }}>{item.id}</td>
                       <td style={{ padding: '0.75rem 1rem', fontWeight: 700, color: '#063669' }}>{item.name}</td>
-                      <td style={{ padding: '0.75rem 1rem' }}><span className="status-chip new" style={{ fontSize: '0.72rem' }}>{item.category}</span></td>
-                      <td style={{ padding: '0.75rem 1rem', color: '#557396', maxWidth: '240px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.subject}</td>
                     </>
                   )}
 
+                  {/* 3. Lead Follow-up Status */}
+                  {selectedCategory === 'followupStatuses' && (
+                    <>
+                      <td style={{ padding: '0.75rem 1rem', fontFamily: 'monospace', fontWeight: 600, color: '#557396' }}>{item.id}</td>
+                      <td style={{ padding: '0.75rem 1rem', color: '#1E293B', fontWeight: 500 }}>{item.description || item.name}</td>
+                    </>
+                  )}
+
+                  {/* 4. Lead Status (Cleaned of Win Probability & Description - First column strictly ID) */}
+                  {selectedCategory === 'leadStatuses' && (
+                    <>
+                      <td style={{ padding: '0.75rem 1rem', fontFamily: 'monospace', fontWeight: 600, color: '#557396' }}>{item.id}</td>
+                      <td style={{ padding: '0.75rem 1rem', fontWeight: 700, color: '#063669' }}>{item.name}</td>
+                    </>
+                  )}
+
+                  {/* 5. Sales Objections */}
                   {selectedCategory === 'objections' && (
                     <>
                       <td style={{ padding: '0.75rem 1rem', fontFamily: 'monospace', fontWeight: 600, color: '#557396' }}>{item.id}</td>
                       <td style={{ padding: '0.75rem 1rem', fontWeight: 700, color: '#063669' }}>{item.name}</td>
-                      <td style={{ padding: '0.75rem 1rem' }}><span className="status-chip contacted" style={{ fontSize: '0.72rem' }}>{item.category}</span></td>
-                      <td style={{ padding: '0.75rem 1rem', color: '#334155', maxWidth: '300px' }}>{item.rebuttal}</td>
-                      <td style={{ padding: '0.75rem 1rem' }}><span className="status-chip lost" style={{ fontSize: '0.72rem' }}>{item.severity}</span></td>
                     </>
                   )}
 
-                  {selectedCategory === 'cadences' && (
+                  {/* 6. Agent Checklist */}
+                  {selectedCategory === 'agentChecklist' && (
+                    <>
+                      <td style={{ padding: '0.75rem 1rem', fontFamily: 'monospace', fontWeight: 600, color: '#557396' }}>{item.id}</td>
+                      <td style={{ padding: '0.75rem 1rem' }}>
+                        <span style={{
+                          display: 'inline-block',
+                          fontSize: '0.75rem',
+                          fontWeight: 700,
+                          padding: '0.2rem 0.55rem',
+                          borderRadius: '6px',
+                          background: '#EBF3FA',
+                          color: '#063669',
+                          border: '1px solid #D5E2EE'
+                        }}>
+                          {item.leadStatus || 'New'}
+                        </span>
+                      </td>
+                      <td style={{ padding: '0.75rem 1rem', color: '#1E293B', fontWeight: 500, lineHeight: 1.5 }}>{item.pointsToTalk || item.name || item.description}</td>
+                    </>
+                  )}
+
+                  {/* 7. Email Templates (Category Removed - First column strictly ID) */}
+                  {selectedCategory === 'emailTemplates' && (
                     <>
                       <td style={{ padding: '0.75rem 1rem', fontFamily: 'monospace', fontWeight: 600, color: '#557396' }}>{item.id}</td>
                       <td style={{ padding: '0.75rem 1rem', fontWeight: 700, color: '#063669' }}>{item.name}</td>
-                      <td style={{ padding: '0.75rem 1rem', fontWeight: 600, color: '#063669' }}>{item.timing}</td>
-                      <td style={{ padding: '0.75rem 1rem', color: '#557396' }}>{item.channel}</td>
-                      <td style={{ padding: '0.75rem 1rem', color: '#334155' }}>{item.mandatoryAction}</td>
+                      <td style={{ padding: '0.75rem 1rem', color: '#557396', maxWidth: '380px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.subject}</td>
                     </>
                   )}
 
-                  {selectedCategory === 'aiRules' && (
+                  {/* 8. Industry Sectors (Standard Margin & Domain Focus Area Removed - First column strictly ID) */}
+                  {selectedCategory === 'industries' && (
                     <>
                       <td style={{ padding: '0.75rem 1rem', fontFamily: 'monospace', fontWeight: 600, color: '#557396' }}>{item.id}</td>
                       <td style={{ padding: '0.75rem 1rem', fontWeight: 700, color: '#063669' }}>{item.name}</td>
-                      <td style={{ padding: '0.75rem 1rem', color: '#557396' }}>{item.factor}</td>
-                      <td style={{ padding: '0.75rem 1rem', fontWeight: 800, color: '#059669' }}>{item.weight}</td>
-                      <td style={{ padding: '0.75rem 1rem', color: '#334155' }}>{item.autoTrigger}</td>
                     </>
                   )}
 
-                  {/* Actions Column */}
+                  {/* Products (Only ID and Product / Service Name - First column strictly ID) */}
+                  {selectedCategory === 'products' && (
+                    <>
+                      <td style={{ padding: '0.75rem 1rem', fontFamily: 'monospace', fontWeight: 600, color: '#557396' }}>{item.id}</td>
+                      <td style={{ padding: '0.75rem 1rem', fontWeight: 700, color: '#063669' }}>{item.name}</td>
+                    </>
+                  )}
+
+                  {/* Sources (Only ID and Channel Name - First column strictly ID) */}
+                  {selectedCategory === 'sources' && (
+                    <>
+                      <td style={{ padding: '0.75rem 1rem', fontFamily: 'monospace', fontWeight: 600, color: '#557396' }}>{item.id}</td>
+                      <td style={{ padding: '0.75rem 1rem', fontWeight: 700, color: '#063669' }}>{item.name}</td>
+                    </>
+                  )}
+
+                  {/* Actions Column (Edit ONLY - NO Delete option) */}
                   <td style={{ padding: '0.75rem 1rem', textAlign: 'right' }}>
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '0.4rem' }}>
                       {selectedCategory === 'emailTemplates' ? (
                         <button
                           type="button"
                           onClick={() => handleOpenEditTemplate(item)}
-                          style={{ background: 'none', border: 'none', color: '#557396', cursor: 'pointer', padding: '4px' }}
+                          style={{
+                            background: '#F1F5F9',
+                            border: '1px solid #CBD5E1',
+                            borderRadius: '6px',
+                            padding: '0.25rem 0.65rem',
+                            fontSize: '0.75rem',
+                            fontWeight: 600,
+                            color: '#063669',
+                            cursor: 'pointer',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '0.35rem'
+                          }}
                           title="Edit Template"
                         >
-                          <LuPencil size={15} />
+                          <LuPencil size={13} /> Edit
                         </button>
                       ) : (
                         <button
@@ -904,8 +1243,10 @@ export default function MasterDataView({
 
               {filteredList.length === 0 && (
                 <tr>
-                  <td colSpan={6} style={{ textAlign: 'center', padding: '2.5rem', color: '#94A3B8', fontSize: '0.875rem' }}>
-                    No records found matching "{effectiveSearch}". Click "+ Add Record" to create one.
+                  <td colSpan={7} style={{ textAlign: 'center', padding: '2.5rem', color: '#94A3B8', fontSize: '0.875rem' }}>
+                    {selectedCategory === 'agentChecklist' && checklistStatusFilter !== 'All'
+                      ? `No points to talk found for status "${checklistStatusFilter}". Click "+ Add Record" to add points for this status.`
+                      : `No records found matching "${effectiveSearch}". Click "+ Add Record" to create one.`}
                   </td>
                 </tr>
               )}
@@ -914,15 +1255,17 @@ export default function MasterDataView({
         </div>
       </div>
 
-      {/* Section-Specific Add Record Modal */}
+      {/* ---------------------------------------------------------------------- */}
+      {/* 3. ADD RECORD MODAL                                                    */}
+      {/* ---------------------------------------------------------------------- */}
       {isAddModalOpen && selectedCategory !== 'emailTemplates' && (() => {
-        const activeCat = selectedCategory || hubAddCategory || 'products';
+        const activeCat = selectedCategory || hubAddCategory || 'contentTypes';
         const meta = MASTER_CATEGORIES.find(c => c.id === activeCat);
         const CatIcon = meta?.icon || LuPackage;
 
         return (
           <div className="modal-overlay" onClick={() => setIsAddModalOpen(false)}>
-            <div className="modal-card" style={{ maxWidth: '520px' }} onClick={e => e.stopPropagation()}>
+            <div className="modal-card" style={{ maxWidth: '540px' }} onClick={e => e.stopPropagation()}>
               <div className="modal-header">
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
                   <div style={{
@@ -971,139 +1314,115 @@ export default function MasterDataView({
                     </div>
                   )}
 
-                  {/* 1. Products & Services */}
-                  {activeCat === 'products' && (
-                    <>
-                      <div className="form-group">
-                        <label className="form-label">Product / Service Name *</label>
-                        <input
-                          type="text"
-                          required
-                          className="form-input"
-                          placeholder="e.g. Enterprise Cloud Suite"
-                          value={sectionFormData.products.name}
-                          onChange={(e) => updateSectionField('products', 'name', e.target.value)}
-                        />
-                      </div>
-                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
-                        <div className="form-group">
-                          <label className="form-label">SKU Code</label>
-                          <input
-                            type="text"
-                            className="form-input"
-                            placeholder="e.g. TGY-ECS-01"
-                            value={sectionFormData.products.sku}
-                            onChange={(e) => updateSectionField('products', 'sku', e.target.value)}
-                          />
-                        </div>
-                        <div className="form-group">
-                          <label className="form-label">Category</label>
-                          <select
-                            className="form-select"
-                            value={sectionFormData.products.category}
-                            onChange={(e) => updateSectionField('products', 'category', e.target.value)}
-                          >
-                            <option value="Software">Software</option>
-                            <option value="Security">Security</option>
-                            <option value="Artificial Intelligence">Artificial Intelligence</option>
-                            <option value="Integration">Integration</option>
-                            <option value="Services">Services</option>
-                            <option value="Cloud Infrastructure">Cloud Infrastructure</option>
-                          </select>
-                        </div>
-                      </div>
-                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
-                        <div className="form-group">
-                          <label className="form-label">Standard Pricing *</label>
-                          <input
-                            type="text"
-                            required
-                            className="form-input"
-                            placeholder="e.g. ₹15,00,000 / yr"
-                            value={sectionFormData.products.price}
-                            onChange={(e) => updateSectionField('products', 'price', e.target.value)}
-                          />
-                        </div>
-                        <div className="form-group">
-                          <label className="form-label">Billing Model</label>
-                          <select
-                            className="form-select"
-                            value={sectionFormData.products.billing}
-                            onChange={(e) => updateSectionField('products', 'billing', e.target.value)}
-                          >
-                            <option value="Annual Subscription">Annual Subscription</option>
-                            <option value="Monthly Retainer">Monthly Retainer</option>
-                            <option value="One-time License">One-time License</option>
-                            <option value="Professional Services">Professional Services</option>
-                            <option value="Usage-based">Usage-based</option>
-                          </select>
-                        </div>
-                      </div>
-                    </>
+                  {/* 1. Content Types */}
+                  {activeCat === 'contentTypes' && (
+                    <div className="form-group">
+                      <label className="form-label">Content Type Name *</label>
+                      <input
+                        type="text"
+                        required
+                        className="form-input"
+                        placeholder="e.g. Email Outreach & Pitch, Product Brochure"
+                        value={sectionFormData.contentTypes.name}
+                        onChange={(e) => updateSectionField('contentTypes', 'name', e.target.value)}
+                      />
+                    </div>
                   )}
 
-                  {/* 2. Lead Sources */}
-                  {activeCat === 'sources' && (
+                  {/* 2. Lead Follow-up Types */}
+                  {activeCat === 'followupTypes' && (
+                    <div className="form-group">
+                      <label className="form-label">Follow-up Type Name *</label>
+                      <input
+                        type="text"
+                        required
+                        className="form-input"
+                        placeholder="e.g. Discovery Follow-up, Architecture Demo Walkthrough"
+                        value={sectionFormData.followupTypes.name}
+                        onChange={(e) => updateSectionField('followupTypes', 'name', e.target.value)}
+                      />
+                    </div>
+                  )}
+
+                  {/* 3. Lead Follow-up Status */}
+                  {activeCat === 'followupStatuses' && (
+                    <div className="form-group">
+                      <label className="form-label">Description *</label>
+                      <textarea
+                        rows={3}
+                        required
+                        className="form-textarea"
+                        placeholder="Define the state and meaning of this status..."
+                        value={sectionFormData.followupStatuses.description}
+                        onChange={(e) => updateSectionField('followupStatuses', 'description', e.target.value)}
+                      />
+                    </div>
+                  )}
+
+                  {/* 4. Lead Status (Cleaned of Win Probability & Description) */}
+                  {activeCat === 'leadStatuses' && (
+                    <div className="form-group">
+                      <label className="form-label">Lead Status Name *</label>
+                      <input
+                        type="text"
+                        required
+                        className="form-input"
+                        placeholder="e.g. Qualified, Proposal, Negotiation"
+                        value={sectionFormData.leadStatuses.name}
+                        onChange={(e) => updateSectionField('leadStatuses', 'name', e.target.value)}
+                      />
+                    </div>
+                  )}
+
+                  {/* 5. Sales Objections */}
+                  {activeCat === 'objections' && (
+                    <div className="form-group">
+                      <label className="form-label">Objection Concern *</label>
+                      <input
+                        type="text"
+                        required
+                        className="form-input"
+                        placeholder="e.g. Budgetary Constraints & Pricing"
+                        value={sectionFormData.objections.name}
+                        onChange={(e) => updateSectionField('objections', 'name', e.target.value)}
+                      />
+                    </div>
+                  )}
+
+                  {/* 6. Agent Checklist */}
+                  {activeCat === 'agentChecklist' && (
                     <>
                       <div className="form-group">
-                        <label className="form-label">Channel / Source Name *</label>
-                        <input
-                          type="text"
+                        <label className="form-label">Lead Status *</label>
+                        <select
                           required
-                          className="form-input"
-                          placeholder="e.g. Partner Portal, Webinar Series, Google Ads"
-                          value={sectionFormData.sources.name}
-                          onChange={(e) => updateSectionField('sources', 'name', e.target.value)}
-                        />
-                      </div>
-                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
-                        <div className="form-group">
-                          <label className="form-label">Channel Type</label>
-                          <select
-                            className="form-select"
-                            value={sectionFormData.sources.type}
-                            onChange={(e) => updateSectionField('sources', 'type', e.target.value)}
-                          >
-                            <option value="Inbound Digital">Inbound Digital</option>
-                            <option value="Direct Voice">Direct Voice</option>
-                            <option value="Partner / Client">Partner / Client</option>
-                            <option value="Social B2B">Social B2B</option>
-                            <option value="Paid Media">Paid Media</option>
-                            <option value="Channel Alliance">Channel Alliance</option>
-                            <option value="Event / Trade Show">Event / Trade Show</option>
-                          </select>
-                        </div>
-                        <div className="form-group">
-                          <label className="form-label">Attribution Weight</label>
-                          <select
-                            className="form-select"
-                            value={sectionFormData.sources.weight}
-                            onChange={(e) => updateSectionField('sources', 'weight', e.target.value)}
-                          >
-                            <option value="High (37.5%)">High (37.5%)</option>
-                            <option value="High (25.0%)">High (25.0%)</option>
-                            <option value="High (18.8%)">High (18.8%)</option>
-                            <option value="Medium (15.0%)">Medium (15.0%)</option>
-                            <option value="Medium (9.4%)">Medium (9.4%)</option>
-                            <option value="Medium (6.3%)">Medium (6.3%)</option>
-                            <option value="Low (3.1%)">Low (3.1%)</option>
-                          </select>
-                        </div>
+                          className="form-select"
+                          value={sectionFormData.agentChecklist.leadStatus || (checklistStatusFilter !== 'All' ? checklistStatusFilter : (masterData.leadStatuses[0]?.name || 'New'))}
+                          onChange={(e) => updateSectionField('agentChecklist', 'leadStatus', e.target.value)}
+                        >
+                          {masterData.leadStatuses.map(ls => (
+                            <option key={ls.id} value={ls.name}>{ls.name}</option>
+                          ))}
+                        </select>
                       </div>
                       <div className="form-group">
-                        <label className="form-label">Estimated Cost per Lead</label>
-                        <input
-                          type="text"
-                          className="form-input"
-                          placeholder="e.g. ₹1,500, ₹0 (Organic), Revenue Share"
-                          value={sectionFormData.sources.costPerLead}
-                          onChange={(e) => updateSectionField('sources', 'costPerLead', e.target.value)}
+                        <label className="form-label">Points to Talk *</label>
+                        <textarea
+                          rows={4}
+                          required
+                          className="form-textarea"
+                          placeholder="Enter talking points, guidance, or qualification requirements for this lead status..."
+                          value={sectionFormData.agentChecklist.pointsToTalk || sectionFormData.agentChecklist.name || ''}
+                          onChange={(e) => {
+                            updateSectionField('agentChecklist', 'pointsToTalk', e.target.value);
+                            updateSectionField('agentChecklist', 'name', e.target.value);
+                          }}
                         />
                       </div>
                     </>
                   )}
 
-                  {/* 3. Industry Sectors */}
+                  {/* 7. Industry Sectors (Standard Margin & Domain Focus Area Removed) */}
                   {activeCat === 'industries' && (
                     <>
                       <div className="form-group">
@@ -1112,246 +1431,51 @@ export default function MasterDataView({
                           type="text"
                           required
                           className="form-input"
-                          placeholder="e.g. Logistics & Supply Chain, FinTech & Banking"
+                          placeholder="e.g. Enterprise Software, FinTech & Banking"
                           value={sectionFormData.industries.name}
                           onChange={(e) => updateSectionField('industries', 'name', e.target.value)}
                         />
                       </div>
-                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
-                        <div className="form-group">
-                          <label className="form-label">Sector Code</label>
-                          <input
-                            type="text"
-                            className="form-input"
-                            placeholder="e.g. IT-SOFT, BFSI-FIN"
-                            value={sectionFormData.industries.code}
-                            onChange={(e) => updateSectionField('industries', 'code', e.target.value)}
-                          />
-                        </div>
-                        <div className="form-group">
-                          <label className="form-label">Standard Margin Target</label>
-                          <input
-                            type="text"
-                            className="form-input"
-                            placeholder="e.g. 42%, 35%"
-                            value={sectionFormData.industries.standardMargin}
-                            onChange={(e) => updateSectionField('industries', 'standardMargin', e.target.value)}
-                          />
-                        </div>
-                      </div>
-                    </>
-                  )}
-
-                  {/* 4. Pipeline Stages */}
-                  {activeCat === 'stages' && (
-                    <>
                       <div className="form-group">
-                        <label className="form-label">Pipeline Stage Name *</label>
+                        <label className="form-label">Sector Code</label>
                         <input
                           type="text"
-                          required
                           className="form-input"
-                          placeholder="e.g. Technical Solution Validation"
-                          value={sectionFormData.stages.name}
-                          onChange={(e) => updateSectionField('stages', 'name', e.target.value)}
-                        />
-                      </div>
-                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
-                        <div className="form-group">
-                          <label className="form-label">Order in Funnel</label>
-                          <input
-                            type="number"
-                            className="form-input"
-                            placeholder="e.g. 5"
-                            value={sectionFormData.stages.order}
-                            onChange={(e) => updateSectionField('stages', 'order', e.target.value)}
-                          />
-                        </div>
-                        <div className="form-group">
-                          <label className="form-label">Win Probability (%) *</label>
-                          <input
-                            type="text"
-                            required
-                            className="form-input"
-                            placeholder="e.g. 50%"
-                            value={sectionFormData.stages.probability}
-                            onChange={(e) => updateSectionField('stages', 'probability', e.target.value)}
-                          />
-                        </div>
-                      </div>
-                      <div className="form-group">
-                        <label className="form-label">Target SLA Duration (Days)</label>
-                        <input
-                          type="number"
-                          className="form-input"
-                          placeholder="e.g. 7"
-                          value={sectionFormData.stages.slaDays}
-                          onChange={(e) => updateSectionField('stages', 'slaDays', e.target.value)}
+                          placeholder="e.g. IT-SOFT, BFSI-FIN"
+                          value={sectionFormData.industries.code}
+                          onChange={(e) => updateSectionField('industries', 'code', e.target.value)}
                         />
                       </div>
                     </>
                   )}
 
-                  {/* 5. Sales Objections */}
-                  {activeCat === 'objections' && (
-                    <>
-                      <div className="form-group">
-                        <label className="form-label">Objection Title *</label>
-                        <input
-                          type="text"
-                          required
-                          className="form-input"
-                          placeholder="e.g. Budget Freeze / Timeline Delay"
-                          value={sectionFormData.objections.name}
-                          onChange={(e) => updateSectionField('objections', 'name', e.target.value)}
-                        />
-                      </div>
-                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
-                        <div className="form-group">
-                          <label className="form-label">Category</label>
-                          <select
-                            className="form-select"
-                            value={sectionFormData.objections.category}
-                            onChange={(e) => updateSectionField('objections', 'category', e.target.value)}
-                          >
-                            <option value="Pricing">Pricing</option>
-                            <option value="Incumbent">Incumbent / Competitor</option>
-                            <option value="Technical">Technical & Security</option>
-                            <option value="Operations">Operations & Bandwidth</option>
-                            <option value="Timeline">Timeline / Delays</option>
-                            <option value="Compliance">Compliance & Legal</option>
-                          </select>
-                        </div>
-                        <div className="form-group">
-                          <label className="form-label">Severity Level</label>
-                          <select
-                            className="form-select"
-                            value={sectionFormData.objections.severity}
-                            onChange={(e) => updateSectionField('objections', 'severity', e.target.value)}
-                          >
-                            <option value="Critical">Critical</option>
-                            <option value="High">High</option>
-                            <option value="Medium">Medium</option>
-                            <option value="Low">Low</option>
-                          </select>
-                        </div>
-                      </div>
-                      <div className="form-group">
-                        <label className="form-label">Recommended Rebuttal / Script *</label>
-                        <textarea
-                          rows={4}
-                          required
-                          className="form-textarea"
-                          placeholder="Detail the suggested response framework, ROI proof point, or customer case study..."
-                          value={sectionFormData.objections.rebuttal}
-                          onChange={(e) => updateSectionField('objections', 'rebuttal', e.target.value)}
-                        />
-                      </div>
-                    </>
+                  {/* Products (Only Product / Service Name) */}
+                  {activeCat === 'products' && (
+                    <div className="form-group">
+                      <label className="form-label">Product / Service Name *</label>
+                      <input
+                        type="text"
+                        required
+                        className="form-input"
+                        placeholder="e.g. TechGy CRM Enterprise Suite"
+                        value={sectionFormData.products.name}
+                        onChange={(e) => updateSectionField('products', 'name', e.target.value)}
+                      />
+                    </div>
                   )}
 
-                  {/* 6. Lead Follow-up Cadences */}
-                  {activeCat === 'cadences' && (
+                  {/* Sources (Channel Type, Attribution Weight, Cost per Lead Removed) */}
+                  {activeCat === 'sources' && (
                     <>
                       <div className="form-group">
-                        <label className="form-label">Cadence Step Name *</label>
+                        <label className="form-label">Channel / Source Name *</label>
                         <input
                           type="text"
                           required
                           className="form-input"
-                          placeholder="e.g. Day 5 Executive Alignment"
-                          value={sectionFormData.cadences.name}
-                          onChange={(e) => updateSectionField('cadences', 'name', e.target.value)}
-                        />
-                      </div>
-                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
-                        <div className="form-group">
-                          <label className="form-label">Timing Window *</label>
-                          <input
-                            type="text"
-                            required
-                            className="form-input"
-                            placeholder="e.g. Within 2 Hours, Day 3 Post-Call"
-                            value={sectionFormData.cadences.timing}
-                            onChange={(e) => updateSectionField('cadences', 'timing', e.target.value)}
-                          />
-                        </div>
-                        <div className="form-group">
-                          <label className="form-label">Channel Mode</label>
-                          <select
-                            className="form-select"
-                            value={sectionFormData.cadences.channel}
-                            onChange={(e) => updateSectionField('cadences', 'channel', e.target.value)}
-                          >
-                            <option value="Direct Call + WhatsApp Intro">Direct Call + WhatsApp Intro</option>
-                            <option value="Customized Pitch Email">Customized Pitch Email</option>
-                            <option value="Executive Follow-up Call">Executive Follow-up Call</option>
-                            <option value="Value-add Whitepaper / Case Study">Value-add Whitepaper / Case Study</option>
-                            <option value="LinkedIn InMail">LinkedIn InMail</option>
-                            <option value="Product Demonstration">Product Demonstration</option>
-                          </select>
-                        </div>
-                      </div>
-                      <div className="form-group">
-                        <label className="form-label">Mandatory Next Action *</label>
-                        <input
-                          type="text"
-                          required
-                          className="form-input"
-                          placeholder="e.g. Validate qualification criteria, Confirm stakeholders"
-                          value={sectionFormData.cadences.mandatoryAction}
-                          onChange={(e) => updateSectionField('cadences', 'mandatoryAction', e.target.value)}
-                        />
-                      </div>
-                    </>
-                  )}
-
-                  {/* 7. AI Scoring Rules */}
-                  {activeCat === 'aiRules' && (
-                    <>
-                      <div className="form-group">
-                        <label className="form-label">Scoring Rule Name *</label>
-                        <input
-                          type="text"
-                          required
-                          className="form-input"
-                          placeholder="e.g. Enterprise Employee Count Multiplier"
-                          value={sectionFormData.aiRules.name}
-                          onChange={(e) => updateSectionField('aiRules', 'name', e.target.value)}
-                        />
-                      </div>
-                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
-                        <div className="form-group">
-                          <label className="form-label">Intent / Profile Factor *</label>
-                          <input
-                            type="text"
-                            required
-                            className="form-input"
-                            placeholder="e.g. Employee Count > 250"
-                            value={sectionFormData.aiRules.factor}
-                            onChange={(e) => updateSectionField('aiRules', 'factor', e.target.value)}
-                          />
-                        </div>
-                        <div className="form-group">
-                          <label className="form-label">Score Weight *</label>
-                          <input
-                            type="text"
-                            required
-                            className="form-input"
-                            placeholder="e.g. +25 Points, -10 Points"
-                            value={sectionFormData.aiRules.weight}
-                            onChange={(e) => updateSectionField('aiRules', 'weight', e.target.value)}
-                          />
-                        </div>
-                      </div>
-                      <div className="form-group">
-                        <label className="form-label">Automated System Trigger</label>
-                        <input
-                          type="text"
-                          className="form-input"
-                          placeholder="e.g. Route to Senior Account Executive"
-                          value={sectionFormData.aiRules.autoTrigger}
-                          onChange={(e) => updateSectionField('aiRules', 'autoTrigger', e.target.value)}
+                          placeholder="e.g. Website, Inbound Call, Referral, LinkedIn"
+                          value={sectionFormData.sources.name}
+                          onChange={(e) => updateSectionField('sources', 'name', e.target.value)}
                         />
                       </div>
                     </>
@@ -1370,7 +1494,9 @@ export default function MasterDataView({
         );
       })()}
 
-      {/* Create / Edit Email Template Modal */}
+      {/* ---------------------------------------------------------------------- */}
+      {/* 4. CREATE EMAIL TEMPLATE MODAL (Category Removed)                      */}
+      {/* ---------------------------------------------------------------------- */}
       {(isAddModalOpen && selectedCategory === 'emailTemplates') && (
         <div className="modal-overlay" onClick={() => setIsAddModalOpen(false)}>
           <div className="modal-card" style={{ maxWidth: '580px' }} onClick={e => e.stopPropagation()}>
@@ -1393,20 +1519,6 @@ export default function MasterDataView({
                 </div>
 
                 <div className="form-group">
-                  <label className="form-label">Category</label>
-                  <select
-                    className="form-select"
-                    value={templateFormData.category}
-                    onChange={(e) => setTemplateFormData({ ...templateFormData, category: e.target.value })}
-                  >
-                    <option value="Sales Outreach">Sales Outreach</option>
-                    <option value="Proposal Follow-up">Proposal Follow-up</option>
-                    <option value="Customer Onboarding">Customer Onboarding</option>
-                    <option value="Executive Update">Executive Update</option>
-                  </select>
-                </div>
-
-                <div className="form-group">
                   <label className="form-label">Subject Line *</label>
                   <input
                     type="text"
@@ -1414,7 +1526,7 @@ export default function MasterDataView({
                     className="form-input"
                     value={templateFormData.subject}
                     onChange={(e) => setTemplateFormData({ ...templateFormData, subject: e.target.value })}
-                    placeholder="e.g. Scaling TechGy CRM Operations for {{company}}"
+                    placeholder="e.g. Scaling TechGy CRM Operations for {company}"
                   />
                 </div>
 
@@ -1425,7 +1537,7 @@ export default function MasterDataView({
                     className="form-textarea"
                     value={templateFormData.body}
                     onChange={(e) => setTemplateFormData({ ...templateFormData, body: e.target.value })}
-                    placeholder="Hi {{leadName}},&#10;&#10;Following up regarding our solution..."
+                    placeholder="Hi {leadName},&#10;&#10;Following up regarding our solution..."
                   />
                 </div>
               </div>
@@ -1438,7 +1550,9 @@ export default function MasterDataView({
         </div>
       )}
 
-      {/* Edit Email Template Modal */}
+      {/* ---------------------------------------------------------------------- */}
+      {/* 5. EDIT EMAIL TEMPLATE MODAL (Category Removed)                        */}
+      {/* ---------------------------------------------------------------------- */}
       {editingTemplate && (
         <div className="modal-overlay" onClick={() => setEditingTemplate(null)}>
           <div className="modal-card" style={{ maxWidth: '580px' }} onClick={e => e.stopPropagation()}>
@@ -1457,20 +1571,6 @@ export default function MasterDataView({
                     value={templateFormData.name}
                     onChange={(e) => setTemplateFormData({ ...templateFormData, name: e.target.value })}
                   />
-                </div>
-
-                <div className="form-group">
-                  <label className="form-label">Category</label>
-                  <select
-                    className="form-select"
-                    value={templateFormData.category}
-                    onChange={(e) => setTemplateFormData({ ...templateFormData, category: e.target.value })}
-                  >
-                    <option value="Sales Outreach">Sales Outreach</option>
-                    <option value="Proposal Follow-up">Proposal Follow-up</option>
-                    <option value="Customer Onboarding">Customer Onboarding</option>
-                    <option value="Executive Update">Executive Update</option>
-                  </select>
                 </div>
 
                 <div className="form-group">
@@ -1503,242 +1603,110 @@ export default function MasterDataView({
         </div>
       )}
 
-      {/* Edit Standard Master Record Modal */}
+      {/* ---------------------------------------------------------------------- */}
+      {/* 6. EDIT STANDARD MASTER RECORD MODAL                                   */}
+      {/* ---------------------------------------------------------------------- */}
       {editingRecord && (
         <div className="modal-overlay" onClick={() => setEditingRecord(null)}>
-          <div className="modal-card" style={{ maxWidth: '500px' }} onClick={e => e.stopPropagation()}>
+          <div className="modal-card" style={{ maxWidth: '520px' }} onClick={e => e.stopPropagation()}>
             <div className="modal-header">
               <h3 className="modal-title">Edit {selectedCategoryMeta?.title.slice(0, -1) || 'Record'}</h3>
               <button className="modal-close-btn" onClick={() => setEditingRecord(null)}><LuX size={18} /></button>
             </div>
             <form onSubmit={handleSaveEditRecord}>
               <div className="modal-body" style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                <div className="form-group">
-                  <label className="form-label">Name / Title *</label>
-                  <input
-                    type="text"
-                    required
-                    className="form-input"
-                    value={editRecordFormData.name || ''}
-                    onChange={(e) => setEditRecordFormData({ ...editRecordFormData, name: e.target.value })}
-                  />
-                </div>
-
-                {selectedCategory === 'products' && (
-                  <>
-                    <div className="form-group">
-                      <label className="form-label">SKU</label>
-                      <input
-                        type="text"
-                        className="form-input"
-                        value={editRecordFormData.sku || ''}
-                        onChange={(e) => setEditRecordFormData({ ...editRecordFormData, sku: e.target.value })}
-                      />
-                    </div>
-                    <div className="form-group">
-                      <label className="form-label">Category</label>
-                      <input
-                        type="text"
-                        className="form-input"
-                        value={editRecordFormData.category || ''}
-                        onChange={(e) => setEditRecordFormData({ ...editRecordFormData, category: e.target.value })}
-                      />
-                    </div>
-                    <div className="form-group">
-                      <label className="form-label">Price / Value</label>
-                      <input
-                        type="text"
-                        className="form-input"
-                        value={editRecordFormData.price || ''}
-                        onChange={(e) => setEditRecordFormData({ ...editRecordFormData, price: e.target.value })}
-                      />
-                    </div>
-                    <div className="form-group">
-                      <label className="form-label">Billing Model</label>
-                      <input
-                        type="text"
-                        className="form-input"
-                        value={editRecordFormData.billing || ''}
-                        onChange={(e) => setEditRecordFormData({ ...editRecordFormData, billing: e.target.value })}
-                      />
-                    </div>
-                  </>
-                )}
-
-                {selectedCategory === 'sources' && (
-                  <>
-                    <div className="form-group">
-                      <label className="form-label">Channel / Type</label>
-                      <input
-                        type="text"
-                        className="form-input"
-                        value={editRecordFormData.type || ''}
-                        onChange={(e) => setEditRecordFormData({ ...editRecordFormData, type: e.target.value })}
-                      />
-                    </div>
-                    <div className="form-group">
-                      <label className="form-label">Attribution Weight</label>
-                      <input
-                        type="text"
-                        className="form-input"
-                        value={editRecordFormData.weight || ''}
-                        onChange={(e) => setEditRecordFormData({ ...editRecordFormData, weight: e.target.value })}
-                      />
-                    </div>
-                    <div className="form-group">
-                      <label className="form-label">Cost Per Lead</label>
-                      <input
-                        type="text"
-                        className="form-input"
-                        value={editRecordFormData.costPerLead || ''}
-                        onChange={(e) => setEditRecordFormData({ ...editRecordFormData, costPerLead: e.target.value })}
-                      />
-                    </div>
-                  </>
-                )}
-
-                {selectedCategory === 'industries' && (
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
-                    <div className="form-group">
-                      <label className="form-label">Sector Code</label>
-                      <input
-                        type="text"
-                        className="form-input"
-                        value={editRecordFormData.code || ''}
-                        onChange={(e) => setEditRecordFormData({ ...editRecordFormData, code: e.target.value })}
-                      />
-                    </div>
-                    <div className="form-group">
-                      <label className="form-label">Standard Margin</label>
-                      <input
-                        type="text"
-                        className="form-input"
-                        value={editRecordFormData.standardMargin || ''}
-                        onChange={(e) => setEditRecordFormData({ ...editRecordFormData, standardMargin: e.target.value })}
-                      />
-                    </div>
+                {selectedCategory === 'agentChecklist' && (
+                  <div className="form-group">
+                    <label className="form-label">Lead Status *</label>
+                    <select
+                      required
+                      className="form-select"
+                      value={editRecordFormData.leadStatus || (masterData.leadStatuses[0]?.name || 'New')}
+                      onChange={(e) => setEditRecordFormData({ ...editRecordFormData, leadStatus: e.target.value })}
+                    >
+                      {masterData.leadStatuses.map(ls => (
+                        <option key={ls.id} value={ls.name}>{ls.name}</option>
+                      ))}
+                    </select>
                   </div>
                 )}
 
-                {selectedCategory === 'stages' && (
-                  <>
-                    <div className="form-group">
-                      <label className="form-label">Win Probability</label>
-                      <input
-                        type="text"
-                        className="form-input"
-                        value={editRecordFormData.probability || ''}
-                        onChange={(e) => setEditRecordFormData({ ...editRecordFormData, probability: e.target.value })}
-                      />
-                    </div>
-                    <div className="form-group">
-                      <label className="form-label">SLA Target Days</label>
-                      <input
-                        type="number"
-                        className="form-input"
-                        value={editRecordFormData.slaDays || 0}
-                        onChange={(e) => setEditRecordFormData({ ...editRecordFormData, slaDays: Number(e.target.value) })}
-                      />
-                    </div>
-                  </>
+                <div className="form-group">
+                  <label className="form-label">
+                    {selectedCategory === 'objections' ? 'Objection Concern *' :
+                     selectedCategory === 'products' ? 'Product / Service Name *' :
+                     selectedCategory === 'sources' ? 'Lead Source Name *' :
+                     selectedCategory === 'agentChecklist' ? 'Points to Talk *' :
+                     selectedCategory === 'contentTypes' ? 'Content Type Name *' :
+                     selectedCategory === 'followupTypes' ? 'Follow-up Type Name *' :
+                     selectedCategory === 'followupStatuses' ? 'Description *' :
+                     'Name / Title *'}
+                  </label>
+                  {selectedCategory === 'agentChecklist' ? (
+                    <textarea
+                      rows={4}
+                      required
+                      className="form-textarea"
+                      placeholder="Enter talking points, guidance, or qualification requirements for this lead status..."
+                      value={editRecordFormData.pointsToTalk || editRecordFormData.name || editRecordFormData.description || ''}
+                      onChange={(e) => setEditRecordFormData({
+                        ...editRecordFormData,
+                        pointsToTalk: e.target.value,
+                        name: e.target.value,
+                        description: e.target.value
+                      })}
+                    />
+                  ) : selectedCategory === 'followupStatuses' ? (
+                    <textarea
+                      rows={3}
+                      required
+                      className="form-textarea"
+                      value={editRecordFormData.description || editRecordFormData.name || ''}
+                      onChange={(e) => setEditRecordFormData({
+                        ...editRecordFormData,
+                        description: e.target.value,
+                        name: e.target.value
+                      })}
+                    />
+                  ) : (
+                    <input
+                      type="text"
+                      required
+                      className="form-input"
+                      value={editRecordFormData.name || ''}
+                      onChange={(e) => setEditRecordFormData({ ...editRecordFormData, name: e.target.value })}
+                    />
+                  )}
+                </div>
+
+                {/* 7. Industry Sectors (Standard Margin & Domain Focus Area Removed) */}
+                {selectedCategory === 'industries' && (
+                  <div className="form-group">
+                    <label className="form-label">Sector Code</label>
+                    <input
+                      type="text"
+                      className="form-input"
+                      value={editRecordFormData.code || ''}
+                      onChange={(e) => setEditRecordFormData({ ...editRecordFormData, code: e.target.value })}
+                    />
+                  </div>
                 )}
 
-                {selectedCategory === 'objections' && (
-                  <>
-                    <div className="form-group">
-                      <label className="form-label">Category</label>
-                      <input
-                        type="text"
-                        className="form-input"
-                        value={editRecordFormData.category || ''}
-                        onChange={(e) => setEditRecordFormData({ ...editRecordFormData, category: e.target.value })}
-                      />
-                    </div>
-                    <div className="form-group">
-                      <label className="form-label">Recommended Rebuttal</label>
-                      <textarea
-                        rows={3}
-                        className="form-textarea"
-                        value={editRecordFormData.rebuttal || ''}
-                        onChange={(e) => setEditRecordFormData({ ...editRecordFormData, rebuttal: e.target.value })}
-                      />
-                    </div>
-                    <div className="form-group">
-                      <label className="form-label">Severity</label>
-                      <input
-                        type="text"
-                        className="form-input"
-                        value={editRecordFormData.severity || ''}
-                        onChange={(e) => setEditRecordFormData({ ...editRecordFormData, severity: e.target.value })}
-                      />
-                    </div>
-                  </>
-                )}
-
-                {selectedCategory === 'cadences' && (
-                  <>
-                    <div className="form-group">
-                      <label className="form-label">Timing</label>
-                      <input
-                        type="text"
-                        className="form-input"
-                        value={editRecordFormData.timing || ''}
-                        onChange={(e) => setEditRecordFormData({ ...editRecordFormData, timing: e.target.value })}
-                      />
-                    </div>
-                    <div className="form-group">
-                      <label className="form-label">Channel</label>
-                      <input
-                        type="text"
-                        className="form-input"
-                        value={editRecordFormData.channel || ''}
-                        onChange={(e) => setEditRecordFormData({ ...editRecordFormData, channel: e.target.value })}
-                      />
-                    </div>
-                    <div className="form-group">
-                      <label className="form-label">Mandatory Action</label>
-                      <input
-                        type="text"
-                        className="form-input"
-                        value={editRecordFormData.mandatoryAction || ''}
-                        onChange={(e) => setEditRecordFormData({ ...editRecordFormData, mandatoryAction: e.target.value })}
-                      />
-                    </div>
-                  </>
-                )}
-
-                {selectedCategory === 'aiRules' && (
-                  <>
-                    <div className="form-group">
-                      <label className="form-label">Factor</label>
-                      <input
-                        type="text"
-                        className="form-input"
-                        value={editRecordFormData.factor || ''}
-                        onChange={(e) => setEditRecordFormData({ ...editRecordFormData, factor: e.target.value })}
-                      />
-                    </div>
-                    <div className="form-group">
-                      <label className="form-label">Weight</label>
-                      <input
-                        type="text"
-                        className="form-input"
-                        value={editRecordFormData.weight || ''}
-                        onChange={(e) => setEditRecordFormData({ ...editRecordFormData, weight: e.target.value })}
-                      />
-                    </div>
-                    <div className="form-group">
-                      <label className="form-label">Automated Trigger</label>
-                      <input
-                        type="text"
-                        className="form-input"
-                        value={editRecordFormData.autoTrigger || ''}
-                        onChange={(e) => setEditRecordFormData({ ...editRecordFormData, autoTrigger: e.target.value })}
-                      />
-                    </div>
-                  </>
+                {/* Sources (Only Channel Name Editable) */}
+                {selectedCategory === 'sources' && (
+                  <div className="form-group">
+                    <label className="form-label">Channel Name *</label>
+                    <input
+                      type="text"
+                      required
+                      className="form-input"
+                      value={editRecordFormData.name || ''}
+                      onChange={(e) => setEditRecordFormData({ ...editRecordFormData, name: e.target.value })}
+                    />
+                  </div>
                 )}
               </div>
+
               <div className="modal-footer">
                 <button type="button" className="btn-secondary" onClick={() => setEditingRecord(null)}>Cancel</button>
                 <button type="submit" className="btn-primary">Save Changes</button>

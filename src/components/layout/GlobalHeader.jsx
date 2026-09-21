@@ -6,15 +6,13 @@ import {
   LuPlus,
   LuUsers,
   LuBuilding2,
-  LuTrendingUp,
-  LuFileText,
   LuContact,
   LuCalendar,
   LuX
 } from 'react-icons/lu';
-import { INITIAL_OWNERS } from '../data/mockData';
-import NotificationsPopover from './NotificationsPopover';
-import CustomDateSelector from './CustomDateSelector';
+import { INITIAL_OWNERS } from '../../data/mockData';
+import NotificationsPopover from '../common/NotificationsPopover';
+import CustomDateSelector from '../common/CustomDateSelector';
 
 export default function GlobalHeader({
   activeModule,
@@ -28,8 +26,6 @@ export default function GlobalHeader({
   onOpenCreateModal,
   leads = [],
   accounts = [],
-  opportunities = [],
-  proposals = [],
   contacts = [],
   activities = [],
   onSelectSearchResult,
@@ -50,9 +46,7 @@ export default function GlobalHeader({
       case 'dashboard': return 'Dashboard';
       case 'leads': return 'Leads Directory';
       case 'accounts': return 'Company Accounts';
-      case 'opportunities': return 'Opportunities Pipeline';
       case 'activities': return 'Activities & Engagement';
-      case 'proposals': return 'Proposals & Value';
       case 'contacts': return 'Contacts Directory';
       case 'masterData': return 'Master Data Management';
       default: return 'Dashboard';
@@ -83,14 +77,6 @@ export default function GlobalHeader({
     ? accounts.filter(a => a.companyName.toLowerCase().includes(q) || a.industry.toLowerCase().includes(q) || a.location.toLowerCase().includes(q) || a.accountOwner.toLowerCase().includes(q))
     : [];
 
-  const matchedOpps = hasQuery
-    ? opportunities.filter(o => o.opportunityName.toLowerCase().includes(q) || o.accountName.toLowerCase().includes(q) || o.owner.toLowerCase().includes(q))
-    : [];
-
-  const matchedProposals = hasQuery
-    ? proposals.filter(p => p.proposalId.toLowerCase().includes(q) || p.company.toLowerCase().includes(q) || p.notes.toLowerCase().includes(q))
-    : [];
-
   const matchedContacts = hasQuery
     ? contacts.filter(c => c.name.toLowerCase().includes(q) || c.company.toLowerCase().includes(q) || c.email.toLowerCase().includes(q))
     : [];
@@ -99,7 +85,7 @@ export default function GlobalHeader({
     ? activities.filter(act => act.company.toLowerCase().includes(q) || (act.lead && act.lead.toLowerCase().includes(q)) || (act.notes && act.notes.toLowerCase().includes(q)))
     : [];
 
-  const totalMatches = matchedLeads.length + matchedAccounts.length + matchedOpps.length + matchedProposals.length + matchedContacts.length + matchedActivities.length;
+  const totalMatches = matchedLeads.length + matchedAccounts.length + matchedContacts.length + matchedActivities.length;
 
   const handleItemClick = (category, item) => {
     setIsSearchOpen(false);
@@ -230,41 +216,7 @@ export default function GlobalHeader({
                     </div>
                   )}
 
-                  {/* Matching Opportunities */}
-                  {matchedOpps.length > 0 && (
-                    <div>
-                      <div className="search-category-title">
-                        <LuTrendingUp size={12} style={{ display: 'inline', marginRight: 4 }} /> Opportunities ({matchedOpps.length})
-                      </div>
-                      {matchedOpps.slice(0, 3).map((opp) => (
-                        <div key={opp.id} className="search-result-item" onClick={() => handleItemClick('opportunity', opp)}>
-                          <div>
-                            <div className="search-result-title">{opp.opportunityName}</div>
-                            <div className="search-result-sub">{opp.accountName} • Stage: {opp.currentStage}</div>
-                          </div>
-                          <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#141414' }}>{opp.estimatedValue}</span>
-                        </div>
-                      ))}
-                    </div>
-                  )}
 
-                  {/* Matching Proposals */}
-                  {matchedProposals.length > 0 && (
-                    <div>
-                      <div className="search-category-title">
-                        <LuFileText size={12} style={{ display: 'inline', marginRight: 4 }} /> Proposals ({matchedProposals.length})
-                      </div>
-                      {matchedProposals.slice(0, 3).map((prop) => (
-                        <div key={prop.id} className="search-result-item" onClick={() => handleItemClick('proposal', prop)}>
-                          <div>
-                            <div className="search-result-title">{prop.proposalId} - {prop.company}</div>
-                            <div className="search-result-sub">{prop.opportunity}</div>
-                          </div>
-                          <span className="status-chip proposal" style={{ fontSize: '0.65rem' }}>{prop.status}</span>
-                        </div>
-                      ))}
-                    </div>
-                  )}
 
                   {/* Matching Contacts */}
                   {matchedContacts.length > 0 && (

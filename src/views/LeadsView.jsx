@@ -13,7 +13,7 @@ import {
 } from 'react-icons/lu';
 import { LEAD_SOURCES, INITIAL_OWNERS } from '../data/mockData';
 import { isDateInFilter } from '../utils/dateUtils';
-import MultiSelectFilter from '../components/MultiSelectFilter';
+import MultiSelectFilter from '../components/common/MultiSelectFilter';
 
 const STATUS_OPTIONS = ['New', 'Contacted', 'Qualified', 'Discussion', 'Proposal', 'Negotiation'];
 const OWNER_OPTIONS = INITIAL_OWNERS.filter(o => o !== 'All Owners');

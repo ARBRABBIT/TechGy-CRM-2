@@ -3,7 +3,7 @@ import {
   LuCalendar,
   LuArrowRight
 } from 'react-icons/lu';
-import { getInitialStageHistory, formatStageDateTime, PIPELINE_STAGES } from '../utils/pipelineUtils';
+import { getInitialStageHistory, formatStageDateTime, PIPELINE_STAGES } from '../../utils/pipelineUtils';
 
 export default function LeadPipelineProgress({
   lead,

@@ -7,7 +7,6 @@ import {
   LuChevronDown,
   LuCheck,
   LuUser,
-  LuBriefcase,
   LuUsers,
   LuCalendar
 } from 'react-icons/lu';
@@ -30,14 +29,6 @@ export const CREATABLE_ENTITY_TYPES = [
     description: 'Enterprise organization or corporate client'
   },
   {
-    id: 'createOpportunity',
-    label: 'Opportunity / Deal',
-    icon: <LuBriefcase size={15} />,
-    bgColor: '#FAF5FF',
-    color: '#9333EA',
-    description: 'Pipeline sales opportunity or deal'
-  },
-  {
     id: 'createContact',
     label: 'Contact Person',
     icon: <LuUsers size={15} />,
@@ -52,20 +43,12 @@ export const CREATABLE_ENTITY_TYPES = [
     bgColor: '#FEF2F2',
     color: '#DC2626',
     description: 'Scheduled meeting, task, or call'
-  },
-  {
-    id: 'createProposal',
-    label: 'Commercial Proposal',
-    icon: <LuFileText size={15} />,
-    bgColor: '#F0FDFA',
-    color: '#0D9488',
-    description: 'Formal commercial proposal draft'
   }
 ];
-import { animateModalEnter } from '../utils/animations';
-import { INITIAL_OWNERS, LEAD_SOURCES, INITIAL_ACCOUNTS, INITIAL_EMAIL_TEMPLATES } from '../data/mockData';
-import { getTodayISO, getFutureISO } from '../utils/dateUtils';
-import FormDateSelector from './FormDateSelector';
+import { animateModalEnter } from '../../utils/animations';
+import { INITIAL_OWNERS, LEAD_SOURCES, INITIAL_ACCOUNTS, INITIAL_EMAIL_TEMPLATES, SERVICES_OFFERED } from '../../data/mockData';
+import { getTodayISO, getFutureISO } from '../../utils/dateUtils';
+import FormDateSelector from '../common/FormDateSelector';
 
 function CompanyAutocompleteInput({
   value,
@@ -249,14 +232,7 @@ function CompanyAutocompleteInput({
   );
 }
 
-const STAGE_DEFAULT_PROBABILITIES = {
-  'Discovery': '20%',
-  'Qualified': '40%',
-  'Proposal Sent': '60%',
-  'Negotiation': '80%',
-  'Won': '100%',
-  'Lost': '0%'
-};
+
 
 export default function CommonActionsModal({
   isOpen,
@@ -315,6 +291,7 @@ export default function CommonActionsModal({
     estimatedAccountValue: '₹50,00,000',
     primaryContact: '',
     tier: 'Strategic Enterprise',
+    serviceProviding: 'TechGy CRM Enterprise Suite',
     phone: '',
     email: '',
     designation: '',
@@ -599,10 +576,8 @@ export default function CommonActionsModal({
       case 'email': return isBulk ? `Send Email (${bulkCount} Leads)` : 'Send / Log Email';
       case 'sms': return 'Log WhatsApp Message';
       case 'createAccount': return 'Create Company Account';
-      case 'createOpportunity': return 'Create Pipeline Opportunity';
       case 'createLead': return 'Create New Lead';
       case 'createActivity': return 'Log Activity / Task';
-      case 'createProposal': return 'Draft Commercial Proposal';
       case 'createContact': return 'Add Account Contact';
       case 'assignOwner': return isBulk ? `Reassign Owner (${bulkCount} Leads)` : 'Reassign Lead Owner';
       case 'changeStatus': return isBulk ? `Update Stage (${bulkCount} Leads)` : 'Change Lead Status';
@@ -870,6 +845,16 @@ export default function CommonActionsModal({
                     </select>
                   </div>
                 </div>
+                <div className="form-group">
+                  <label className="form-label">Service Providing</label>
+                  <select
+                    className="form-select"
+                    value={formData.serviceProviding || 'TechGy CRM Enterprise Suite'}
+                    onChange={(e) => setFormData({ ...formData, serviceProviding: e.target.value })}
+                  >
+                    {SERVICES_OFFERED.map(srv => <option key={srv} value={srv}>{srv}</option>)}
+                  </select>
+                </div>
                 <div className="form-grid-2">
                   <div className="form-group">
                     <label className="form-label">Location / Headquarters</label>
@@ -953,111 +938,7 @@ export default function CommonActionsModal({
                 </div>
               </>
             )}
-            {actionType === 'createOpportunity' && (
-              <>
-                <div className="form-group">
-                  <label className="form-label">Opportunity Name *</label>
-                  <input
-                    type="text"
-                    className="form-input"
-                    required
-                    placeholder="e.g. Tata Tech – Cloud ERP Integration"
-                    value={formData.opportunityName}
-                    onChange={(e) => setFormData({ ...formData, opportunityName: e.target.value })}
-                  />
-                </div>
-                <div className="form-grid-2">
-                  <div className="form-group">
-                    <label className="form-label">Company / Account Name *</label>
-                    <CompanyAutocompleteInput
-                      required
-                      placeholder="e.g. Tata Consultancy Tech Ltd"
-                      value={formData.company}
-                      onChange={(val) => setFormData({ ...formData, company: val })}
-                      companies={allExistingCompanies}
-                    />
-                  </div>
-                  <div className="form-group">
-                    <label className="form-label">Estimated Value *</label>
-                    <input
-                      type="text"
-                      className="form-input"
-                      required
-                      placeholder="e.g. ₹75.00 Lakh or ₹1.20 Cr"
-                      value={formData.estimatedValue}
-                      onChange={(e) => setFormData({ ...formData, estimatedValue: e.target.value })}
-                    />
-                  </div>
-                </div>
-                <div className="form-grid-2">
-                  <div className="form-group">
-                    <label className="form-label">Current Stage</label>
-                    <select
-                      className="form-select"
-                      value={formData.currentStage}
-                      onChange={(e) => {
-                        const newStage = e.target.value;
-                        setFormData(prev => ({
-                          ...prev,
-                          currentStage: newStage,
-                          probability: STAGE_DEFAULT_PROBABILITIES[newStage] !== undefined ? STAGE_DEFAULT_PROBABILITIES[newStage] : prev.probability
-                        }));
-                      }}
-                    >
-                      <option value="Discovery">Discovery</option>
-                      <option value="Qualified">Qualified</option>
-                      <option value="Proposal Sent">Proposal Sent</option>
-                      <option value="Negotiation">Negotiation</option>
-                      <option value="Won">Won</option>
-                      <option value="Lost">Lost</option>
-                    </select>
-                  </div>
-                  <div className="form-group">
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <label className="form-label">Probability (%)</label>
-                      <span style={{ fontSize: '0.875rem', fontWeight: 700, color: '#063669' }}>
-                        {Math.min(100, Math.max(0, parseInt(formData.probability, 10) || 0))}%
-                      </span>
-                    </div>
-                    <div className="probability-slider-wrapper">
-                      <input
-                        type="range"
-                        min="0"
-                        max="100"
-                        step="5"
-                        value={Math.min(100, Math.max(0, parseInt(formData.probability, 10) || 0))}
-                        onChange={(e) => setFormData({ ...formData, probability: `${e.target.value}%` })}
-                        className="probability-range-slider"
-                        style={{
-                          background: `linear-gradient(to right, #063669 ${Math.min(100, Math.max(0, parseInt(formData.probability, 10) || 0))}%, #E2E8F0 ${Math.min(100, Math.max(0, parseInt(formData.probability, 10) || 0))}%)`
-                        }}
-                        aria-label="Probability percentage slider"
-                      />
-                    </div>
-                  </div>
-                </div>
-                <div className="form-grid-2">
-                  <div className="form-group">
-                    <label className="form-label">Expected Close Date</label>
-                    <FormDateSelector
-                      value={formData.closeDate}
-                      onChange={(newDate) => setFormData({ ...formData, closeDate: newDate })}
-                      placement="top"
-                    />
-                  </div>
-                  <div className="form-group">
-                    <label className="form-label">Opportunity Owner</label>
-                    <select
-                      className="form-select"
-                      value={formData.owner}
-                      onChange={(e) => setFormData({ ...formData, owner: e.target.value })}
-                    >
-                      {INITIAL_OWNERS.filter(o => o !== 'All Owners').map(o => <option key={o} value={o}>{o}</option>)}
-                    </select>
-                  </div>
-                </div>
-              </>
-            )}
+
 
             {actionType === 'createLead' && (
               <>
@@ -1141,6 +1022,16 @@ export default function CommonActionsModal({
                       {INITIAL_OWNERS.filter(o => o !== 'All Owners').map(o => <option key={o} value={o}>{o}</option>)}
                     </select>
                   </div>
+                </div>
+                <div className="form-group">
+                  <label className="form-label">Service Providing</label>
+                  <select
+                    className="form-select"
+                    value={formData.serviceProviding || 'TechGy CRM Enterprise Suite'}
+                    onChange={(e) => setFormData({ ...formData, serviceProviding: e.target.value })}
+                  >
+                    {SERVICES_OFFERED.map(srv => <option key={srv} value={srv}>{srv}</option>)}
+                  </select>
                 </div>
               </>
             )}
@@ -1894,64 +1785,7 @@ export default function CommonActionsModal({
               </>
             )}
 
-            {actionType === 'createProposal' && (
-              <>
-                <div className="form-group">
-                  <label className="form-label">Proposal Title *</label>
-                  <input
-                    type="text"
-                    className="form-input"
-                    required
-                    placeholder="e.g. Enterprise Cloud ERP Implementation Proposal"
-                    value={formData.opportunityName}
-                    onChange={(e) => setFormData({ ...formData, opportunityName: e.target.value })}
-                  />
-                </div>
-                <div className="form-grid-2">
-                  <div className="form-group">
-                    <label className="form-label">Company / Account Name *</label>
-                    <CompanyAutocompleteInput
-                      required
-                      placeholder="e.g. Tata Consultancy Tech Ltd"
-                      value={formData.company}
-                      onChange={(val) => setFormData({ ...formData, company: val })}
-                      companies={allExistingCompanies}
-                    />
-                  </div>
-                  <div className="form-group">
-                    <label className="form-label">Proposal Amount *</label>
-                    <input
-                      type="text"
-                      className="form-input"
-                      required
-                      placeholder="e.g. ₹45,00,000"
-                      value={formData.estimatedValue}
-                      onChange={(e) => setFormData({ ...formData, estimatedValue: e.target.value })}
-                    />
-                  </div>
-                </div>
-                <div className="form-grid-2">
-                  <div className="form-group">
-                    <label className="form-label">Valid Until Date</label>
-                    <FormDateSelector
-                      value={formData.closeDate}
-                      onChange={(d) => setFormData({ ...formData, closeDate: d })}
-                      placement="top"
-                    />
-                  </div>
-                  <div className="form-group">
-                    <label className="form-label">Owner</label>
-                    <select
-                      className="form-select"
-                      value={formData.owner}
-                      onChange={(e) => setFormData({ ...formData, owner: e.target.value })}
-                    >
-                      {INITIAL_OWNERS.filter(o => o !== 'All Owners').map(o => <option key={o} value={o}>{o}</option>)}
-                    </select>
-                  </div>
-                </div>
-              </>
-            )}
+
 
             {actionType === 'createContact' && (
               <>
@@ -2132,10 +1966,8 @@ export default function CommonActionsModal({
               {isBulk ? `Apply to ${bulkCount} Leads` : (
                 actionType === 'createLead' ? 'Create Lead' :
                 actionType === 'createAccount' ? 'Create Company Account' :
-                actionType === 'createOpportunity' ? 'Create Opportunity' :
                 actionType === 'createContact' ? 'Add Contact' :
                 actionType === 'createActivity' ? 'Schedule Activity' :
-                actionType === 'createProposal' ? 'Draft Proposal' :
                 'Confirm Action'
               )}
             </button>

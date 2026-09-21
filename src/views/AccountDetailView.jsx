@@ -6,10 +6,10 @@ import {
   LuUsers,
   LuPlus,
   LuPencil,
-  LuSave,
-  LuCheck
+  LuCheck,
+  LuLayers
 } from 'react-icons/lu';
-import { INITIAL_OWNERS } from '../data/mockData';
+import { INITIAL_OWNERS, SERVICES_OFFERED } from '../data/mockData';
 
 export default function AccountDetailView({
   account,
@@ -22,9 +22,7 @@ export default function AccountDetailView({
   navigationSource = 'accounts',
   fromDashboard = false,
   onNavigateToActivities,
-  onNavigateToProposals,
   onNavigateToContacts,
-  onNavigateToOpportunities,
   onNavigateToLeads
 }) {
   const isBlankAccount = !account?.industry && !account?.website && !account?.location;
@@ -32,6 +30,7 @@ export default function AccountDetailView({
   const [formData, setFormData] = useState({
     companyName: account?.companyName || account?.company || '',
     industry: account?.industry || '',
+    serviceProviding: account?.serviceProviding || 'TechGy CRM Enterprise Suite',
     companySize: account?.companySize || '',
     estimatedAccountValue: account?.estimatedAccountValue || '',
     website: account?.website || '',
@@ -44,6 +43,7 @@ export default function AccountDetailView({
     setFormData({
       companyName: account.companyName || account.company || '',
       industry: account.industry || '',
+      serviceProviding: account.serviceProviding || 'TechGy CRM Enterprise Suite',
       companySize: account.companySize || '',
       estimatedAccountValue: account.estimatedAccountValue || '',
       website: account.website || '',
@@ -127,34 +127,7 @@ export default function AccountDetailView({
                 {formData.companyName || account.companyName}
               </span>
             </>
-          ) : navigationSource === 'proposals' ? (
-            <>
-              <span
-                onClick={onNavigateToProposals || onBack}
-                style={{ cursor: 'pointer', color: '#063669', fontWeight: 600 }}
-                title="Return to Proposals & Commercial Worth"
-              >
-                Proposals & Commercial Worth
-              </span>
-              <LuChevronRight size={14} />
-              <span style={{ color: '#063669', fontWeight: 700 }}>
-                {formData.companyName || account.companyName}
-              </span>
-            </>
-          ) : navigationSource === 'opportunities' ? (
-            <>
-              <span
-                onClick={onNavigateToOpportunities || onBack}
-                style={{ cursor: 'pointer', color: '#063669', fontWeight: 600 }}
-                title="Return to Opportunities Pipeline"
-              >
-                Opportunities Pipeline
-              </span>
-              <LuChevronRight size={14} />
-              <span style={{ color: '#063669', fontWeight: 700 }}>
-                {formData.companyName || account.companyName}
-              </span>
-            </>
+
           ) : navigationSource === 'leads' ? (
             <>
               <span
@@ -212,9 +185,23 @@ export default function AccountDetailView({
               </span>
             )}
           </div>
-          <p style={{ margin: 0, color: '#557396', fontSize: '0.875rem' }}>
-            {formData.industry || 'No industry set'} • {formData.companySize || 'No size specified'} • Owner: {formData.accountOwner}
-          </p>
+          <div style={{ margin: 0, color: '#557396', fontSize: '0.875rem', display: 'flex', alignItems: 'center', gap: '0.65rem', flexWrap: 'wrap' }}>
+            <span>{formData.industry || 'No industry set'} • {formData.companySize || 'No size specified'} • Owner: {formData.accountOwner}</span>
+            <span style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '0.35rem',
+              backgroundColor: '#E6EFF8',
+              color: '#063669',
+              padding: '0.2rem 0.65rem',
+              borderRadius: '20px',
+              fontSize: '0.75rem',
+              fontWeight: 700,
+              border: '1px solid #D5E2EE'
+            }}>
+              <LuLayers size={13} style={{ color: '#063669' }} /> Service Providing: {formData.serviceProviding || 'TechGy CRM Enterprise Suite'}
+            </span>
+          </div>
         </div>
       </div>
 
@@ -234,38 +221,40 @@ export default function AccountDetailView({
             <span className="kpi-title">Estimated Account Value</span>
             <div className="kpi-icon-wrap" style={{ background: '#063669', color: 'white' }}><LuGlobe size={18} /></div>
           </div>
-          <div className="kpi-value">{formData.estimatedAccountValue || 'Not Set'}</div>
+          <div className="kpi-value">{formData.estimatedAccountValue || '₹0'}</div>
           <div className="kpi-subtext">{formData.companySize || 'Enterprise Tier'}</div>
         </div>
       </div>
 
-      {/* 4. Main Content Container */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
+      {/* 4. Company Detail Grid */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
 
-        {/* Account Profile Summary / Editor Card */}
-        <div className="section-card" style={{ marginBottom: '0.65rem', padding: '1rem 1.25rem' }}>
-          <div className="section-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+        {/* Company Profile Details Card */}
+        <div className="section-card">
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', borderBottom: '1px solid #E0E6EE', paddingBottom: '0.75rem' }}>
             <h3 className="section-title">Company Profile</h3>
-            <div style={{ display: 'flex', gap: '0.5rem' }}>
+            <div>
               {isEditing ? (
                 <>
-                  {!isBlankAccount && (
-                    <button
-                      type="button"
-                      className="btn-secondary"
-                      onClick={() => setIsEditing(false)}
-                      style={{ fontSize: '0.785rem', padding: '0.35rem 0.75rem' }}
-                    >
-                      Cancel
-                    </button>
-                  )}
                   <button
                     type="button"
-                    className="btn-primary"
-                    onClick={handleSaveProfile}
-                    style={{ fontSize: '0.785rem', padding: '0.35rem 0.85rem', display: 'inline-flex', alignItems: 'center', gap: '0.35rem', fontWeight: 600 }}
+                    className="btn-secondary"
+                    onClick={() => {
+                      setFormData({
+                        companyName: account.companyName || account.company || '',
+                        industry: account.industry || '',
+                        serviceProviding: account.serviceProviding || 'TechGy CRM Enterprise Suite',
+                        companySize: account.companySize || '',
+                        estimatedAccountValue: account.estimatedAccountValue || '',
+                        website: account.website || '',
+                        location: account.location || '',
+                        accountOwner: account.accountOwner || 'Rajesh Sharma'
+                      });
+                      setIsEditing(false);
+                    }}
+                    style={{ fontSize: '0.785rem', padding: '0.35rem 0.75rem', marginRight: '0.5rem' }}
                   >
-                    <LuSave size={14} /> Save Profile
+                    Cancel
                   </button>
                 </>
               ) : (
@@ -305,6 +294,19 @@ export default function AccountDetailView({
                     value={formData.industry}
                     onChange={(e) => setFormData({ ...formData, industry: e.target.value })}
                   />
+                </div>
+
+                <div className="form-group">
+                  <label className="form-label">Service Providing</label>
+                  <select
+                    className="form-select"
+                    value={formData.serviceProviding}
+                    onChange={(e) => setFormData({ ...formData, serviceProviding: e.target.value })}
+                  >
+                    {SERVICES_OFFERED.map(srv => (
+                      <option key={srv} value={srv}>{srv}</option>
+                    ))}
+                  </select>
                 </div>
 
                 <div className="form-group">
@@ -387,6 +389,24 @@ export default function AccountDetailView({
               <div className="drawer-field-group">
                 <div className="field-label">Industry</div>
                 <div className="field-value">{formData.industry || 'Not Set'}</div>
+              </div>
+
+              <div className="drawer-field-group">
+                <div className="field-label">Service Providing</div>
+                <div className="field-value" style={{ fontWeight: 700, color: '#063669' }}>
+                  <span style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '0.35rem',
+                    backgroundColor: '#F0F5FA',
+                    border: '1px solid #D5E2EE',
+                    padding: '0.25rem 0.65rem',
+                    borderRadius: '6px',
+                    fontSize: '0.82rem'
+                  }}>
+                    <LuLayers size={13} style={{ color: '#063669' }} /> {formData.serviceProviding || 'TechGy CRM Enterprise Suite'}
+                  </span>
+                </div>
               </div>
 
               <div className="drawer-field-group">

@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import { LuBuilding2, LuX, LuArrowRight } from 'react-icons/lu';
-import { animateModalEnter } from '../utils/animations';
+import { animateModalEnter } from '../../utils/animations';
 
 export default function NewCompanyPromptModal({
   isOpen,

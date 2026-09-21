@@ -1,5 +1,5 @@
 import React from 'react';
-import { LuBuilding2, LuGlobe, LuMapPin, LuChevronRight } from 'react-icons/lu';
+import { LuBuilding2, LuGlobe, LuMapPin, LuChevronRight, LuLayers } from 'react-icons/lu';
 import { isDateInFilter } from '../utils/dateUtils';
 
 export default function AccountsView({
@@ -13,21 +13,27 @@ export default function AccountsView({
 }) {
   const q = searchQuery.toLowerCase().trim();
   const filteredAccounts = accounts.filter(acc => {
-    const matchesSearch = !q ||
+    // 1. Search Query Filter
+    const matchSearch =
+      !q ||
       acc.companyName.toLowerCase().includes(q) ||
       acc.industry.toLowerCase().includes(q) ||
+      (acc.serviceProviding && acc.serviceProviding.toLowerCase().includes(q)) ||
       acc.location.toLowerCase().includes(q) ||
       acc.accountOwner.toLowerCase().includes(q);
+    if (!matchSearch) return false;
 
-    const matchesOwner = !selectedOwnerFilter || selectedOwnerFilter === 'All Owners' || acc.accountOwner === selectedOwnerFilter;
+    // 2. Date Range Filter
+    if (selectedDateFilter !== 'This Month' && selectedDateFilter !== 'This Quarter' && selectedDateFilter !== 'All Time') {
+      if (!isDateInFilter(acc.createdDate, selectedDateFilter)) return false;
+    }
 
-    // Company Accounts are enduring organizational records; only filter by creation date if an explicit custom range is set
-    const isCustomDate = typeof selectedDateFilter === 'object' && selectedDateFilter?.type === 'custom';
-    const matchesDate = isCustomDate
-      ? (!acc.createdDate ? true : isDateInFilter(acc.createdDate, selectedDateFilter))
-      : true;
+    // 3. Owner Filter
+    if (selectedOwnerFilter !== 'All Owners') {
+      if (acc.accountOwner !== selectedOwnerFilter) return false;
+    }
 
-    return matchesSearch && matchesOwner && matchesDate;
+    return true;
   });
 
   return (
@@ -69,7 +75,7 @@ export default function AccountsView({
             <div
               key={acc.id}
               className="kpi-card"
-              style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}
+              style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', cursor: 'pointer' }}
               onClick={() => onSelectAccount(acc)}
             >
               <div>
@@ -85,8 +91,14 @@ export default function AccountsView({
                 <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: '#063669', marginBottom: '0.25rem' }}>
                   {acc.companyName}
                 </h3>
-                <div style={{ fontSize: '0.8rem', color: '#557396', marginBottom: '0.75rem' }}>
+                <div style={{ fontSize: '0.8rem', color: '#557396', marginBottom: '0.5rem' }}>
                   {acc.industry} • {acc.companySize}
+                </div>
+
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', fontSize: '0.75rem', color: '#063669', marginBottom: '0.85rem' }}>
+                  <span style={{ backgroundColor: '#EBF3FA', border: '1px solid #D5E2EE', padding: '0.2rem 0.55rem', borderRadius: '6px', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}>
+                    <LuLayers size={12} /> {acc.serviceProviding || 'TechGy CRM Enterprise Suite'}
+                  </span>
                 </div>
 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem', fontSize: '0.8rem', color: '#063669', marginBottom: '1rem' }}>

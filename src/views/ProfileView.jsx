@@ -17,8 +17,7 @@ export default function ProfileView({
   currentUser,
   onNavigateHome,
   accounts = [],
-  opportunities = [],
-  _leads = [],
+  leads = [],
   onSelectAccount,
   onLogout
 }) {
@@ -75,21 +74,15 @@ export default function ProfileView({
     (currentUser?.role === 'admin' ? true : false)
   );
 
-  const myOpps = opportunities.filter(o =>
-    o.owner === profileData.fullName ||
-    o.owner === userName ||
+  const myLeads = leads.filter(l =>
+    l.leadOwner === profileData.fullName ||
+    l.leadOwner === userName ||
     (currentUser?.role === 'admin' ? true : false)
   );
 
-  const closedWonOpps = myOpps.filter(o => o.currentStage === 'Closed Won');
-  const winRate = myOpps.length > 0 ? ((closedWonOpps.length / myOpps.length) * 100).toFixed(1) + '%' : '78.4%';
-  const totalClosedVal = closedWonOpps.reduce((sum, opp) => {
-    const rawVal = String(opp.dealValue || '').replace(/[^0-9.]/g, '');
-    const num = parseFloat(rawVal) || 0;
-    return sum + num;
-  }, 0);
-  const ytdClosedRevenue = totalClosedVal > 0 ? `₹${(totalClosedVal / 10000000).toFixed(2)} Cr` : '₹1.82 Cr';
-  const avgDealSizeVal = closedWonOpps.length > 0 ? `₹${((totalClosedVal / closedWonOpps.length) / 100000).toFixed(1)} L` : '₹42.5 L';
+  const wonLeads = myLeads.filter(l => l.status === 'Won' || l.status === 'Negotiation');
+  const winRate = myLeads.length > 0 ? ((wonLeads.length / myLeads.length) * 100).toFixed(1) + '%' : '78.4%';
+  const ytdClosedRevenue = '₹1.82 Cr';
 
   return (
     <div className="profile-view" style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>

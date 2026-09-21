@@ -13,14 +13,15 @@ import {
   LuArrowUpDown,
   LuX,
   LuPencil,
-  LuCheck
+  LuCheck,
+  LuLayers
 } from 'react-icons/lu';
-import { LEAD_SOURCES, INITIAL_OWNERS, INITIAL_ACCOUNTS } from '../data/mockData';
-import StageConfirmModal from '../components/StageConfirmModal';
-import LeadCallHistory from '../components/LeadCallHistory';
-import LeadPipelineProgress from '../components/LeadPipelineProgress';
-import LeadChatHistory from '../components/LeadChatHistory';
-import FormDateSelector from '../components/FormDateSelector';
+import { LEAD_SOURCES, INITIAL_OWNERS, INITIAL_ACCOUNTS, SERVICES_OFFERED } from '../data/mockData';
+import StageConfirmModal from '../components/modals/StageConfirmModal';
+import LeadCallHistory from '../components/leads/LeadCallHistory';
+import LeadPipelineProgress from '../components/leads/LeadPipelineProgress';
+import LeadChatHistory from '../components/leads/LeadChatHistory';
+import FormDateSelector from '../components/common/FormDateSelector';
 
 export default function LeadDetailView({
   lead,
@@ -32,7 +33,6 @@ export default function LeadDetailView({
   onNavigateToAccount,
   navigationSource = 'leads',
   onNavigateToActivities,
-  onNavigateToProposals,
   onNavigateToContacts,
   onUpdateLeadStage,
   onUpdateLead,
@@ -92,6 +92,7 @@ export default function LeadDetailView({
     leadName: '',
     company: '',
     designation: '',
+    serviceProviding: 'TechGy CRM Enterprise Suite',
     leadSource: 'Website',
     phoneNumber: '',
     emailId: '',
@@ -116,6 +117,7 @@ export default function LeadDetailView({
       leadName: lead.leadName || '',
       company: lead.company || '',
       designation: lead.designation || '',
+      serviceProviding: lead.serviceProviding || 'TechGy CRM Enterprise Suite',
       leadSource: lead.leadSource || 'Website',
       phoneNumber: lead.phoneNumber || '',
       emailId: lead.emailId || '',
@@ -139,6 +141,7 @@ export default function LeadDetailView({
         leadName: editForm.leadName.trim(),
         company: editForm.company.trim(),
         designation: editForm.designation.trim(),
+        serviceProviding: editForm.serviceProviding,
         phoneNumber: editForm.phoneNumber.trim(),
         emailId: editForm.emailId.trim(),
         leadSource: editForm.leadSource,
@@ -373,20 +376,7 @@ export default function LeadDetailView({
                 {lead.leadName} ({lead.company})
               </span>
             </>
-          ) : navigationSource === 'proposals' ? (
-            <>
-              <span
-                onClick={onNavigateToProposals || onBack}
-                style={{ cursor: 'pointer', color: '#063669', fontWeight: 600 }}
-                title="Return to Proposals Directory"
-              >
-                Proposals Directory
-              </span>
-              <LuChevronRight size={14} />
-              <span style={{ color: '#063669', fontWeight: 700 }}>
-                {lead.leadName} ({lead.company})
-              </span>
-            </>
+
           ) : navigationSource === 'accounts' ? (
             <>
               <span
@@ -433,7 +423,7 @@ export default function LeadDetailView({
             <h1 style={{ fontSize: '1.65rem', fontWeight: 800, color: '#063669', margin: '0 0 0.35rem 0', letterSpacing: '-0.02em' }}>
               {lead.leadName}
             </h1>
-            <div style={{ fontSize: '0.95rem', color: '#557396', display: 'flex', alignItems: 'center', gap: '0.45rem', flexWrap: 'wrap' }}>
+            <div style={{ fontSize: '0.95rem', color: '#557396', display: 'flex', alignItems: 'center', gap: '0.65rem', flexWrap: 'wrap' }}>
               <span>{lead.designation} at</span>
               <button
                 type="button"
@@ -443,6 +433,20 @@ export default function LeadDetailView({
               >
                 {lead.company}
               </button>
+              <span style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '0.35rem',
+                backgroundColor: '#E6EFF8',
+                color: '#063669',
+                padding: '0.2rem 0.65rem',
+                borderRadius: '20px',
+                fontSize: '0.75rem',
+                fontWeight: 700,
+                border: '1px solid #D5E2EE'
+              }}>
+                <LuLayers size={13} style={{ color: '#063669' }} /> Service Providing: {lead.serviceProviding || 'TechGy CRM Enterprise Suite'}
+              </span>
             </div>
           </div>
 
@@ -665,6 +669,24 @@ export default function LeadDetailView({
               <div className="drawer-field-group">
                 <div className="field-label">Designation</div>
                 <div className="field-value">{lead.designation}</div>
+              </div>
+
+              <div className="drawer-field-group">
+                <div className="field-label">Service Providing</div>
+                <div className="field-value" style={{ fontWeight: 700, color: '#063669' }}>
+                  <span style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '0.35rem',
+                    backgroundColor: '#F0F5FA',
+                    border: '1px solid #D5E2EE',
+                    padding: '0.25rem 0.65rem',
+                    borderRadius: '6px',
+                    fontSize: '0.82rem'
+                  }}>
+                    <LuLayers size={13} style={{ color: '#063669' }} /> {lead.serviceProviding || 'TechGy CRM Enterprise Suite'}
+                  </span>
+                </div>
               </div>
 
               <div className="drawer-field-group">
@@ -1474,6 +1496,19 @@ export default function LeadDetailView({
                       placeholder="e.g. VP of Technology"
                     />
                   </div>
+                </div>
+
+                <div className="form-group" style={{ marginBottom: 0 }}>
+                  <label className="form-label">Service Providing</label>
+                  <select
+                    className="form-select"
+                    value={editForm.serviceProviding}
+                    onChange={(e) => setEditForm({ ...editForm, serviceProviding: e.target.value })}
+                  >
+                    {SERVICES_OFFERED.map(srv => (
+                      <option key={srv} value={srv}>{srv}</option>
+                    ))}
+                  </select>
                 </div>
 
                 <div className="form-grid-2">

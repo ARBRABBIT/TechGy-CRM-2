@@ -27,6 +27,16 @@ export const LEAD_SOURCES = [
   'Partner'
 ];
 
+export const SERVICES_OFFERED = [
+  'TechGy CRM Enterprise Suite',
+  'Omnichannel Voice & AI Dialer',
+  'Field Sales Mobility & Geofencing',
+  'Enterprise Data Migration & Onboarding',
+  'Custom ERP & WhatsApp Gateway Integration',
+  'Cloud Infrastructure & Security Solutions',
+  'Dedicated Support & AMC'
+];
+
 export const REVENUE_DATA = {
   Monthly: {
     revenue: '₹14,25,000',
@@ -44,10 +54,9 @@ export const REVENUE_DATA = {
     quarterly: '₹48,50,000',
     fy: '₹1,82,00,000',
     trend: [
-      { period: 'Q1', revenue: 3900000, target: 4000000 },
-      { period: 'Q2', revenue: 4400000, target: 4200000 },
-      { period: 'Q3', revenue: 4850000, target: 4500000 },
-      { period: 'Q4 (Est)', revenue: 5050000, target: 4800000 },
+      { period: 'Month 1', revenue: 1425000, target: 1500000 },
+      { period: 'Month 2', revenue: 1680000, target: 1600000 },
+      { period: 'Month 3', revenue: 1745000, target: 1700000 },
     ]
   },
   FY: {
@@ -55,10 +64,31 @@ export const REVENUE_DATA = {
     quarterly: '₹48,50,000',
     fy: '₹1,82,00,000',
     trend: [
-      { period: '2022-23', revenue: 11000000, target: 10000000 },
-      { period: '2023-24', revenue: 14500000, target: 13000000 },
-      { period: '2024-25', revenue: 16800000, target: 16000000 },
-      { period: '2025-26', revenue: 18200000, target: 17500000 },
+      { period: 'Q1', revenue: 4200000, target: 4000000 },
+      { period: 'Q2', revenue: 4850000, target: 4500000 },
+      { period: 'Q3', revenue: 5100000, target: 5000000 },
+      { period: 'Q4', revenue: 4050000, target: 4500000 },
+    ]
+  },
+  FY26: {
+    revenue: '₹1,82,00,000',
+    quarterly: '₹48,50,000',
+    fy: '₹1,82,00,000',
+    trend: [
+      { period: 'Q1', revenue: 4200000, target: 4000000 },
+      { period: 'Q2', revenue: 4850000, target: 4500000 },
+      { period: 'Q3', revenue: 5100000, target: 5000000 },
+      { period: 'Q4', revenue: 4050000, target: 4500000 },
+    ]
+  },
+  AllTime: {
+    revenue: '₹5,40,00,000',
+    quarterly: '₹48,50,000',
+    fy: '₹1,82,00,000',
+    trend: [
+      { period: 'FY24', revenue: 14500000, target: 14000000 },
+      { period: 'FY25', revenue: 21300000, target: 20000000 },
+      { period: 'FY26', revenue: 18200000, target: 18000000 },
     ]
   }
 };
@@ -77,6 +107,7 @@ export const INITIAL_ACCOUNTS = [
     id: 'ACC-101',
     companyName: 'Tata Consultancy Tech Ltd',
     industry: 'Enterprise Software',
+    serviceProviding: 'TechGy CRM Enterprise Suite',
     companySize: '500-1000 employees',
     website: 'www.tatatech.co.in',
     location: 'Mumbai, MH',
@@ -84,14 +115,13 @@ export const INITIAL_ACCOUNTS = [
     estimatedAccountValue: '₹1,80,00,000',
     leadsCount: 3,
     contactsCount: 4,
-    oppsCount: 2,
-    proposalsCount: 2,
     createdDate: '2026-08-15'
   },
   {
     id: 'ACC-102',
     companyName: 'Reliance Cloud Solutions',
     industry: 'Cloud Infrastructure',
+    serviceProviding: 'Enterprise Data Migration & Onboarding',
     companySize: '1000+ employees',
     website: 'www.reliancecloud.in',
     location: 'Bengaluru, KA',
@@ -99,14 +129,13 @@ export const INITIAL_ACCOUNTS = [
     estimatedAccountValue: '₹3,20,00,000',
     leadsCount: 2,
     contactsCount: 3,
-    oppsCount: 1,
-    proposalsCount: 1,
     createdDate: '2026-08-18'
   },
   {
     id: 'ACC-103',
     companyName: 'Infosys Digital Systems',
     industry: 'Healthcare IT',
+    serviceProviding: 'Omnichannel Voice & AI Dialer',
     companySize: '250-500 employees',
     website: 'www.infosysdigital.co.in',
     location: 'Hyderabad, TS',
@@ -114,14 +143,13 @@ export const INITIAL_ACCOUNTS = [
     estimatedAccountValue: '₹1,40,00,000',
     leadsCount: 4,
     contactsCount: 5,
-    oppsCount: 2,
-    proposalsCount: 1,
     createdDate: '2026-08-20'
   },
   {
     id: 'ACC-104',
     companyName: 'HDFC Fintech Dynamics',
     industry: 'Financial Services',
+    serviceProviding: 'Custom ERP & WhatsApp Gateway Integration',
     companySize: '100-250 employees',
     website: 'www.hdfcfintech.in',
     location: 'Delhi NCR',
@@ -129,14 +157,13 @@ export const INITIAL_ACCOUNTS = [
     estimatedAccountValue: '₹95,00,000',
     leadsCount: 2,
     contactsCount: 2,
-    oppsCount: 1,
-    proposalsCount: 1,
     createdDate: '2026-08-22'
   },
   {
     id: 'ACC-105',
     companyName: 'Mahindra Supply Chain Logistics',
     industry: 'Supply Chain',
+    serviceProviding: 'Field Sales Mobility & Geofencing',
     companySize: '50-100 employees',
     website: 'www.mahindralogistics.co.in',
     location: 'Pune, MH',
@@ -144,14 +171,13 @@ export const INITIAL_ACCOUNTS = [
     estimatedAccountValue: '₹75,00,000',
     leadsCount: 1,
     contactsCount: 2,
-    oppsCount: 1,
-    proposalsCount: 0,
     createdDate: '2026-08-25'
   },
   {
     id: 'ACC-106',
     companyName: 'GreenGrid Energy Pvt Ltd',
     industry: 'Renewable Energy & CleanTech',
+    serviceProviding: 'TechGy CRM Enterprise Suite',
     companySize: '250-500 employees',
     website: 'www.greengridenergy.in',
     location: 'Ahmedabad, GJ',
@@ -159,14 +185,13 @@ export const INITIAL_ACCOUNTS = [
     estimatedAccountValue: '₹1,50,00,000',
     leadsCount: 1,
     contactsCount: 2,
-    oppsCount: 1,
-    proposalsCount: 1,
     createdDate: '2026-08-15'
   },
   {
     id: 'ACC-107',
     companyName: 'Apex Technologies Ltd',
     industry: 'Cloud Infrastructure & DevOps',
+    serviceProviding: 'Cloud Infrastructure & Security Solutions',
     companySize: '500-1000 employees',
     website: 'www.apextech.co.in',
     location: 'Bengaluru, KA',
@@ -174,14 +199,13 @@ export const INITIAL_ACCOUNTS = [
     estimatedAccountValue: '₹2,10,00,000',
     leadsCount: 1,
     contactsCount: 2,
-    oppsCount: 1,
-    proposalsCount: 1,
     createdDate: '2026-08-20'
   },
   {
     id: 'ACC-108',
     companyName: 'Nexus Retails India',
     industry: 'Retail & Consumer Goods',
+    serviceProviding: 'Omnichannel Voice & AI Dialer',
     companySize: '1000+ employees',
     website: 'www.nexusretails.in',
     location: 'Gurugram, HR',
@@ -189,8 +213,6 @@ export const INITIAL_ACCOUNTS = [
     estimatedAccountValue: '₹1,25,00,000',
     leadsCount: 1,
     contactsCount: 3,
-    oppsCount: 5,
-    proposalsCount: 1,
     createdDate: '2026-08-22'
   }
 ];
@@ -203,6 +225,7 @@ export const INITIAL_LEADS = [
     emailId: 'aarav.sharma@tatatech.co.in',
     company: 'Tata Consultancy Tech Ltd',
     designation: 'VP of Technology',
+    serviceProviding: 'TechGy CRM Enterprise Suite',
     leadSource: 'Website',
     status: 'Qualified',
     leadOwner: 'Rajesh Sharma',
@@ -222,6 +245,7 @@ export const INITIAL_LEADS = [
     emailId: 'ananya.patel@reliancecloud.in',
     company: 'Reliance Cloud Solutions',
     designation: 'Director of Procurement',
+    serviceProviding: 'Enterprise Data Migration & Onboarding',
     leadSource: 'Referral',
     status: 'Discussion',
     leadOwner: 'Priya Patel',
@@ -241,6 +265,7 @@ export const INITIAL_LEADS = [
     emailId: 'rohan.verma@infosysdigital.co.in',
     company: 'Infosys Digital Systems',
     designation: 'Chief Technology Officer',
+    serviceProviding: 'Cloud Infrastructure & Security Solutions',
     leadSource: 'Inbound Call',
     status: 'New',
     leadOwner: 'Amit Verma',
@@ -260,6 +285,7 @@ export const INITIAL_LEADS = [
     emailId: 'pooja.iyer@hdfcfintech.in',
     company: 'HDFC Fintech Dynamics',
     designation: 'Head of Operations',
+    serviceProviding: 'Custom ERP & WhatsApp Gateway Integration',
     leadSource: 'LinkedIn',
     status: 'Proposal',
     leadOwner: 'Ananya Rao',
@@ -279,6 +305,7 @@ export const INITIAL_LEADS = [
     emailId: 'karan.mehta@mahindralogistics.co.in',
     company: 'Mahindra Supply Chain Logistics',
     designation: 'IT Director',
+    serviceProviding: 'Field Sales Mobility & Geofencing',
     leadSource: 'Campaign',
     status: 'Contacted',
     leadOwner: 'Vikram Malhotra',
@@ -298,6 +325,7 @@ export const INITIAL_LEADS = [
     emailId: 'sneha.k@tatatech.co.in',
     company: 'Tata Consultancy Tech Ltd',
     designation: 'Sales Operations Manager',
+    serviceProviding: 'TechGy CRM Enterprise Suite',
     leadSource: 'Website',
     status: 'Qualified',
     leadOwner: 'Rajesh Sharma',
@@ -317,6 +345,7 @@ export const INITIAL_LEADS = [
     emailId: 'aditya.joshi@reliancecloud.in',
     company: 'Reliance Cloud Solutions',
     designation: 'VP of Product',
+    serviceProviding: 'Enterprise Data Migration & Onboarding',
     leadSource: 'Partner',
     status: 'Negotiation',
     leadOwner: 'Priya Patel',
@@ -336,6 +365,7 @@ export const INITIAL_LEADS = [
     emailId: 'deepak.nair@wiprocloud.in',
     company: 'Wipro Enterprise Cloud',
     designation: 'Head of Infrastructure',
+    serviceProviding: 'Cloud Infrastructure & Security Solutions',
     leadSource: 'Campaign',
     status: 'Contacted',
     leadOwner: 'Amit Verma',
@@ -355,6 +385,7 @@ export const INITIAL_LEADS = [
     emailId: 'sunita.rao@airtelbusiness.in',
     company: 'Bharti Airtel Business',
     designation: 'VP of Enterprise Solutions',
+    serviceProviding: 'Omnichannel Voice & AI Dialer',
     leadSource: 'LinkedIn',
     status: 'Discussion',
     leadOwner: 'Vikram Malhotra',
@@ -374,6 +405,7 @@ export const INITIAL_LEADS = [
     emailId: 'vikrant.j@ltinfotech.com',
     company: 'L&T Infotech Systems',
     designation: 'Procurement Director',
+    serviceProviding: 'TechGy CRM Enterprise Suite',
     leadSource: 'Referral',
     status: 'Qualified',
     leadOwner: 'Rajesh Sharma',
@@ -388,161 +420,7 @@ export const INITIAL_LEADS = [
   }
 ];
 
-export const INITIAL_OPPORTUNITIES = [
-  {
-    id: 'OPP-101',
-    opportunityName: 'GreenGrid – ERP Integration',
-    accountName: 'GreenGrid Energy Pvt Ltd',
-    estimatedValue: '₹45.50 Lakh',
-    currentStage: 'Proposal Sent',
-    probability: '60%',
-    expectedClosureDate: '28 Sep 2026',
-    createdDate: '2026-08-15',
-    owner: 'Rahul Verma',
-    score: 78,
-    visualLevel: 'High'
-  },
-  {
-    id: 'OPP-102',
-    opportunityName: 'Apex Tech – Cloud Migration',
-    accountName: 'Apex Technologies Ltd',
-    estimatedValue: '₹1.20 Cr',
-    currentStage: 'Negotiation',
-    probability: '85%',
-    expectedClosureDate: '15 Sep 2026',
-    createdDate: '2026-08-18',
-    owner: 'Priya Sharma',
-    score: 90,
-    visualLevel: 'High'
-  },
-  {
-    id: 'OPP-103',
-    opportunityName: 'Nexus – Q4 Software License',
-    accountName: 'Nexus Retails India',
-    estimatedValue: '₹8.75 Lakh',
-    currentStage: 'Discovery',
-    probability: '20%',
-    expectedClosureDate: '10 Sep 2026',
-    createdDate: '2026-08-20',
-    owner: 'Rahul Verma',
-    score: 45,
-    visualLevel: 'Low'
-  },
-  {
-    id: 'OPP-104',
-    opportunityName: 'Nexus – Q4 Software License',
-    accountName: 'Nexus Retails India',
-    estimatedValue: '₹8.75 Lakh',
-    currentStage: 'Discovery',
-    probability: '20%',
-    expectedClosureDate: '12 Sep 2026',
-    createdDate: '2026-08-22',
-    owner: 'Rahul Verma',
-    score: 45,
-    visualLevel: 'Low'
-  },
-  {
-    id: 'OPP-105',
-    opportunityName: 'Nexus – Q4 Software License',
-    accountName: 'Nexus Retails India',
-    estimatedValue: '₹8.75 Lakh',
-    currentStage: 'Discovery',
-    probability: '20%',
-    expectedClosureDate: '14 Sep 2026',
-    createdDate: '2026-08-25',
-    owner: 'Rahul Verma',
-    score: 45,
-    visualLevel: 'Low'
-  },
-  {
-    id: 'OPP-106',
-    opportunityName: 'Nexus – Q4 Software License',
-    accountName: 'Nexus Retails India',
-    estimatedValue: '₹8.75 Lakh',
-    currentStage: 'Discovery',
-    probability: '20%',
-    expectedClosureDate: '16 Sep 2026',
-    createdDate: '2026-08-26',
-    owner: 'Rahul Verma',
-    score: 45,
-    visualLevel: 'Low'
-  },
-  {
-    id: 'OPP-107',
-    opportunityName: 'Nexus – Q4 Software License',
-    accountName: 'Nexus Retails India',
-    estimatedValue: '₹8.75 Lakh',
-    currentStage: 'Discovery',
-    probability: '20%',
-    expectedClosureDate: '18 Sep 2026',
-    createdDate: '2026-08-28',
-    owner: 'Rahul Verma',
-    score: 45,
-    visualLevel: 'Low'
-  },
-  {
-    id: 'OPP-108',
-    opportunityName: 'Tata Tech CRM Enterprise License Expansion',
-    accountName: 'Tata Consultancy Tech Ltd',
-    estimatedValue: '₹1.80 Cr',
-    currentStage: 'Proposal Sent',
-    probability: '80%',
-    expectedClosureDate: '30 Sep 2026',
-    createdDate: '2026-08-10',
-    owner: 'Rajesh Sharma',
-    score: 85,
-    visualLevel: 'High'
-  },
-  {
-    id: 'OPP-109',
-    opportunityName: 'Reliance Cloud Multi-Region Rollout',
-    accountName: 'Reliance Cloud Solutions',
-    estimatedValue: '₹3.20 Cr',
-    currentStage: 'Negotiation',
-    probability: '90%',
-    expectedClosureDate: '15 Sep 2026',
-    createdDate: '2026-08-05',
-    owner: 'Priya Patel',
-    score: 92,
-    visualLevel: 'High'
-  },
-  {
-    id: 'OPP-110',
-    opportunityName: 'Infosys Digital Secure Workspace',
-    accountName: 'Infosys Digital Systems',
-    estimatedValue: '₹1.40 Cr',
-    currentStage: 'Discovery',
-    probability: '60%',
-    expectedClosureDate: '25 Sep 2026',
-    createdDate: '2026-08-12',
-    owner: 'Amit Verma',
-    score: 65,
-    visualLevel: 'Medium'
-  },
-  ...Array.from({ length: 38 }).map((_, idx) => {
-    const num = idx + 11;
-    const stages = ['Discovery', 'Proposal Sent', 'Negotiation', 'Qualified', 'New'];
-    const owners = ['Rahul Verma', 'Priya Sharma', 'Rajesh Sharma', 'Priya Patel', 'Amit Verma', 'Ananya Rao', 'Vikram Malhotra'];
-    const companies = ['Zomato Logistics', 'Swiggy Pay', 'Paytm Tech', 'Razorpay Payments', 'Zerodha Capital', 'Pine Labs', 'Meesho Commerce'];
-    const stg = stages[num % stages.length];
-    const own = owners[num % owners.length];
-    const comp = companies[num % companies.length];
-    const prob = stg === 'Negotiation' ? '85%' : stg === 'Proposal Sent' ? '65%' : stg === 'Discovery' ? '20%' : '40%';
-    return {
-      id: `OPP-${100 + num}`,
-      opportunityName: `${comp} – Enterprise Integration`,
-      accountName: comp,
-      estimatedValue: `₹${(15 + num * 2.5).toFixed(2)} Lakh`,
-      currentStage: stg,
-      probability: prob,
-      expectedClosureDate: `${(num % 28) + 1} Sep 2026`,
-      createdDate: '2026-08-15',
-      owner: own,
-      score: 50 + (num % 45),
-      visualLevel: num % 2 === 0 ? 'High' : 'Medium'
-    };
-  })
-];
+
 
 export const INITIAL_ACTIVITIES = [
   {
@@ -745,60 +623,7 @@ export const INITIAL_ACTIVITIES = [
   }
 ];
 
-export const INITIAL_PROPOSALS = [
-  {
-    id: 'PR-401',
-    proposalId: 'PR-2026-001',
-    company: 'Tata Consultancy Tech Ltd',
-    opportunity: 'Tata Tech CRM Enterprise License Expansion',
-    proposalDate: '2026-08-20',
-    proposalValue: '₹1,80,00,000',
-    estimatedAccountWorth: '₹2,20,00,000',
-    status: 'Negotiation',
-    validityDate: '2026-09-30',
-    owner: 'Rajesh Sharma',
-    notes: 'Includes 100 user seats, custom API connectors, and 24/7 dedicated support SLA.'
-  },
-  {
-    id: 'PR-402',
-    proposalId: 'PR-2026-002',
-    company: 'Reliance Cloud Solutions',
-    opportunity: 'Reliance Cloud Multi-Region Rollout',
-    proposalDate: '2026-08-15',
-    proposalValue: '₹3,20,00,000',
-    estimatedAccountWorth: '₹4,00,00,000',
-    status: 'Sent',
-    validityDate: '2026-09-15',
-    owner: 'Priya Patel',
-    notes: 'Enterprise multi-region cloud deployment package.'
-  },
-  {
-    id: 'PR-403',
-    proposalId: 'PR-2026-003',
-    company: 'Infosys Digital Systems',
-    opportunity: 'Infosys Digital Secure Workspace',
-    proposalDate: '2026-08-25',
-    proposalValue: '₹1,40,00,000',
-    estimatedAccountWorth: '₹1,60,00,000',
-    status: 'Viewed',
-    validityDate: '2026-10-15',
-    owner: 'Amit Verma',
-    notes: 'Enterprise cloud instance with dedicated hardware isolation.'
-  },
-  {
-    id: 'PR-404',
-    proposalId: 'PR-2026-004',
-    company: 'HDFC Fintech Dynamics',
-    opportunity: 'HDFC Core Analytics Integration',
-    proposalDate: '2026-08-22',
-    proposalValue: '₹95,00,000',
-    estimatedAccountWorth: '₹1,10,00,000',
-    status: 'Draft',
-    validityDate: '2026-09-25',
-    owner: 'Ananya Rao',
-    notes: 'Standard annual subscription + analytics add-on module.'
-  }
-];
+
 
 export const INITIAL_CONTACTS = [
   {
@@ -879,46 +704,7 @@ export const INITIAL_NOTIFICATIONS = [
     priority: 'High',
     targetModule: 'leads'
   },
-  {
-    id: 'NOTIF-2',
-    title: 'Opportunity Won',
-    message: 'Reliance Cloud Solutions accepted proposal #PR-902 (₹3.2 Cr) and moved to Won stage.',
-    timestamp: '45 mins ago',
-    category: 'Opportunity',
-    isRead: false,
-    priority: 'High',
-    targetModule: 'opportunities'
-  },
-  {
-    id: 'NOTIF-3',
-    title: 'New Lead Assigned',
-    message: 'Rajesh Sharma assigned a new lead: Infosys Enterprise Systems.',
-    timestamp: '2 hours ago',
-    category: 'Lead',
-    isRead: false,
-    priority: 'Normal',
-    targetModule: 'leads'
-  },
-  {
-    id: 'NOTIF-4',
-    title: 'Activity Scheduled',
-    message: 'Product demo meeting with Priya Patel scheduled for today at 3:30 PM.',
-    timestamp: '3 hours ago',
-    category: 'Activity',
-    isRead: false,
-    priority: 'Normal',
-    targetModule: 'activities'
-  },
-  {
-    id: 'NOTIF-5',
-    title: 'Proposal Viewed',
-    message: 'Mahindra Tech Solutions opened commercial proposal #PR-904.',
-    timestamp: '5 hours ago',
-    category: 'Proposal',
-    isRead: false,
-    priority: 'Normal',
-    targetModule: 'proposals'
-  },
+
   {
     id: 'NOTIF-6',
     title: 'New Contact Added',

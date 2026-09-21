@@ -5,8 +5,6 @@ import {
   LuCircleCheck,
   LuUserPlus,
   LuCalendar,
-  LuFileText,
-  LuTrendingUp,
   LuX,
   LuCheckCheck,
   LuTrash2
@@ -71,7 +69,7 @@ export default function NotificationsPopover({
   const filteredNotifications = notifications.filter(n => {
     if (activeTab === 'Unread') return !n.isRead;
     if (activeTab === 'Overdue') return n.category === 'Overdue' || n.priority === 'High';
-    if (activeTab === 'Updates') return n.category === 'Lead' || n.category === 'Opportunity' || n.category === 'Proposal';
+    if (activeTab === 'Updates') return n.category === 'Lead' || n.category === 'Activity';
     return true;
   });
 
@@ -79,14 +77,10 @@ export default function NotificationsPopover({
     switch (category) {
       case 'Overdue':
         return <LuTriangleAlert size={16} />;
-      case 'Opportunity':
-        return <LuTrendingUp size={16} />;
       case 'Lead':
         return <LuUserPlus size={16} />;
       case 'Activity':
         return <LuCalendar size={16} />;
-      case 'Proposal':
-        return <LuFileText size={16} />;
       default:
         return <LuCircleCheck size={16} />;
     }
@@ -95,10 +89,8 @@ export default function NotificationsPopover({
   const getCategoryClass = (category) => {
     switch (category) {
       case 'Overdue': return 'overdue';
-      case 'Opportunity': return 'opportunity';
       case 'Lead': return 'lead';
       case 'Activity': return 'activity';
-      case 'Proposal': return 'proposal';
       default: return 'default';
     }
   };

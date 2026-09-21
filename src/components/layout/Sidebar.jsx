@@ -7,7 +7,7 @@ import {
   LuPanelLeft,
   LuX
 } from 'react-icons/lu';
-import { animateDrawerEnter } from '../utils/animations';
+import { animateDrawerEnter } from '../../utils/animations';
 
 const BASE_MODULES = [
   { id: 'dashboard', title: 'Dashboard', icon: LuLayoutDashboard },

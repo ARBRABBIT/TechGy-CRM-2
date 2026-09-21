@@ -102,7 +102,7 @@ export default function DashboardView({
   ).length;
 
   // Active revenue data based on toggle
-  const currentRevObj = REVENUE_DATA[revenueToggle] || REVENUE_DATA.Monthly;
+  const currentRevObj = REVENUE_DATA?.[revenueToggle] || REVENUE_DATA?.FY || REVENUE_DATA?.Monthly || { trend: [] };
 
   // Filter follow-up action items: must match owner filter AND date filter on scheduled follow-up time
   const followUpActions = leads
@@ -176,7 +176,7 @@ export default function DashboardView({
               <LuIndianRupee size={18} />
             </div>
           </div>
-          <div className="kpi-value">{REVENUE_DATA.Monthly.revenue}</div>
+          <div className="kpi-value">{REVENUE_DATA?.Monthly?.revenue || '₹14,25,000'}</div>
           <div className="kpi-subtext">
             <span className="badge-success"><LuArrowUpRight size={14} /> +12.4%</span> vs last month
           </div>
@@ -189,7 +189,7 @@ export default function DashboardView({
               <LuTrendingUp size={18} />
             </div>
           </div>
-          <div className="kpi-value">{REVENUE_DATA.Quarterly.revenue}</div>
+          <div className="kpi-value">{REVENUE_DATA?.Quarterly?.revenue || '₹48,50,000'}</div>
           <div className="kpi-subtext">
             <span className="badge-success"><LuArrowUpRight size={14} /> +8.2%</span> vs Q2 target
           </div>
@@ -202,7 +202,7 @@ export default function DashboardView({
               <LuIndianRupee size={18} />
             </div>
           </div>
-          <div className="kpi-value">{REVENUE_DATA.FY.revenue}</div>
+          <div className="kpi-value">{REVENUE_DATA?.FY?.revenue || REVENUE_DATA?.FY26?.revenue || '₹1,82,00,000'}</div>
           <div className="kpi-subtext">
             <span style={{ color: '#557396' }}>Target: ₹2,00,00,000</span>
           </div>

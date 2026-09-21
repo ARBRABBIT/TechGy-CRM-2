@@ -1,20 +1,18 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { animateViewTransition } from './utils/animations';
-import Sidebar from './components/Sidebar';
-import GlobalHeader from './components/GlobalHeader';
-import CommonActionsModal from './components/CommonActionsModal';
-import LogoutConfirmModal from './components/LogoutConfirmModal';
-import NewCompanyPromptModal from './components/NewCompanyPromptModal';
-import CallSessionModal from './components/CallSessionModal';
+import Sidebar from './components/layout/Sidebar';
+import GlobalHeader from './components/layout/GlobalHeader';
+import CommonActionsModal from './components/modals/CommonActionsModal';
+import LogoutConfirmModal from './components/modals/LogoutConfirmModal';
+import NewCompanyPromptModal from './components/modals/NewCompanyPromptModal';
+import CallSessionModal from './components/modals/CallSessionModal';
 
 // Views
 import DashboardView from './views/DashboardView';
 import LeadsView from './views/LeadsView';
 import AccountsView from './views/AccountsView';
-import OpportunitiesView from './views/OpportunitiesView';
 import ActivitiesView from './views/ActivitiesView';
-import ProposalsView from './views/ProposalsView';
 import ContactsView from './views/ContactsView';
 import MasterDataView from './views/MasterDataView';
 import LoginView from './views/LoginView';
@@ -29,17 +27,15 @@ import {
   INITIAL_LEADS,
   INITIAL_ACCOUNTS,
   INITIAL_ACTIVITIES,
-  INITIAL_OPPORTUNITIES,
-  INITIAL_PROPOSALS,
   INITIAL_CONTACTS,
   INITIAL_NOTIFICATIONS,
   INITIAL_EMAIL_TEMPLATES
 } from './data/mockData';
 import { LuCircleCheck, LuX, LuTriangleAlert, LuCircleAlert, LuInfo } from 'react-icons/lu';
 import { getInitialStageHistory } from './utils/pipelineUtils';
-import { getTodayISO, getFutureISO } from './utils/dateUtils';
+import { getTodayISO } from './utils/dateUtils';
 
-const DATA_VERSION = 'v3.9_filter_fixes';
+const DATA_VERSION = 'v4.0_clean_modules';
 
 // Clean atomic migration on DATA_VERSION change
 if (typeof window !== 'undefined') {
@@ -87,8 +83,6 @@ function createGeneratedAccount(companyName, overrides = {}) {
     estimatedAccountValue: overrides.estimatedAccountValue !== undefined ? overrides.estimatedAccountValue : '',
     leadsCount: overrides.leadsCount !== undefined ? overrides.leadsCount : 1,
     contactsCount: overrides.contactsCount !== undefined ? overrides.contactsCount : 0,
-    oppsCount: overrides.oppsCount !== undefined ? overrides.oppsCount : 0,
-    proposalsCount: overrides.proposalsCount !== undefined ? overrides.proposalsCount : 0,
     ...overrides
   };
 }
@@ -119,11 +113,21 @@ export default function App() {
   const [selectedOwnerFilter, setSelectedOwnerFilter] = useState('All Owners');
 
   // Relational Data State (Hydrated from localStorage with mock fallback)
-  const [leads, setLeads] = useState(() => loadFromStorage('leads', INITIAL_LEADS));
-  const [accounts, setAccounts] = useState(() => loadFromStorage('accounts', INITIAL_ACCOUNTS));
+  const [leads, setLeads] = useState(() => {
+    const raw = loadFromStorage('leads', INITIAL_LEADS);
+    return raw.map(l => ({
+      ...l,
+      serviceProviding: l.serviceProviding || 'TechGy CRM Enterprise Suite'
+    }));
+  });
+  const [accounts, setAccounts] = useState(() => {
+    const raw = loadFromStorage('accounts', INITIAL_ACCOUNTS);
+    return raw.map(a => ({
+      ...a,
+      serviceProviding: a.serviceProviding || 'TechGy CRM Enterprise Suite'
+    }));
+  });
   const [activities, setActivities] = useState(() => loadFromStorage('activities', INITIAL_ACTIVITIES));
-  const [opportunities, setOpportunities] = useState(() => loadFromStorage('opportunities', INITIAL_OPPORTUNITIES));
-  const [proposals, setProposals] = useState(() => loadFromStorage('proposals', INITIAL_PROPOSALS));
   const [contacts, setContacts] = useState(() => loadFromStorage('contacts', INITIAL_CONTACTS));
   const [notifications, setNotifications] = useState(() => loadFromStorage('notifications', INITIAL_NOTIFICATIONS));
   const [emailTemplates, setEmailTemplates] = useState(() => loadFromStorage('email_templates', INITIAL_EMAIL_TEMPLATES));
@@ -133,8 +137,6 @@ export default function App() {
   useEffect(() => { saveToStorage('leads', leads); }, [leads]);
   useEffect(() => { saveToStorage('accounts', accounts); }, [accounts]);
   useEffect(() => { saveToStorage('activities', activities); }, [activities]);
-  useEffect(() => { saveToStorage('opportunities', opportunities); }, [opportunities]);
-  useEffect(() => { saveToStorage('proposals', proposals); }, [proposals]);
   useEffect(() => { saveToStorage('contacts', contacts); }, [contacts]);
   useEffect(() => { saveToStorage('notifications', notifications); }, [notifications]);
   useEffect(() => { saveToStorage('email_templates', emailTemplates); }, [emailTemplates]);
@@ -148,11 +150,6 @@ export default function App() {
       return () => clearTimeout(timer);
     }
   }, [toastMessage]);
-
-  const opportunitiesRef = useRef(opportunities);
-  useEffect(() => {
-    opportunitiesRef.current = opportunities;
-  }, [opportunities]);
 
   // Recompute overdue and dueToday status at runtime
   useEffect(() => {
@@ -373,14 +370,6 @@ export default function App() {
       const fullAcc = accounts.find(a => a.companyName.toLowerCase() === item.companyName.toLowerCase()) || item;
       setSelectedAccount(fullAcc);
       setActiveModule('accounts');
-    } else if (category === 'opportunity') {
-      setSelectedLead(null);
-      setSelectedAccount(null);
-      setActiveModule('opportunities');
-    } else if (category === 'proposal') {
-      setSelectedLead(null);
-      setSelectedAccount(null);
-      setActiveModule('proposals');
     } else if (category === 'contact') {
       setSelectedLead(null);
       const parentAcc = accounts.find(a => a.companyName.toLowerCase() === item.company.toLowerCase());
@@ -486,25 +475,7 @@ export default function App() {
 
   // Quick Action Handler
   const handleQuickAction = (actionType, lead) => {
-    if (actionType === 'convertOpportunity') {
-      const newOpp = {
-        id: `OPP-${Date.now()}`,
-        accountName: lead.company,
-        opportunityName: `${lead.company} CRM Expansion Opportunity`,
-        score: 75,
-        visualLevel: 'Medium',
-        estimatedValue: '₹1,20,00,000',
-        probability: '60%',
-        expectedClosureDate: getFutureISO(30),
-        createdDate: getTodayISO(),
-        currentStage: 'Qualified',
-        owner: lead.leadOwner
-      };
-      setOpportunities([newOpp, ...opportunities]);
-      pushNotification('Opportunity Converted', `Lead "${lead.leadName}" (${lead.company}) converted to Opportunity!`, 'Opportunity', 'opportunities');
-      setSelectedLead(null);
-      setActiveModule('opportunities');
-    } else if (actionType === 'call') {
+    if (actionType === 'call') {
       handleInitiateCall(lead);
     } else {
       setModalInitialType(actionType);
@@ -588,8 +559,7 @@ export default function App() {
     });
   };
 
-  // Navigate directly to Account (Company) full page detail view
-  const handleSelectAccountByCompany = (companyInput, source = 'opportunities', initialTab = 'Opportunities') => {
+  const handleSelectAccountByCompany = (companyInput, source = 'accounts', initialTab = 'Leads') => {
     const companyName = typeof companyInput === 'string' ? companyInput : (companyInput?.company || companyInput?.companyName || companyInput?.accountName);
     if (!companyName) return;
 
@@ -635,43 +605,7 @@ export default function App() {
       return;
     }
 
-    if (type === 'createOpportunity') {
-      const closeDateFormatted = formData.closeDate || getFutureISO(30);
-      const oppTitle = formData.opportunityName || `${formData.company || 'Enterprise'} Opportunity`;
-      const compName = formData.company || 'Enterprise Client';
-      const probVal = formData.probability ? (formData.probability.includes('%') ? formData.probability : `${formData.probability}%`) : '60%';
-
-      const newOppObj = {
-        id: `OPP-${Date.now()}`,
-        opportunityName: oppTitle,
-        accountName: compName,
-        estimatedValue: formData.estimatedValue || '₹50.00 Lakh',
-        currentStage: formData.currentStage || 'Qualified',
-        probability: probVal,
-        expectedClosureDate: closeDateFormatted,
-        createdDate: getTodayISO(),
-        owner: formData.owner || currentUser?.name || 'Unassigned',
-        score: 80,
-        visualLevel: 'High'
-      };
-
-      setOpportunities([newOppObj, ...opportunities]);
-      pushNotification('New Opportunity Created', `Opportunity "${oppTitle}" created for ${compName}`, 'Opportunity', 'opportunities');
-      triggerToast(`Opportunity "${oppTitle}" created`, 'success');
-
-      // Ensure Account exists or increment its opp count
-      const existingAcc = accounts.find(a => a.companyName.toLowerCase() === compName.toLowerCase());
-      if (!existingAcc) {
-        const newAcc = createGeneratedAccount(compName, {
-          accountOwner: formData.owner || currentUser?.name || 'Unassigned',
-          estimatedAccountValue: formData.estimatedValue || '₹1,00,00,000',
-          oppsCount: 1
-        });
-        setAccounts([newAcc, ...accounts]);
-      } else {
-        setAccounts(accounts.map(a => a.id === existingAcc.id ? { ...a, oppsCount: (a.oppsCount || 0) + 1 } : a));
-      }
-    } else if (type === 'createAccount') {
+    if (type === 'createAccount') {
       const compName = formData.companyName || formData.company || 'Enterprise Client';
       const existingAcc = accounts.find(a => a.companyName.toLowerCase() === compName.toLowerCase());
       if (existingAcc) {
@@ -681,6 +615,7 @@ export default function App() {
       const newAcc = createGeneratedAccount(compName, {
         accountOwner: formData.owner || currentUser?.name || 'Unassigned',
         industry: formData.industry || 'Technology & IT Services',
+        serviceProviding: formData.serviceProviding || 'TechGy CRM Enterprise Suite',
         companySize: formData.companySize || '51-200 employees',
         website: formData.website || `https://www.${compName.toLowerCase().replace(/[^a-z0-9]/g, '')}.com`,
         location: formData.location || 'Mumbai, Maharashtra',
@@ -705,6 +640,7 @@ export default function App() {
         emailId: formData.email || 'lead@example.co.in',
         company: formData.company,
         designation: formData.designation || 'Manager',
+        serviceProviding: formData.serviceProviding || 'TechGy CRM Enterprise Suite',
         leadSource: formData.leadSource || 'Website',
         status: formData.status || 'New',
         leadOwner: formData.owner || currentUser?.name || 'Unassigned',
@@ -726,6 +662,7 @@ export default function App() {
       if (!existingAcc) {
         const newAcc = createGeneratedAccount(formData.company, {
           accountOwner: formData.owner || currentUser?.name || 'Unassigned',
+          serviceProviding: formData.serviceProviding || 'TechGy CRM Enterprise Suite',
           leadsCount: 1,
           industry: '',
           companySize: '',
@@ -953,21 +890,6 @@ export default function App() {
       setActivities([newAct, ...activities]);
       pushNotification('New Activity Scheduled', `Activity scheduled for ${newAct.company}`, 'Activity', 'activities');
       triggerToast(`Activity scheduled for ${newAct.company}`, 'success');
-    } else if (type === 'createProposal') {
-      const newProp = {
-        id: `PROP-${Date.now()}`,
-        title: formData.opportunityName || `${formData.company || 'Enterprise'} Solution Proposal`,
-        company: formData.company || 'Enterprise Account',
-        contactPerson: formData.leadName || (targetLead ? targetLead.leadName : 'Procurement Lead'),
-        amount: formData.estimatedValue || '₹45,00,000',
-        status: 'Draft',
-        submissionDate: getTodayISO(),
-        validUntil: formData.closeDate || getFutureISO(45),
-        owner: formData.owner || currentUser?.name || 'Unassigned'
-      };
-      setProposals([newProp, ...proposals]);
-      pushNotification('New Proposal Drafted', `Proposal drafted for ${newProp.company}`, 'Proposal', 'proposals');
-      triggerToast(`Proposal drafted for ${newProp.company}`, 'success');
     } else if (type === 'createContact') {
       const newCont = {
         id: `CONT-${Date.now()}`,
@@ -1045,10 +967,8 @@ export default function App() {
           setMobileOpen={setMobileOpen}
           onOpenCreateModal={(type = (
             activeModule === 'accounts' ? 'createAccount' :
-            activeModule === 'opportunities' ? 'createOpportunity' :
             activeModule === 'contacts' ? 'createContact' :
-            activeModule === 'activities' ? 'createActivity' :
-            activeModule === 'proposals' ? 'createProposal' : 'createLead'
+            activeModule === 'activities' ? 'createActivity' : 'createLead'
           )) => {
             setModalInitialType(type);
             setModalTargetAccount(selectedAccount);
@@ -1057,8 +977,6 @@ export default function App() {
           }}
           leads={leads}
           accounts={accounts}
-          opportunities={opportunities}
-          proposals={proposals}
           contacts={contacts}
           activities={activities}
           onSelectSearchResult={handleSelectSearchResult}
@@ -1084,7 +1002,6 @@ export default function App() {
               }}
               leads={leads}
               accounts={accounts}
-              opportunities={opportunities}
               onSelectLead={(lead) => {
                 setIsProfileActive(false);
                 setSelectedLead(lead);
@@ -1116,20 +1033,10 @@ export default function App() {
                 setSelectedAccount(null);
                 setActiveModule('activities');
               }}
-              onNavigateToProposals={() => {
-                setSelectedLead(null);
-                setSelectedAccount(null);
-                setActiveModule('proposals');
-              }}
               onNavigateToContacts={() => {
                 setSelectedLead(null);
                 setSelectedAccount(null);
                 setActiveModule('contacts');
-              }}
-              onNavigateToOpportunities={() => {
-                setSelectedLead(null);
-                setSelectedAccount(null);
-                setActiveModule('opportunities');
               }}
               onUpdateLeadStage={handleUpdateLeadStage}
               onUpdateLead={handleUpdateLead}
@@ -1149,8 +1056,6 @@ export default function App() {
               leads={leads}
               activities={activities}
               contacts={contacts}
-              opportunities={opportunities}
-              proposals={proposals}
               onUpdateAccount={handleUpdateAccount}
               onSelectLead={(l) => {
                 setLeadNavSource('leads');
@@ -1170,20 +1075,10 @@ export default function App() {
                 setSelectedAccount(null);
                 setActiveModule('activities');
               }}
-              onNavigateToProposals={() => {
-                setSelectedLead(null);
-                setSelectedAccount(null);
-                setActiveModule('proposals');
-              }}
               onNavigateToContacts={() => {
                 setSelectedLead(null);
                 setSelectedAccount(null);
                 setActiveModule('contacts');
-              }}
-              onNavigateToOpportunities={() => {
-                setSelectedLead(null);
-                setSelectedAccount(null);
-                setActiveModule('opportunities');
               }}
               onNavigateToLeads={() => {
                 setSelectedLead(null);
@@ -1271,27 +1166,7 @@ export default function App() {
                 />
               )}
 
-              {activeModule === 'opportunities' && (
-                <OpportunitiesView
-                  opportunities={opportunities}
-                  onUpdateOpportunityStage={(oppId, newStage) => {
-                    const targetOpp = opportunitiesRef.current.find(o => o.id === oppId);
-                    if (targetOpp) {
-                      pushNotification('Stage Updated', `Moved "${targetOpp.opportunityName}" to ${newStage}`, 'Opportunity', 'opportunities');
-                    }
-                    setOpportunities(prev => prev.map(o => o.id === oppId ? { ...o, currentStage: newStage } : o));
-                  }}
-                  onSelectAccount={(comp) => handleSelectAccountByCompany(comp, 'opportunities', 'Opportunities')}
-                  searchQuery={searchQuery}
-                  selectedDateFilter={selectedDateFilter}
-                  selectedOwnerFilter={selectedOwnerFilter}
-                  onOpenCreateModal={(type = 'createOpportunity') => {
-                    setModalInitialType(type);
-                    setIsCreateModalOpen(true);
-                  }}
-                  onTriggerToast={triggerToast}
-                />
-              )}
+
 
               {activeModule === 'activities' && (
                 <ActivitiesView
@@ -1330,38 +1205,7 @@ export default function App() {
                 />
               )}
 
-              {activeModule === 'proposals' && (
-                <ProposalsView
-                  proposals={proposals}
-                  searchQuery={searchQuery}
-                  selectedDateFilter={selectedDateFilter}
-                  onSelectAccount={(companyName) => {
-                    let fullAcc = accounts.find(a =>
-                      a.companyName === companyName ||
-                      a.companyName.toLowerCase().includes((companyName || '').toLowerCase()) ||
-                      (companyName || '').toLowerCase().includes(a.companyName.toLowerCase())
-                    );
 
-                    if (!fullAcc && companyName) {
-                      fullAcc = createGeneratedAccount(companyName, {
-                        companySize: '500-1000 employees',
-                        location: 'Mumbai HQ, India',
-                        estimatedAccountValue: '₹1,80,00,000',
-                        leadsCount: 1,
-                        contactsCount: 1,
-                        oppsCount: 1,
-                        proposalsCount: 1
-                      });
-                    }
-
-                    if (fullAcc) {
-                      setLeadNavSource('proposals');
-                      setAccountInitialTab('Proposals');
-                      setSelectedAccount(fullAcc);
-                    }
-                  }}
-                />
-              )}
 
               {activeModule === 'contacts' && (
                 <ContactsView
@@ -1381,9 +1225,7 @@ export default function App() {
                         location: 'Mumbai HQ, India',
                         estimatedAccountValue: '₹1,80,00,000',
                         leadsCount: 2,
-                        contactsCount: 4,
-                        oppsCount: 1,
-                        proposalsCount: 1
+                        contactsCount: 4
                       });
                     }
 
