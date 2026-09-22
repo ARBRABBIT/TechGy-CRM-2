@@ -246,6 +246,7 @@ export const MASTER_CATEGORIES = [
   {
     id: 'contentTypes',
     title: 'Content Types',
+    singular: 'Content Type',
     desc: 'Configure message formats, collateral types, marketing assets, and outbound delivery channels.',
     icon: LuLayers,
     iconBg: '#EFF6FF',
@@ -254,6 +255,7 @@ export const MASTER_CATEGORIES = [
   {
     id: 'followupTypes',
     title: 'Lead Follow-up Types',
+    singular: 'Lead Follow-up Type',
     desc: 'Standardize communication methods, recommended timeframes, and priority levels for lead follow-up activities.',
     icon: LuPhoneCall,
     iconBg: '#F5F3FF',
@@ -262,6 +264,7 @@ export const MASTER_CATEGORIES = [
   {
     id: 'followupStatuses',
     title: 'Lead Follow-up Status',
+    singular: 'Lead Follow-up Status',
     desc: 'Manage follow-up activity lifecycles, escalation triggers, and resolution states.',
     icon: LuCircleCheck,
     iconBg: '#ECFDF5',
@@ -270,6 +273,7 @@ export const MASTER_CATEGORIES = [
   {
     id: 'leadStatuses',
     title: 'Lead Status',
+    singular: 'Lead Status',
     desc: 'Standardize sales funnel stages and pipeline progression criteria.',
     icon: LuGitCommitVertical,
     iconBg: '#F0F4F9',
@@ -278,6 +282,7 @@ export const MASTER_CATEGORIES = [
   {
     id: 'objections',
     title: 'Sales Objections',
+    singular: 'Sales Objection',
     desc: 'Maintain a central directory of common buyer concerns, pricing hesitations, and objection scenarios.',
     icon: LuShieldAlert,
     iconBg: '#FEF2F2',
@@ -286,6 +291,7 @@ export const MASTER_CATEGORIES = [
   {
     id: 'agentChecklist',
     title: 'Agent Checklist',
+    singular: 'Checklist Item',
     desc: 'Configure talking points and call guidance for each lead status to steer buyer interactions.',
     icon: LuClipboardCheck,
     iconBg: '#FEF3C7',
@@ -294,6 +300,7 @@ export const MASTER_CATEGORIES = [
   {
     id: 'emailTemplates',
     title: 'Email Templates',
+    singular: 'Email Template',
     desc: 'Centralize standardized sales outreach copy, proposal emails, follow-up messages, and dynamic merge tags.',
     icon: LuMail,
     iconBg: '#FFF1F2',
@@ -302,6 +309,7 @@ export const MASTER_CATEGORIES = [
   {
     id: 'industries',
     title: 'Industry Sectors',
+    singular: 'Industry Sector',
     desc: 'Standardize client industry classifications, domain focus areas, and sector codes.',
     icon: LuFactory,
     iconBg: '#F0FDF4',
@@ -310,6 +318,7 @@ export const MASTER_CATEGORIES = [
   {
     id: 'products',
     title: 'Products & Services',
+    singular: 'Product / Service',
     desc: 'Define and manage the catalog of software suites, enterprise solutions, and client services.',
     icon: LuPackage,
     iconBg: '#F1F5F9',
@@ -318,6 +327,7 @@ export const MASTER_CATEGORIES = [
   {
     id: 'sources',
     title: 'Lead Sources',
+    singular: 'Lead Source',
     desc: 'Configure lead acquisition channels and source attribution names.',
     icon: LuShare2,
     iconBg: '#E0F2FE',
@@ -344,36 +354,66 @@ export default function MasterDataView({
 
   const initialSectionFormData = {
     contentTypes: {
+      code: '',
       name: ''
     },
     followupTypes: {
+      code: '',
       name: ''
     },
     followupStatuses: {
+      code: '',
       description: ''
     },
     leadStatuses: {
+      code: '',
       name: ''
     },
     objections: {
+      code: '',
       name: ''
     },
     agentChecklist: {
+      code: '',
       leadStatus: 'New',
       pointsToTalk: '',
       name: '',
       description: ''
     },
     industries: {
-      name: '',
-      code: ''
+      code: '',
+      name: ''
     },
     products: {
+      code: '',
       name: ''
     },
     sources: {
+      code: '',
       name: ''
     }
+  };
+
+  const getCategoryPrefix = (catId) => {
+    switch (catId) {
+      case 'contentTypes': return 'CNT';
+      case 'followupTypes': return 'FUT';
+      case 'followupStatuses': return 'FUS';
+      case 'leadStatuses': return 'LST';
+      case 'objections': return 'OBJ';
+      case 'agentChecklist': return 'CHK';
+      case 'industries': return 'IND';
+      case 'products': return 'PRD';
+      case 'sources': return 'SRC';
+      case 'emailTemplates': return 'TPL';
+      default: return 'MST';
+    }
+  };
+
+  const getSuggestedCode = (catId) => {
+    const prefix = getCategoryPrefix(catId);
+    const count = (masterData[catId]?.length || 0) + 1;
+    return `${prefix}-${String(count).padStart(3, '0')}`;
   };
 
   const [sectionFormData, setSectionFormData] = useState(initialSectionFormData);
@@ -397,6 +437,7 @@ export default function MasterDataView({
 
   // Form state for adding/editing email templates (Category removed)
   const [templateFormData, setTemplateFormData] = useState({
+    code: '',
     name: '',
     subject: '',
     body: '',
@@ -567,6 +608,7 @@ export default function MasterDataView({
     setEditingRecord(item);
     setEditRecordFormData({
       ...item,
+      code: item.code || item.id || '',
       leadStatus: item.leadStatus || (masterData.leadStatuses[0]?.name || 'New'),
       pointsToTalk: item.pointsToTalk || item.name || item.description || ''
     });
@@ -577,12 +619,18 @@ export default function MasterDataView({
     const primaryField = editRecordFormData.pointsToTalk || editRecordFormData.name || editRecordFormData.description || editRecordFormData.code;
     if (!editingRecord || !primaryField?.trim()) return;
 
+    const finalCode = (editRecordFormData.code && editRecordFormData.code.trim())
+      ? editRecordFormData.code.trim().toUpperCase()
+      : editingRecord.id;
+
     setMasterData(prev => ({
       ...prev,
       [selectedCategory]: (prev[selectedCategory] || []).map(item =>
         item.id === editingRecord.id ? {
           ...item,
           ...editRecordFormData,
+          id: finalCode,
+          code: finalCode,
           pointsToTalk: editRecordFormData.pointsToTalk || editRecordFormData.name || editRecordFormData.description,
           name: editRecordFormData.pointsToTalk || editRecordFormData.name || editRecordFormData.description,
           description: editRecordFormData.pointsToTalk || editRecordFormData.description || editRecordFormData.name,
@@ -610,6 +658,7 @@ export default function MasterDataView({
     setTemplateCcEmails(initialCc);
     setTemplateCcInput('');
     setTemplateFormData({
+      code: tpl.code || tpl.id || '',
       name: tpl.name || '',
       subject: tpl.subject || '',
       body: tpl.body || '',
@@ -622,19 +671,23 @@ export default function MasterDataView({
     if (!editingTemplate || !templateFormData.name.trim() || !templateFormData.subject.trim()) return;
 
     const finalCc = templateCcEmails.join(', ');
+    const finalCode = (templateFormData.code && templateFormData.code.trim())
+      ? templateFormData.code.trim().toUpperCase()
+      : editingTemplate.id;
 
-    const updated = activeEmailTemplates.map(tpl => {
-      if (tpl.id === editingTemplate.id) {
-        return {
-          ...tpl,
-          name: templateFormData.name.trim(),
-          subject: templateFormData.subject.trim(),
-          body: templateFormData.body,
-          cc: finalCc
-        };
-      }
-      return tpl;
-    });
+    const updated = activeEmailTemplates.map(tpl =>
+      tpl.id === editingTemplate.id
+        ? {
+            ...tpl,
+            id: finalCode,
+            code: finalCode,
+            name: templateFormData.name.trim(),
+            subject: templateFormData.subject.trim(),
+            body: templateFormData.body,
+            cc: finalCc
+          }
+        : tpl
+    );
 
     updateTemplates(updated);
     setEditingTemplate(null);
@@ -659,9 +712,13 @@ export default function MasterDataView({
       if (!templateFormData.name.trim() || !templateFormData.subject.trim()) return;
 
       const finalCc = templateCcEmails.join(', ');
+      const finalCode = (templateFormData.code && templateFormData.code.trim())
+        ? templateFormData.code.trim().toUpperCase()
+        : `TPL-${String(activeEmailTemplates.length + 1).padStart(3, '0')}`;
 
       const newTpl = {
-        id: `TPL-${String(activeEmailTemplates.length + 1).padStart(3, '0')}`,
+        id: finalCode,
+        code: finalCode,
         name: templateFormData.name.trim(),
         subject: templateFormData.subject.trim(),
         body: templateFormData.body || '',
@@ -679,7 +736,7 @@ export default function MasterDataView({
         });
       }
 
-      setTemplateFormData({ name: '', subject: '', body: '', cc: '' });
+      setTemplateFormData({ code: '', name: '', subject: '', body: '', cc: '' });
       setTemplateCcEmails([]);
       setTemplateCcInput('');
       setIsAddModalOpen(false);
@@ -697,33 +754,19 @@ export default function MasterDataView({
     if (targetCategory === 'followupStatuses') {
       newRecord.name = newRecord.description;
     }
-    const nextNum = (masterData[targetCategory]?.length || 0) + 1;
+    const autoCode = getSuggestedCode(targetCategory);
+    const finalCode = (newRecord.code && newRecord.code.trim())
+      ? newRecord.code.trim().toUpperCase()
+      : autoCode;
 
-    if (targetCategory === 'contentTypes') {
-      newRecord.id = `CNT-${String(nextNum).padStart(3, '0')}`;
-    } else if (targetCategory === 'followupTypes') {
-      newRecord.id = `FUT-${String(nextNum).padStart(3, '0')}`;
-    } else if (targetCategory === 'followupStatuses') {
-      newRecord.id = `FUS-${String(nextNum).padStart(3, '0')}`;
-    } else if (targetCategory === 'leadStatuses') {
-      newRecord.id = `LST-${String(nextNum).padStart(3, '0')}`;
-    } else if (targetCategory === 'objections') {
-      newRecord.id = `OBJ-${String(nextNum).padStart(3, '0')}`;
-    } else if (targetCategory === 'agentChecklist') {
-      newRecord.id = `CHK-${String(nextNum).padStart(3, '0')}`;
+    newRecord.id = finalCode;
+    newRecord.code = finalCode;
+
+    if (targetCategory === 'agentChecklist') {
       newRecord.leadStatus = newRecord.leadStatus || (checklistStatusFilter !== 'All' ? checklistStatusFilter : (masterData.leadStatuses[0]?.name || 'New'));
       newRecord.pointsToTalk = newRecord.pointsToTalk || newRecord.name || newRecord.description || '';
       newRecord.name = newRecord.pointsToTalk;
       newRecord.description = newRecord.pointsToTalk;
-    } else if (targetCategory === 'industries') {
-      newRecord.id = `IND-${String(nextNum).padStart(3, '0')}`;
-      if (!newRecord.code?.trim()) {
-        newRecord.code = newRecord.name.replace(/[^a-zA-Z]/g, '').slice(0, 4).toUpperCase();
-      }
-    } else if (targetCategory === 'products') {
-      newRecord.id = `PRD-${String(nextNum).padStart(3, '0')}`;
-    } else if (targetCategory === 'sources') {
-      newRecord.id = `SRC-${String(nextNum).padStart(3, '0')}`;
     }
 
     setMasterData(prev => ({
@@ -937,7 +980,7 @@ export default function MasterDataView({
                 cursor: 'pointer'
               }}
             >
-              <LuPlus size={16} /> {selectedCategory === 'emailTemplates' ? 'Create Email Template' : `Add ${selectedCategoryMeta?.title.slice(0, -1) || 'Record'}`}
+              <LuPlus size={16} /> {selectedCategory === 'emailTemplates' ? 'Create Email Template' : `Add ${selectedCategoryMeta?.singular || selectedCategoryMeta?.title || 'Record'}`}
             </button>
           </div>
         </div>
@@ -1175,7 +1218,7 @@ export default function MasterDataView({
                   {/* 1. Content Types */}
                   {selectedCategory === 'contentTypes' && (
                     <>
-                      <th style={{ padding: '0.75rem 1rem' }}>ID</th>
+                      <th style={{ padding: '0.75rem 1rem' }}>Code</th>
                       <th style={{ padding: '0.75rem 1rem' }}>Content Type Name</th>
                       <th style={{ padding: '0.75rem 1rem', textAlign: 'right' }}>Actions</th>
                     </>
@@ -1184,7 +1227,7 @@ export default function MasterDataView({
                   {/* 2. Lead Follow-up Types */}
                   {selectedCategory === 'followupTypes' && (
                     <>
-                      <th style={{ padding: '0.75rem 1rem' }}>ID</th>
+                      <th style={{ padding: '0.75rem 1rem' }}>Code</th>
                       <th style={{ padding: '0.75rem 1rem' }}>Follow-up Type</th>
                       <th style={{ padding: '0.75rem 1rem', textAlign: 'right' }}>Actions</th>
                     </>
@@ -1193,16 +1236,16 @@ export default function MasterDataView({
                   {/* 3. Lead Follow-up Status */}
                   {selectedCategory === 'followupStatuses' && (
                     <>
-                      <th style={{ padding: '0.75rem 1rem' }}>ID</th>
+                      <th style={{ padding: '0.75rem 1rem' }}>Code</th>
                       <th style={{ padding: '0.75rem 1rem' }}>Description</th>
                       <th style={{ padding: '0.75rem 1rem', textAlign: 'right' }}>Actions</th>
                     </>
                   )}
 
-                  {/* 4. Lead Status (Cleaned of Win Probability & Description - First column strictly ID) */}
+                  {/* 4. Lead Status */}
                   {selectedCategory === 'leadStatuses' && (
                     <>
-                      <th style={{ padding: '0.75rem 1rem' }}>ID</th>
+                      <th style={{ padding: '0.75rem 1rem' }}>Code</th>
                       <th style={{ padding: '0.75rem 1rem' }}>Lead Status Name</th>
                       <th style={{ padding: '0.75rem 1rem', textAlign: 'right' }}>Actions</th>
                     </>
@@ -1211,7 +1254,7 @@ export default function MasterDataView({
                   {/* 5. Sales Objections */}
                   {selectedCategory === 'objections' && (
                     <>
-                      <th style={{ padding: '0.75rem 1rem' }}>ID</th>
+                      <th style={{ padding: '0.75rem 1rem' }}>Code</th>
                       <th style={{ padding: '0.75rem 1rem' }}>Objection Concern</th>
                       <th style={{ padding: '0.75rem 1rem', textAlign: 'right' }}>Actions</th>
                     </>
@@ -1220,35 +1263,35 @@ export default function MasterDataView({
                   {/* 6. Agent Checklist */}
                   {selectedCategory === 'agentChecklist' && (
                     <>
-                      <th style={{ padding: '0.75rem 1rem' }}>ID</th>
+                      <th style={{ padding: '0.75rem 1rem' }}>Code</th>
                       <th style={{ padding: '0.75rem 1rem' }}>Lead Status</th>
                       <th style={{ padding: '0.75rem 1rem' }}>Points to Talk</th>
                       <th style={{ padding: '0.75rem 1rem', textAlign: 'right' }}>Actions</th>
                     </>
                   )}
 
-                  {/* 8. Industry Sectors (Standard Margin & Domain Focus Area Removed - First column strictly ID) */}
+                  {/* 8. Industry Sectors */}
                   {selectedCategory === 'industries' && (
                     <>
-                      <th style={{ padding: '0.75rem 1rem' }}>ID</th>
+                      <th style={{ padding: '0.75rem 1rem' }}>Code</th>
                       <th style={{ padding: '0.75rem 1rem' }}>Industry Sector</th>
                       <th style={{ padding: '0.75rem 1rem', textAlign: 'right' }}>Actions</th>
                     </>
                   )}
 
-                  {/* Products (Only ID and Product / Service Name - First column strictly ID) */}
+                  {/* Products */}
                   {selectedCategory === 'products' && (
                     <>
-                      <th style={{ padding: '0.75rem 1rem' }}>ID</th>
+                      <th style={{ padding: '0.75rem 1rem' }}>Code</th>
                       <th style={{ padding: '0.75rem 1rem' }}>Product / Service Name</th>
                       <th style={{ padding: '0.75rem 1rem', textAlign: 'right' }}>Actions</th>
                     </>
                   )}
 
-                  {/* Sources (Channel Type, Attribution Weight, Cost per Lead Removed - First column strictly ID) */}
+                  {/* Sources */}
                   {selectedCategory === 'sources' && (
                     <>
-                      <th style={{ padding: '0.75rem 1rem' }}>ID</th>
+                      <th style={{ padding: '0.75rem 1rem' }}>Code</th>
                       <th style={{ padding: '0.75rem 1rem' }}>Channel Name</th>
                       <th style={{ padding: '0.75rem 1rem', textAlign: 'right' }}>Actions</th>
                     </>
@@ -1262,7 +1305,7 @@ export default function MasterDataView({
                     {/* 1. Content Types */}
                     {selectedCategory === 'contentTypes' && (
                       <>
-                        <td style={{ padding: '0.75rem 1rem', fontFamily: 'monospace', fontWeight: 600, color: '#557396' }}>{item.id}</td>
+                        <td style={{ padding: '0.75rem 1rem', fontFamily: 'monospace', fontWeight: 600, color: '#557396' }}>{item.code || item.id}</td>
                         <td style={{ padding: '0.75rem 1rem', fontWeight: 700, color: '#063669' }}>{item.name}</td>
                       </>
                     )}
@@ -1270,7 +1313,7 @@ export default function MasterDataView({
                     {/* 2. Lead Follow-up Types */}
                     {selectedCategory === 'followupTypes' && (
                       <>
-                        <td style={{ padding: '0.75rem 1rem', fontFamily: 'monospace', fontWeight: 600, color: '#557396' }}>{item.id}</td>
+                        <td style={{ padding: '0.75rem 1rem', fontFamily: 'monospace', fontWeight: 600, color: '#557396' }}>{item.code || item.id}</td>
                         <td style={{ padding: '0.75rem 1rem', fontWeight: 700, color: '#063669' }}>{item.name}</td>
                       </>
                     )}
@@ -1278,15 +1321,15 @@ export default function MasterDataView({
                     {/* 3. Lead Follow-up Status */}
                     {selectedCategory === 'followupStatuses' && (
                       <>
-                        <td style={{ padding: '0.75rem 1rem', fontFamily: 'monospace', fontWeight: 600, color: '#557396' }}>{item.id}</td>
+                        <td style={{ padding: '0.75rem 1rem', fontFamily: 'monospace', fontWeight: 600, color: '#557396' }}>{item.code || item.id}</td>
                         <td style={{ padding: '0.75rem 1rem', color: '#1E293B', fontWeight: 500 }}>{item.description || item.name}</td>
                       </>
                     )}
 
-                    {/* 4. Lead Status (Cleaned of Win Probability & Description - First column strictly ID) */}
+                    {/* 4. Lead Status */}
                     {selectedCategory === 'leadStatuses' && (
                       <>
-                        <td style={{ padding: '0.75rem 1rem', fontFamily: 'monospace', fontWeight: 600, color: '#557396' }}>{item.id}</td>
+                        <td style={{ padding: '0.75rem 1rem', fontFamily: 'monospace', fontWeight: 600, color: '#557396' }}>{item.code || item.id}</td>
                         <td style={{ padding: '0.75rem 1rem', fontWeight: 700, color: '#063669' }}>{item.name}</td>
                       </>
                     )}
@@ -1294,7 +1337,7 @@ export default function MasterDataView({
                     {/* 5. Sales Objections */}
                     {selectedCategory === 'objections' && (
                       <>
-                        <td style={{ padding: '0.75rem 1rem', fontFamily: 'monospace', fontWeight: 600, color: '#557396' }}>{item.id}</td>
+                        <td style={{ padding: '0.75rem 1rem', fontFamily: 'monospace', fontWeight: 600, color: '#557396' }}>{item.code || item.id}</td>
                         <td style={{ padding: '0.75rem 1rem', fontWeight: 700, color: '#063669' }}>{item.name}</td>
                       </>
                     )}
@@ -1302,7 +1345,7 @@ export default function MasterDataView({
                     {/* 6. Agent Checklist */}
                     {selectedCategory === 'agentChecklist' && (
                       <>
-                        <td style={{ padding: '0.75rem 1rem', fontFamily: 'monospace', fontWeight: 600, color: '#557396' }}>{item.id}</td>
+                        <td style={{ padding: '0.75rem 1rem', fontFamily: 'monospace', fontWeight: 600, color: '#557396' }}>{item.code || item.id}</td>
                         <td style={{ padding: '0.75rem 1rem' }}>
                           <span style={{
                             display: 'inline-block',
@@ -1321,26 +1364,26 @@ export default function MasterDataView({
                       </>
                     )}
 
-                    {/* 8. Industry Sectors (Standard Margin & Domain Focus Area Removed - First column strictly ID) */}
+                    {/* 8. Industry Sectors */}
                     {selectedCategory === 'industries' && (
                       <>
-                        <td style={{ padding: '0.75rem 1rem', fontFamily: 'monospace', fontWeight: 600, color: '#557396' }}>{item.id}</td>
+                        <td style={{ padding: '0.75rem 1rem', fontFamily: 'monospace', fontWeight: 600, color: '#557396' }}>{item.code || item.id}</td>
                         <td style={{ padding: '0.75rem 1rem', fontWeight: 700, color: '#063669' }}>{item.name}</td>
                       </>
                     )}
 
-                    {/* Products (Only ID and Product / Service Name - First column strictly ID) */}
+                    {/* Products */}
                     {selectedCategory === 'products' && (
                       <>
-                        <td style={{ padding: '0.75rem 1rem', fontFamily: 'monospace', fontWeight: 600, color: '#557396' }}>{item.id}</td>
+                        <td style={{ padding: '0.75rem 1rem', fontFamily: 'monospace', fontWeight: 600, color: '#557396' }}>{item.code || item.id}</td>
                         <td style={{ padding: '0.75rem 1rem', fontWeight: 700, color: '#063669' }}>{item.name}</td>
                       </>
                     )}
 
-                    {/* Sources (Only ID and Channel Name - First column strictly ID) */}
+                    {/* Sources */}
                     {selectedCategory === 'sources' && (
                       <>
-                        <td style={{ padding: '0.75rem 1rem', fontFamily: 'monospace', fontWeight: 600, color: '#557396' }}>{item.id}</td>
+                        <td style={{ padding: '0.75rem 1rem', fontFamily: 'monospace', fontWeight: 600, color: '#557396' }}>{item.code || item.id}</td>
                         <td style={{ padding: '0.75rem 1rem', fontWeight: 700, color: '#063669' }}>{item.name}</td>
                       </>
                     )}
@@ -1415,7 +1458,7 @@ export default function MasterDataView({
                   </div>
                   <div>
                     <h3 className="modal-title" style={{ fontSize: '1.1rem', margin: 0 }}>
-                      Add {meta?.title.slice(0, -1) || 'Record'}
+                      Add {meta?.singular || meta?.title || 'Record'}
                     </h3>
                     <div style={{ fontSize: '0.725rem', color: '#557396' }}>
                       Section: <strong>{meta?.title}</strong>
@@ -1444,6 +1487,20 @@ export default function MasterDataView({
                           <option key={c.id} value={c.id}>{c.title}</option>
                         ))}
                       </select>
+                    </div>
+                  )}
+
+                  {/* Code Input Field (appears for all master data records) */}
+                  {activeCat !== 'emailTemplates' && (
+                    <div className="form-group">
+                      <label className="form-label">Code</label>
+                      <input
+                        type="text"
+                        className="form-input"
+                        placeholder="Enter code"
+                        value={sectionFormData[activeCat]?.code || ''}
+                        onChange={(e) => updateSectionField(activeCat, 'code', e.target.value.toUpperCase())}
+                      />
                     </div>
                   )}
 
@@ -1557,29 +1614,17 @@ export default function MasterDataView({
 
                   {/* 7. Industry Sectors (Standard Margin & Domain Focus Area Removed) */}
                   {activeCat === 'industries' && (
-                    <>
-                      <div className="form-group">
-                        <label className="form-label">Industry Sector Name *</label>
-                        <input
-                          type="text"
-                          required
-                          className="form-input"
-                          placeholder="e.g. Enterprise Software, FinTech & Banking"
-                          value={sectionFormData.industries.name}
-                          onChange={(e) => updateSectionField('industries', 'name', e.target.value)}
-                        />
-                      </div>
-                      <div className="form-group">
-                        <label className="form-label">Sector Code</label>
-                        <input
-                          type="text"
-                          className="form-input"
-                          placeholder="e.g. IT-SOFT, BFSI-FIN"
-                          value={sectionFormData.industries.code}
-                          onChange={(e) => updateSectionField('industries', 'code', e.target.value)}
-                        />
-                      </div>
-                    </>
+                    <div className="form-group">
+                      <label className="form-label">Industry Sector Name *</label>
+                      <input
+                        type="text"
+                        required
+                        className="form-input"
+                        placeholder="e.g. Enterprise Software, FinTech & Banking"
+                        value={sectionFormData.industries.name}
+                        onChange={(e) => updateSectionField('industries', 'name', e.target.value)}
+                      />
+                    </div>
                   )}
 
                   {/* Products (Only Product / Service Name) */}
@@ -1599,26 +1644,24 @@ export default function MasterDataView({
 
                   {/* Sources (Channel Type, Attribution Weight, Cost per Lead Removed) */}
                   {activeCat === 'sources' && (
-                    <>
-                      <div className="form-group">
-                        <label className="form-label">Channel / Source Name *</label>
-                        <input
-                          type="text"
-                          required
-                          className="form-input"
-                          placeholder="e.g. Website, Inbound Call, Referral, LinkedIn"
-                          value={sectionFormData.sources.name}
-                          onChange={(e) => updateSectionField('sources', 'name', e.target.value)}
-                        />
-                      </div>
-                    </>
+                    <div className="form-group">
+                      <label className="form-label">Channel / Source Name *</label>
+                      <input
+                        type="text"
+                        required
+                        className="form-input"
+                        placeholder="e.g. Website, Inbound Call, Referral, LinkedIn"
+                        value={sectionFormData.sources.name}
+                        onChange={(e) => updateSectionField('sources', 'name', e.target.value)}
+                      />
+                    </div>
                   )}
 
                 </div>
                 <div className="modal-footer">
                   <button type="button" className="btn-secondary" onClick={() => setIsAddModalOpen(false)}>Cancel</button>
                   <button type="submit" className="btn-primary">
-                    Save {meta?.title.slice(0, -1) || 'Record'}
+                    Save {meta?.singular || meta?.title || 'Record'}
                   </button>
                 </div>
               </form>
@@ -1751,6 +1794,18 @@ export default function MasterDataView({
                 >
                   {/* Left Column: Template Form Editor */}
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                    <div className="form-group" style={{ marginBottom: 0 }}>
+                      <label className="form-label">Template Code</label>
+                      <input
+                        type="text"
+                        className="form-input"
+                        placeholder="Enter template code"
+                        value={templateFormData.code || ''}
+                        onChange={(e) => setTemplateFormData({ ...templateFormData, code: e.target.value.toUpperCase() })}
+                        style={{ height: '40px', fontSize: '0.875rem' }}
+                      />
+                    </div>
+
                     <div className="form-group" style={{ marginBottom: 0 }}>
                       <label className="form-label">Template Name *</label>
                       <input
@@ -2170,11 +2225,26 @@ export default function MasterDataView({
         <div className="modal-overlay" onClick={() => setEditingRecord(null)}>
           <div className="modal-card" style={{ maxWidth: '520px' }} onClick={e => e.stopPropagation()}>
             <div className="modal-header">
-              <h3 className="modal-title">Edit {selectedCategoryMeta?.title.slice(0, -1) || 'Record'}</h3>
+              <h3 className="modal-title">Edit {selectedCategoryMeta?.singular || selectedCategoryMeta?.title || 'Record'}</h3>
               <button className="modal-close-btn" onClick={() => setEditingRecord(null)}><LuX size={18} /></button>
             </div>
             <form onSubmit={handleSaveEditRecord}>
               <div className="modal-body" style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                <div className="form-group">
+                  <label className="form-label">Code</label>
+                  <input
+                    type="text"
+                    className="form-input"
+                    style={{ fontFamily: 'monospace', textTransform: 'uppercase' }}
+                    value={editRecordFormData.code || editRecordFormData.id || ''}
+                    onChange={(e) => setEditRecordFormData({
+                      ...editRecordFormData,
+                      code: e.target.value.toUpperCase(),
+                      id: e.target.value.toUpperCase()
+                    })}
+                  />
+                </div>
+
                 {selectedCategory === 'agentChecklist' && (
                   <div className="form-group">
                     <label className="form-label">Lead Status *</label>
@@ -2238,19 +2308,6 @@ export default function MasterDataView({
                     />
                   )}
                 </div>
-
-                {/* 7. Industry Sectors (Standard Margin & Domain Focus Area Removed) */}
-                {selectedCategory === 'industries' && (
-                  <div className="form-group">
-                    <label className="form-label">Sector Code</label>
-                    <input
-                      type="text"
-                      className="form-input"
-                      value={editRecordFormData.code || ''}
-                      onChange={(e) => setEditRecordFormData({ ...editRecordFormData, code: e.target.value })}
-                    />
-                  </div>
-                )}
 
                 {/* Sources (Only Channel Name Editable) */}
                 {selectedCategory === 'sources' && (
