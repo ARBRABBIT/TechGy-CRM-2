@@ -2111,6 +2111,30 @@ button,
   justify-content: space-between;
 }
 
+.modal-close-btn {
+  background: transparent;
+  border: none;
+  outline: none;
+  color: #64748B;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 0;
+  transition: background-color 0.15s ease, color 0.15s ease;
+  animation: none !important;
+  transform: none !important;
+}
+
+.modal-close-btn:hover {
+  background-color: #F1F5F9;
+  color: #063669;
+  transform: none !important;
+}
+
 .modal-body {
   padding: 0.25rem 1.75rem 1.5rem 1.75rem;
   display: flex;
@@ -3691,10 +3715,12 @@ div:has(> .action-table)::-webkit-scrollbar,
     transform: scale(0.95);
     opacity: 0.8;
   }
+
   50% {
     transform: scale(1.35);
     opacity: 0.3;
   }
+
   100% {
     transform: scale(1.7);
     opacity: 0;
@@ -3702,9 +3728,12 @@ div:has(> .action-table)::-webkit-scrollbar,
 }
 
 @keyframes callSoundWave {
-  0%, 100% {
+
+  0%,
+  100% {
     height: 8px;
   }
+
   50% {
     height: 32px;
   }
@@ -3714,9 +3743,11 @@ div:has(> .action-table)::-webkit-scrollbar,
   0% {
     box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
   }
+
   70% {
     box-shadow: 0 0 0 8px rgba(16, 185, 129, 0);
   }
+
   100% {
     box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
   }
@@ -3726,9 +3757,11 @@ div:has(> .action-table)::-webkit-scrollbar,
   0% {
     box-shadow: 0 0 0 0 rgba(6, 54, 105, 0.6);
   }
+
   70% {
     box-shadow: 0 0 0 10px rgba(6, 54, 105, 0);
   }
+
   100% {
     box-shadow: 0 0 0 0 rgba(6, 54, 105, 0);
   }
@@ -4022,4 +4055,138 @@ div:has(> .action-table)::-webkit-scrollbar,
   color: #557396;
   line-height: 1.55;
   margin: 0;
+}
+
+/* Master Data Email Template Cards Grid & Card Styles */
+.email-template-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  gap: 1.25rem;
+}
+
+.email-template-card {
+  background: #FFFFFF;
+  border-radius: 14px;
+  border: 1px solid #E2E8F0;
+  box-shadow: 0 2px 8px rgba(6, 54, 105, 0.04);
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  cursor: default;
+  position: relative;
+  overflow: hidden;
+}
+
+.email-template-card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.65rem;
+}
+
+.email-template-id-badge {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #0369A1;
+  background-color: #E0F2FE;
+  border: 1px solid #BAE6FD;
+  padding: 0.2rem 0.55rem;
+  border-radius: 6px;
+  letter-spacing: 0.02em;
+}
+
+.email-template-card-title {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: #063669;
+  margin: 0 0 0.55rem 0;
+  line-height: 1.35;
+  letter-spacing: -0.01em;
+}
+
+.email-template-subject-box {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.45rem;
+  background: #F8FAFC;
+  padding: 0.5rem 0.75rem;
+  border-radius: 8px;
+  border: 1px solid #EDF2F7;
+  margin-bottom: 0.85rem;
+}
+
+.email-template-subject-text {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #1E293B;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1;
+}
+
+.email-template-mini-preview {
+  border-radius: 8px;
+  border: 1px solid #E2E8F0;
+  overflow: hidden;
+  background: #FFFFFF;
+  margin-bottom: 0.85rem;
+  box-shadow: 0 1px 3px rgba(6, 54, 105, 0.03);
+}
+
+.email-template-mini-header {
+  background: linear-gradient(135deg, #063669 0%, #0a4a8a 40%, #1565c0 100%);
+  height: 24px;
+  padding: 0 0.65rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.email-template-mini-brand {
+  font-size: 0.65rem;
+  font-weight: 800;
+  color: #FFFFFF;
+  letter-spacing: 0.04em;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.email-template-mini-body {
+  padding: 0.65rem 0.75rem;
+  font-size: 0.775rem;
+  color: #64748B;
+  line-height: 1.5;
+  min-height: 54px;
+  max-height: 68px;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  background: #FAFAFA;
+}
+
+.email-template-edit-btn {
+  background: #F1F5F9;
+  border: 1px solid #CBD5E1;
+  border-radius: 6px;
+  padding: 0.25rem 0.65rem;
+  font-size: 0.74rem;
+  font-weight: 600;
+  color: #063669;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  transition: all 0.15s ease;
+}
+
+.email-template-edit-btn:hover {
+  background: #063669;
+  border-color: #063669;
+  color: #FFFFFF;
+  box-shadow: 0 2px 6px rgba(6, 54, 105, 0.2);
 }

@@ -15,7 +15,8 @@ import {
   LuLayers,
   LuPhoneCall,
   LuCircleCheck,
-  LuClipboardCheck
+  LuClipboardCheck,
+  LuCheck
 } from 'react-icons/lu';
 import { INITIAL_EMAIL_TEMPLATES } from '../data/mockData';
 import { STORAGE_KEYS } from '../constants/storageKeys';
@@ -398,8 +399,46 @@ export default function MasterDataView({
   const [templateFormData, setTemplateFormData] = useState({
     name: '',
     subject: '',
-    body: ''
+    body: '',
+    cc: ''
   });
+  const [templateCcEmails, setTemplateCcEmails] = useState([]);
+  const [templateCcInput, setTemplateCcInput] = useState('');
+
+  const handleAddTemplateCcEmail = (rawText) => {
+    if (!rawText) return;
+    const parts = rawText
+      .split(/[,;\s]+/)
+      .map(s => s.trim())
+      .filter(s => s.length > 0 && s.includes('@'));
+
+    if (parts.length > 0) {
+      setTemplateCcEmails(prev => {
+        const set = new Set([...prev, ...parts]);
+        return Array.from(set);
+      });
+      setTemplateCcInput('');
+    }
+  };
+
+  const handleTemplateCcKeyDown = (e) => {
+    if (e.key === 'Enter' || e.key === ',' || e.key === ';') {
+      e.preventDefault();
+      handleAddTemplateCcEmail(templateCcInput);
+    } else if (e.key === 'Backspace' && !templateCcInput && templateCcEmails.length > 0) {
+      setTemplateCcEmails(prev => prev.slice(0, -1));
+    }
+  };
+
+  const handleTemplateCcBlur = () => {
+    if (templateCcInput.trim()) {
+      handleAddTemplateCcEmail(templateCcInput);
+    }
+  };
+
+  const handleRemoveTemplateCcEmail = (indexToRemove) => {
+    setTemplateCcEmails(prev => prev.filter((_, idx) => idx !== indexToRemove));
+  };
 
   const MASTER_STORAGE_KEY = STORAGE_KEYS?.MASTER_DATA || 'techgy_master_data_v13';
 
@@ -565,10 +604,16 @@ export default function MasterDataView({
 
   const handleOpenEditTemplate = (tpl) => {
     setEditingTemplate(tpl);
+    const initialCc = tpl.cc
+      ? (Array.isArray(tpl.cc) ? tpl.cc : tpl.cc.split(/[,;\s]+/).map(s => s.trim()).filter(Boolean))
+      : [];
+    setTemplateCcEmails(initialCc);
+    setTemplateCcInput('');
     setTemplateFormData({
       name: tpl.name || '',
       subject: tpl.subject || '',
-      body: tpl.body || ''
+      body: tpl.body || '',
+      cc: tpl.cc || ''
     });
   };
 
@@ -576,13 +621,16 @@ export default function MasterDataView({
     e.preventDefault();
     if (!editingTemplate || !templateFormData.name.trim() || !templateFormData.subject.trim()) return;
 
+    const finalCc = templateCcEmails.join(', ');
+
     const updated = activeEmailTemplates.map(tpl => {
       if (tpl.id === editingTemplate.id) {
         return {
           ...tpl,
           name: templateFormData.name.trim(),
           subject: templateFormData.subject.trim(),
-          body: templateFormData.body
+          body: templateFormData.body,
+          cc: finalCc
         };
       }
       return tpl;
@@ -590,6 +638,8 @@ export default function MasterDataView({
 
     updateTemplates(updated);
     setEditingTemplate(null);
+    setTemplateCcEmails([]);
+    setTemplateCcInput('');
 
     if (onTriggerToast) {
       onTriggerToast({
@@ -608,11 +658,14 @@ export default function MasterDataView({
     if (targetCategory === 'emailTemplates') {
       if (!templateFormData.name.trim() || !templateFormData.subject.trim()) return;
 
+      const finalCc = templateCcEmails.join(', ');
+
       const newTpl = {
         id: `TPL-${String(activeEmailTemplates.length + 1).padStart(3, '0')}`,
         name: templateFormData.name.trim(),
         subject: templateFormData.subject.trim(),
-        body: templateFormData.body || ''
+        body: templateFormData.body || '',
+        cc: finalCc
       };
 
       const updated = [newTpl, ...activeEmailTemplates];
@@ -626,7 +679,9 @@ export default function MasterDataView({
         });
       }
 
-      setTemplateFormData({ name: '', subject: '', body: '' });
+      setTemplateFormData({ name: '', subject: '', body: '', cc: '' });
+      setTemplateCcEmails([]);
+      setTemplateCcInput('');
       setIsAddModalOpen(false);
       return;
     }
@@ -865,7 +920,9 @@ export default function MasterDataView({
               className="btn-primary"
               onClick={() => {
                 if (selectedCategory === 'emailTemplates') {
-                  setTemplateFormData({ name: '', subject: '', body: '' });
+                  setTemplateFormData({ name: '', subject: '', body: '', cc: '' });
+                  setTemplateCcEmails([]);
+                  setTemplateCcInput('');
                 }
                 setIsAddModalOpen(true);
               }}
@@ -993,228 +1050,304 @@ export default function MasterDataView({
           </div>
         )}
 
-        {/* Data Table */}
-        <div style={{ overflowX: 'auto' }}>
-          <table className="crm-table" style={{ width: '100%', borderCollapse: 'collapse' }}>
-            <thead>
-              <tr style={{ background: '#F8FAFC', borderBottom: '1px solid #E2E8F0', color: '#557396', fontSize: '0.785rem', textAlign: 'left' }}>
-                {/* 1. Content Types */}
-                {selectedCategory === 'contentTypes' && (
-                  <>
-                    <th style={{ padding: '0.75rem 1rem' }}>ID</th>
-                    <th style={{ padding: '0.75rem 1rem' }}>Content Type Name</th>
-                    <th style={{ padding: '0.75rem 1rem', textAlign: 'right' }}>Actions</th>
-                  </>
-                )}
+        {/* Email Templates Card Grid OR Standard Master Data Table */}
+        {selectedCategory === 'emailTemplates' ? (
+          filteredList.length === 0 ? (
+            <div style={{
+              textAlign: 'center',
+              padding: '3.5rem 1.5rem',
+              background: '#F8FAFC',
+              borderRadius: '12px',
+              border: '1px dashed #CBD5E1'
+            }}>
+              <div style={{
+                width: '48px',
+                height: '48px',
+                borderRadius: '50%',
+                backgroundColor: '#E0F2FE',
+                color: '#0284C7',
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                marginBottom: '0.85rem'
+              }}>
+                <LuMail size={24} />
+              </div>
+              <h4 style={{ margin: '0 0 0.35rem 0', color: '#063669', fontSize: '1.05rem', fontWeight: 700 }}>
+                No Email Templates Found
+              </h4>
+              <p style={{ margin: 0, color: '#64748B', fontSize: '0.825rem' }}>
+                {localSearch ? `No email templates match "${localSearch}". Try clearing your search term.` : 'Create a new template using the "+ Create Email Template" button above.'}
+              </p>
+            </div>
+          ) : (
+            <div className="email-template-cards-grid">
+              {filteredList.map((tpl) => (
+                <div
+                  key={tpl.id}
+                  className="email-template-card"
+                >
+                  <div>
+                    {/* Top Row: ID Badge & Edit CTA */}
+                    <div className="email-template-card-top">
+                      <span className="email-template-id-badge">
+                        {tpl.id}
+                      </span>
+                      <button
+                        type="button"
+                        className="email-template-edit-btn"
+                        onClick={() => handleOpenEditTemplate(tpl)}
+                        title="Edit Template"
+                      >
+                        <LuPencil size={12} /> Edit
+                      </button>
+                    </div>
 
-                {/* 2. Lead Follow-up Types */}
-                {selectedCategory === 'followupTypes' && (
-                  <>
-                    <th style={{ padding: '0.75rem 1rem' }}>ID</th>
-                    <th style={{ padding: '0.75rem 1rem' }}>Follow-up Type</th>
-                    <th style={{ padding: '0.75rem 1rem', textAlign: 'right' }}>Actions</th>
-                  </>
-                )}
+                    {/* Template Name */}
+                    <h3 className="email-template-card-title">
+                      {tpl.name}
+                    </h3>
 
-                {/* 3. Lead Follow-up Status */}
-                {selectedCategory === 'followupStatuses' && (
-                  <>
-                    <th style={{ padding: '0.75rem 1rem' }}>ID</th>
-                    <th style={{ padding: '0.75rem 1rem' }}>Description</th>
-                    <th style={{ padding: '0.75rem 1rem', textAlign: 'right' }}>Actions</th>
-                  </>
-                )}
+                    {/* Subject Line preview */}
+                    <div className="email-template-subject-box">
+                      <LuMail size={14} style={{ color: '#0284C7', marginTop: '2px', flexShrink: 0 }} />
+                      <span className="email-template-subject-text" title={tpl.subject}>
+                        {tpl.subject || '(No Subject Line)'}
+                      </span>
+                    </div>
 
-                {/* 4. Lead Status (Cleaned of Win Probability & Description - First column strictly ID) */}
-                {selectedCategory === 'leadStatuses' && (
-                  <>
-                    <th style={{ padding: '0.75rem 1rem' }}>ID</th>
-                    <th style={{ padding: '0.75rem 1rem' }}>Lead Status Name</th>
-                    <th style={{ padding: '0.75rem 1rem', textAlign: 'right' }}>Actions</th>
-                  </>
-                )}
+                    {/* CC recipient preview if present */}
+                    {tpl.cc && (
+                      <div style={{
+                        fontSize: '0.725rem',
+                        color: '#0369A1',
+                        backgroundColor: '#F0F9FF',
+                        border: '1px solid #BAE6FD',
+                        borderRadius: '6px',
+                        padding: '0.2rem 0.5rem',
+                        marginBottom: '0.85rem',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.35rem'
+                      }}>
+                        <span style={{ fontWeight: 700 }}>CC:</span>
+                        <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{tpl.cc}</span>
+                      </div>
+                    )}
 
-                {/* 5. Sales Objections */}
-                {selectedCategory === 'objections' && (
-                  <>
-                    <th style={{ padding: '0.75rem 1rem' }}>ID</th>
-                    <th style={{ padding: '0.75rem 1rem' }}>Objection Concern</th>
-                    <th style={{ padding: '0.75rem 1rem', textAlign: 'right' }}>Actions</th>
-                  </>
-                )}
-
-                {/* 6. Agent Checklist */}
-                {selectedCategory === 'agentChecklist' && (
-                  <>
-                    <th style={{ padding: '0.75rem 1rem' }}>ID</th>
-                    <th style={{ padding: '0.75rem 1rem' }}>Lead Status</th>
-                    <th style={{ padding: '0.75rem 1rem' }}>Points to Talk</th>
-                    <th style={{ padding: '0.75rem 1rem', textAlign: 'right' }}>Actions</th>
-                  </>
-                )}
-
-                {/* 7. Email Templates (Category Removed - First column strictly ID) */}
-                {selectedCategory === 'emailTemplates' && (
-                  <>
-                    <th style={{ padding: '0.75rem 1rem' }}>ID</th>
-                    <th style={{ padding: '0.75rem 1rem' }}>Template Name</th>
-                    <th style={{ padding: '0.75rem 1rem' }}>Subject Line</th>
-                    <th style={{ padding: '0.75rem 1rem', textAlign: 'right' }}>Actions</th>
-                  </>
-                )}
-
-                {/* 8. Industry Sectors (Standard Margin & Domain Focus Area Removed - First column strictly ID) */}
-                {selectedCategory === 'industries' && (
-                  <>
-                    <th style={{ padding: '0.75rem 1rem' }}>ID</th>
-                    <th style={{ padding: '0.75rem 1rem' }}>Industry Sector</th>
-                    <th style={{ padding: '0.75rem 1rem', textAlign: 'right' }}>Actions</th>
-                  </>
-                )}
-
-                {/* Products (Only ID and Product / Service Name - First column strictly ID) */}
-                {selectedCategory === 'products' && (
-                  <>
-                    <th style={{ padding: '0.75rem 1rem' }}>ID</th>
-                    <th style={{ padding: '0.75rem 1rem' }}>Product / Service Name</th>
-                    <th style={{ padding: '0.75rem 1rem', textAlign: 'right' }}>Actions</th>
-                  </>
-                )}
-
-                {/* Sources (Channel Type, Attribution Weight, Cost per Lead Removed - First column strictly ID) */}
-                {selectedCategory === 'sources' && (
-                  <>
-                    <th style={{ padding: '0.75rem 1rem' }}>ID</th>
-                    <th style={{ padding: '0.75rem 1rem' }}>Channel Name</th>
-                    <th style={{ padding: '0.75rem 1rem', textAlign: 'right' }}>Actions</th>
-                  </>
-                )}
-              </tr>
-            </thead>
-
-            <tbody>
-              {filteredList.map((item) => (
-                <tr key={item.id} style={{ borderBottom: '1px solid #F1F5F9', fontSize: '0.825rem' }}>
+                    {/* Mini Mail Template Mockup Preview (Aesthetic from Create Mail) */}
+                    <div className="email-template-mini-preview" style={{ marginBottom: 0 }}>
+                      <div className="email-template-mini-header">
+                        <div className="email-template-mini-brand">
+                          <svg width="12" height="12" viewBox="0 0 24 24" fill="none">
+                            <path d="M12 2L2 7l10 5 10-5-10-5z" fill="white" opacity="0.9"/>
+                            <path d="M2 17l10 5 10-5" stroke="white" strokeWidth="1.8" strokeLinecap="round" opacity="0.7"/>
+                            <path d="M2 12l10 5 10-5" stroke="white" strokeWidth="1.8" strokeLinecap="round" opacity="0.5"/>
+                          </svg>
+                          <span>TechGy CRM</span>
+                        </div>
+                        <span style={{ fontSize: '0.6rem', color: 'rgba(255,255,255,0.7)', fontWeight: 600 }}>
+                          Official Mail
+                        </span>
+                      </div>
+                      <div className="email-template-mini-body">
+                        <div style={{ fontWeight: 600, color: '#334155', marginBottom: '0.2rem' }}>
+                          Dear {'{leadName}'},
+                        </div>
+                        {tpl.body ? (
+                          <span>{tpl.body}</span>
+                        ) : (
+                          <span style={{ color: '#94A3B8', fontStyle: 'italic' }}>(No body content defined)</span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )
+        ) : (
+          /* Data Table */
+          <div style={{ overflowX: 'auto' }}>
+            <table className="crm-table" style={{ width: '100%', borderCollapse: 'collapse' }}>
+              <thead>
+                <tr style={{ background: '#F8FAFC', borderBottom: '1px solid #E2E8F0', color: '#557396', fontSize: '0.785rem', textAlign: 'left' }}>
                   {/* 1. Content Types */}
                   {selectedCategory === 'contentTypes' && (
                     <>
-                      <td style={{ padding: '0.75rem 1rem', fontFamily: 'monospace', fontWeight: 600, color: '#557396' }}>{item.id}</td>
-                      <td style={{ padding: '0.75rem 1rem', fontWeight: 700, color: '#063669' }}>{item.name}</td>
+                      <th style={{ padding: '0.75rem 1rem' }}>ID</th>
+                      <th style={{ padding: '0.75rem 1rem' }}>Content Type Name</th>
+                      <th style={{ padding: '0.75rem 1rem', textAlign: 'right' }}>Actions</th>
                     </>
                   )}
 
                   {/* 2. Lead Follow-up Types */}
                   {selectedCategory === 'followupTypes' && (
                     <>
-                      <td style={{ padding: '0.75rem 1rem', fontFamily: 'monospace', fontWeight: 600, color: '#557396' }}>{item.id}</td>
-                      <td style={{ padding: '0.75rem 1rem', fontWeight: 700, color: '#063669' }}>{item.name}</td>
+                      <th style={{ padding: '0.75rem 1rem' }}>ID</th>
+                      <th style={{ padding: '0.75rem 1rem' }}>Follow-up Type</th>
+                      <th style={{ padding: '0.75rem 1rem', textAlign: 'right' }}>Actions</th>
                     </>
                   )}
 
                   {/* 3. Lead Follow-up Status */}
                   {selectedCategory === 'followupStatuses' && (
                     <>
-                      <td style={{ padding: '0.75rem 1rem', fontFamily: 'monospace', fontWeight: 600, color: '#557396' }}>{item.id}</td>
-                      <td style={{ padding: '0.75rem 1rem', color: '#1E293B', fontWeight: 500 }}>{item.description || item.name}</td>
+                      <th style={{ padding: '0.75rem 1rem' }}>ID</th>
+                      <th style={{ padding: '0.75rem 1rem' }}>Description</th>
+                      <th style={{ padding: '0.75rem 1rem', textAlign: 'right' }}>Actions</th>
                     </>
                   )}
 
                   {/* 4. Lead Status (Cleaned of Win Probability & Description - First column strictly ID) */}
                   {selectedCategory === 'leadStatuses' && (
                     <>
-                      <td style={{ padding: '0.75rem 1rem', fontFamily: 'monospace', fontWeight: 600, color: '#557396' }}>{item.id}</td>
-                      <td style={{ padding: '0.75rem 1rem', fontWeight: 700, color: '#063669' }}>{item.name}</td>
+                      <th style={{ padding: '0.75rem 1rem' }}>ID</th>
+                      <th style={{ padding: '0.75rem 1rem' }}>Lead Status Name</th>
+                      <th style={{ padding: '0.75rem 1rem', textAlign: 'right' }}>Actions</th>
                     </>
                   )}
 
                   {/* 5. Sales Objections */}
                   {selectedCategory === 'objections' && (
                     <>
-                      <td style={{ padding: '0.75rem 1rem', fontFamily: 'monospace', fontWeight: 600, color: '#557396' }}>{item.id}</td>
-                      <td style={{ padding: '0.75rem 1rem', fontWeight: 700, color: '#063669' }}>{item.name}</td>
+                      <th style={{ padding: '0.75rem 1rem' }}>ID</th>
+                      <th style={{ padding: '0.75rem 1rem' }}>Objection Concern</th>
+                      <th style={{ padding: '0.75rem 1rem', textAlign: 'right' }}>Actions</th>
                     </>
                   )}
 
                   {/* 6. Agent Checklist */}
                   {selectedCategory === 'agentChecklist' && (
                     <>
-                      <td style={{ padding: '0.75rem 1rem', fontFamily: 'monospace', fontWeight: 600, color: '#557396' }}>{item.id}</td>
-                      <td style={{ padding: '0.75rem 1rem' }}>
-                        <span style={{
-                          display: 'inline-block',
-                          fontSize: '0.75rem',
-                          fontWeight: 700,
-                          padding: '0.2rem 0.55rem',
-                          borderRadius: '6px',
-                          background: '#EBF3FA',
-                          color: '#063669',
-                          border: '1px solid #D5E2EE'
-                        }}>
-                          {item.leadStatus || 'New'}
-                        </span>
-                      </td>
-                      <td style={{ padding: '0.75rem 1rem', color: '#1E293B', fontWeight: 500, lineHeight: 1.5 }}>{item.pointsToTalk || item.name || item.description}</td>
-                    </>
-                  )}
-
-                  {/* 7. Email Templates (Category Removed - First column strictly ID) */}
-                  {selectedCategory === 'emailTemplates' && (
-                    <>
-                      <td style={{ padding: '0.75rem 1rem', fontFamily: 'monospace', fontWeight: 600, color: '#557396' }}>{item.id}</td>
-                      <td style={{ padding: '0.75rem 1rem', fontWeight: 700, color: '#063669' }}>{item.name}</td>
-                      <td style={{ padding: '0.75rem 1rem', color: '#557396', maxWidth: '380px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.subject}</td>
+                      <th style={{ padding: '0.75rem 1rem' }}>ID</th>
+                      <th style={{ padding: '0.75rem 1rem' }}>Lead Status</th>
+                      <th style={{ padding: '0.75rem 1rem' }}>Points to Talk</th>
+                      <th style={{ padding: '0.75rem 1rem', textAlign: 'right' }}>Actions</th>
                     </>
                   )}
 
                   {/* 8. Industry Sectors (Standard Margin & Domain Focus Area Removed - First column strictly ID) */}
                   {selectedCategory === 'industries' && (
                     <>
-                      <td style={{ padding: '0.75rem 1rem', fontFamily: 'monospace', fontWeight: 600, color: '#557396' }}>{item.id}</td>
-                      <td style={{ padding: '0.75rem 1rem', fontWeight: 700, color: '#063669' }}>{item.name}</td>
+                      <th style={{ padding: '0.75rem 1rem' }}>ID</th>
+                      <th style={{ padding: '0.75rem 1rem' }}>Industry Sector</th>
+                      <th style={{ padding: '0.75rem 1rem', textAlign: 'right' }}>Actions</th>
                     </>
                   )}
 
                   {/* Products (Only ID and Product / Service Name - First column strictly ID) */}
                   {selectedCategory === 'products' && (
                     <>
-                      <td style={{ padding: '0.75rem 1rem', fontFamily: 'monospace', fontWeight: 600, color: '#557396' }}>{item.id}</td>
-                      <td style={{ padding: '0.75rem 1rem', fontWeight: 700, color: '#063669' }}>{item.name}</td>
+                      <th style={{ padding: '0.75rem 1rem' }}>ID</th>
+                      <th style={{ padding: '0.75rem 1rem' }}>Product / Service Name</th>
+                      <th style={{ padding: '0.75rem 1rem', textAlign: 'right' }}>Actions</th>
                     </>
                   )}
 
-                  {/* Sources (Only ID and Channel Name - First column strictly ID) */}
+                  {/* Sources (Channel Type, Attribution Weight, Cost per Lead Removed - First column strictly ID) */}
                   {selectedCategory === 'sources' && (
                     <>
-                      <td style={{ padding: '0.75rem 1rem', fontFamily: 'monospace', fontWeight: 600, color: '#557396' }}>{item.id}</td>
-                      <td style={{ padding: '0.75rem 1rem', fontWeight: 700, color: '#063669' }}>{item.name}</td>
+                      <th style={{ padding: '0.75rem 1rem' }}>ID</th>
+                      <th style={{ padding: '0.75rem 1rem' }}>Channel Name</th>
+                      <th style={{ padding: '0.75rem 1rem', textAlign: 'right' }}>Actions</th>
                     </>
                   )}
+                </tr>
+              </thead>
 
-                  {/* Actions Column (Edit ONLY - NO Delete option) */}
-                  <td style={{ padding: '0.75rem 1rem', textAlign: 'right' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '0.4rem' }}>
-                      {selectedCategory === 'emailTemplates' ? (
-                        <button
-                          type="button"
-                          onClick={() => handleOpenEditTemplate(item)}
-                          style={{
-                            background: '#F1F5F9',
-                            border: '1px solid #CBD5E1',
-                            borderRadius: '6px',
-                            padding: '0.25rem 0.65rem',
+              <tbody>
+                {filteredList.map((item) => (
+                  <tr key={item.id} style={{ borderBottom: '1px solid #F1F5F9', fontSize: '0.825rem' }}>
+                    {/* 1. Content Types */}
+                    {selectedCategory === 'contentTypes' && (
+                      <>
+                        <td style={{ padding: '0.75rem 1rem', fontFamily: 'monospace', fontWeight: 600, color: '#557396' }}>{item.id}</td>
+                        <td style={{ padding: '0.75rem 1rem', fontWeight: 700, color: '#063669' }}>{item.name}</td>
+                      </>
+                    )}
+
+                    {/* 2. Lead Follow-up Types */}
+                    {selectedCategory === 'followupTypes' && (
+                      <>
+                        <td style={{ padding: '0.75rem 1rem', fontFamily: 'monospace', fontWeight: 600, color: '#557396' }}>{item.id}</td>
+                        <td style={{ padding: '0.75rem 1rem', fontWeight: 700, color: '#063669' }}>{item.name}</td>
+                      </>
+                    )}
+
+                    {/* 3. Lead Follow-up Status */}
+                    {selectedCategory === 'followupStatuses' && (
+                      <>
+                        <td style={{ padding: '0.75rem 1rem', fontFamily: 'monospace', fontWeight: 600, color: '#557396' }}>{item.id}</td>
+                        <td style={{ padding: '0.75rem 1rem', color: '#1E293B', fontWeight: 500 }}>{item.description || item.name}</td>
+                      </>
+                    )}
+
+                    {/* 4. Lead Status (Cleaned of Win Probability & Description - First column strictly ID) */}
+                    {selectedCategory === 'leadStatuses' && (
+                      <>
+                        <td style={{ padding: '0.75rem 1rem', fontFamily: 'monospace', fontWeight: 600, color: '#557396' }}>{item.id}</td>
+                        <td style={{ padding: '0.75rem 1rem', fontWeight: 700, color: '#063669' }}>{item.name}</td>
+                      </>
+                    )}
+
+                    {/* 5. Sales Objections */}
+                    {selectedCategory === 'objections' && (
+                      <>
+                        <td style={{ padding: '0.75rem 1rem', fontFamily: 'monospace', fontWeight: 600, color: '#557396' }}>{item.id}</td>
+                        <td style={{ padding: '0.75rem 1rem', fontWeight: 700, color: '#063669' }}>{item.name}</td>
+                      </>
+                    )}
+
+                    {/* 6. Agent Checklist */}
+                    {selectedCategory === 'agentChecklist' && (
+                      <>
+                        <td style={{ padding: '0.75rem 1rem', fontFamily: 'monospace', fontWeight: 600, color: '#557396' }}>{item.id}</td>
+                        <td style={{ padding: '0.75rem 1rem' }}>
+                          <span style={{
+                            display: 'inline-block',
                             fontSize: '0.75rem',
-                            fontWeight: 600,
+                            fontWeight: 700,
+                            padding: '0.2rem 0.55rem',
+                            borderRadius: '6px',
+                            background: '#EBF3FA',
                             color: '#063669',
-                            cursor: 'pointer',
-                            display: 'inline-flex',
-                            alignItems: 'center',
-                            gap: '0.35rem'
-                          }}
-                          title="Edit Template"
-                        >
-                          <LuPencil size={13} /> Edit
-                        </button>
-                      ) : (
+                            border: '1px solid #D5E2EE'
+                          }}>
+                            {item.leadStatus || 'New'}
+                          </span>
+                        </td>
+                        <td style={{ padding: '0.75rem 1rem', color: '#1E293B', fontWeight: 500, lineHeight: 1.5 }}>{item.pointsToTalk || item.name || item.description}</td>
+                      </>
+                    )}
+
+                    {/* 8. Industry Sectors (Standard Margin & Domain Focus Area Removed - First column strictly ID) */}
+                    {selectedCategory === 'industries' && (
+                      <>
+                        <td style={{ padding: '0.75rem 1rem', fontFamily: 'monospace', fontWeight: 600, color: '#557396' }}>{item.id}</td>
+                        <td style={{ padding: '0.75rem 1rem', fontWeight: 700, color: '#063669' }}>{item.name}</td>
+                      </>
+                    )}
+
+                    {/* Products (Only ID and Product / Service Name - First column strictly ID) */}
+                    {selectedCategory === 'products' && (
+                      <>
+                        <td style={{ padding: '0.75rem 1rem', fontFamily: 'monospace', fontWeight: 600, color: '#557396' }}>{item.id}</td>
+                        <td style={{ padding: '0.75rem 1rem', fontWeight: 700, color: '#063669' }}>{item.name}</td>
+                      </>
+                    )}
+
+                    {/* Sources (Only ID and Channel Name - First column strictly ID) */}
+                    {selectedCategory === 'sources' && (
+                      <>
+                        <td style={{ padding: '0.75rem 1rem', fontFamily: 'monospace', fontWeight: 600, color: '#557396' }}>{item.id}</td>
+                        <td style={{ padding: '0.75rem 1rem', fontWeight: 700, color: '#063669' }}>{item.name}</td>
+                      </>
+                    )}
+
+                    {/* Actions Column (Edit ONLY - NO Delete option) */}
+                    <td style={{ padding: '0.75rem 1rem', textAlign: 'right' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '0.4rem' }}>
                         <button
                           type="button"
                           onClick={() => handleOpenEditRecord(item)}
@@ -1235,24 +1368,24 @@ export default function MasterDataView({
                         >
                           <LuPencil size={13} /> Edit
                         </button>
-                      )}
-                    </div>
-                  </td>
-                </tr>
-              ))}
+                      </div>
+                    </td>
+                  </tr>
+                ))}
 
-              {filteredList.length === 0 && (
-                <tr>
-                  <td colSpan={7} style={{ textAlign: 'center', padding: '2.5rem', color: '#94A3B8', fontSize: '0.875rem' }}>
-                    {selectedCategory === 'agentChecklist' && checklistStatusFilter !== 'All'
-                      ? `No points to talk found for status "${checklistStatusFilter}". Click "+ Add Record" to add points for this status.`
-                      : `No records found matching "${effectiveSearch}". Click "+ Add Record" to create one.`}
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
+                {filteredList.length === 0 && (
+                  <tr>
+                    <td colSpan={7} style={{ textAlign: 'center', padding: '2.5rem', color: '#94A3B8', fontSize: '0.875rem' }}>
+                      {selectedCategory === 'agentChecklist' && checklistStatusFilter !== 'All'
+                        ? `No points to talk found for status "${checklistStatusFilter}". Click "+ Add Record" to add points for this status.`
+                        : `No records found matching "${effectiveSearch}". Click "+ Add Record" to create one.`}
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
 
       {/* ---------------------------------------------------------------------- */}
@@ -1495,113 +1628,540 @@ export default function MasterDataView({
       })()}
 
       {/* ---------------------------------------------------------------------- */}
-      {/* 4. CREATE EMAIL TEMPLATE MODAL (Category Removed)                      */}
+      {/* 4. WHOLE MAIL TEMPLATE MODAL (EDIT & CREATE - WITH LIVE CORPORATE PREVIEW) */}
       {/* ---------------------------------------------------------------------- */}
-      {(isAddModalOpen && selectedCategory === 'emailTemplates') && (
-        <div className="modal-overlay" onClick={() => setIsAddModalOpen(false)}>
-          <div className="modal-card" style={{ maxWidth: '580px' }} onClick={e => e.stopPropagation()}>
-            <div className="modal-header">
-              <h3 className="modal-title">Create Email Template</h3>
-              <button className="modal-close-btn" onClick={() => setIsAddModalOpen(false)}><LuX size={18} /></button>
+      {(editingTemplate || (isAddModalOpen && selectedCategory === 'emailTemplates')) && (() => {
+        const isEditing = !!editingTemplate;
+        const currentId = isEditing
+          ? editingTemplate.id
+          : `TPL-${String(activeEmailTemplates.length + 1).padStart(3, '0')}`;
+        const closeHandler = () => {
+          if (isEditing) {
+            setEditingTemplate(null);
+          } else {
+            setIsAddModalOpen(false);
+          }
+        };
+        const submitHandler = isEditing ? handleSaveEditTemplate : handleCreateRecord;
+
+
+        return (
+          <div className="modal-overlay" onClick={closeHandler} style={{ zIndex: 1200, animation: 'none' }}>
+            <div
+              className="modal-card"
+              style={{
+                maxWidth: '1100px',
+                width: '95vw',
+                maxHeight: '92vh',
+                display: 'flex',
+                flexDirection: 'column',
+                borderRadius: '16px',
+                overflow: 'hidden',
+                animation: 'none',
+                transform: 'none'
+              }}
+              onClick={e => e.stopPropagation()}
+            >
+              {/* Modal Top Header */}
+              <div className="modal-header" style={{ borderBottom: '1px solid #E2E8F0', padding: '1rem 1.5rem', background: '#F8FAFC' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                  <div style={{
+                    width: '36px',
+                    height: '36px',
+                    borderRadius: '10px',
+                    backgroundColor: '#E0F2FE',
+                    color: '#0284C7',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center'
+                  }}>
+                    <LuMail size={18} />
+                  </div>
+                  <div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
+                      <h3 className="modal-title" style={{ fontSize: '1.15rem', fontWeight: 800, color: '#063669', margin: 0 }}>
+                        {isEditing ? 'Edit Email Template' : 'Create Email Template'}
+                      </h3>
+                      <span style={{
+                        fontFamily: 'monospace',
+                        fontWeight: 700,
+                        fontSize: '0.75rem',
+                        color: '#0369A1',
+                        backgroundColor: '#E0F2FE',
+                        border: '1px solid #BAE6FD',
+                        padding: '0.15rem 0.55rem',
+                        borderRadius: '6px'
+                      }}>
+                        {currentId}
+                      </span>
+                    </div>
+                    <p style={{ margin: '0.2rem 0 0 0', fontSize: '0.785rem', color: '#64748B' }}>
+                      Interactive email template editor with real-time Gmail corporate preview
+                    </p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  className="modal-close-btn"
+                  onClick={closeHandler}
+                  title="Close"
+                  style={{
+                    background: 'transparent',
+                    border: 'none',
+                    outline: 'none',
+                    cursor: 'pointer',
+                    color: '#64748B',
+                    width: '32px',
+                    height: '32px',
+                    borderRadius: '8px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    padding: 0,
+                    animation: 'none',
+                    transform: 'none',
+                    transition: 'background-color 0.15s ease, color 0.15s ease'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor = '#F1F5F9';
+                    e.currentTarget.style.color = '#063669';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = 'transparent';
+                    e.currentTarget.style.color = '#64748B';
+                  }}
+                >
+                  <LuX size={20} />
+                </button>
+              </div>
+
+              {/* Modal Body: 2-Column Split View */}
+              <form onSubmit={submitHandler} style={{ display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0, overflow: 'hidden' }}>
+                <div
+                  className="modal-body"
+                  style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(auto-fit, minmax(360px, 1fr))',
+                    gap: '1.5rem',
+                    padding: '1.25rem 1.5rem',
+                    overflowY: 'auto',
+                    flex: 1,
+                    minHeight: 0
+                  }}
+                >
+                  {/* Left Column: Template Form Editor */}
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                    <div className="form-group" style={{ marginBottom: 0 }}>
+                      <label className="form-label">Template Name *</label>
+                      <input
+                        type="text"
+                        required
+                        className="form-input"
+                        placeholder="e.g. Introduction & Capabilities Overview"
+                        value={templateFormData.name}
+                        onChange={(e) => setTemplateFormData({ ...templateFormData, name: e.target.value })}
+                        style={{ height: '40px', fontSize: '0.875rem' }}
+                      />
+                    </div>
+
+                    <div className="form-group" style={{ marginBottom: 0 }}>
+                      <label className="form-label">Subject Line *</label>
+                      <input
+                        type="text"
+                        required
+                        className="form-input"
+                        placeholder="e.g. Introduction: TechGy Enterprise CRM Overview for {company}"
+                        value={templateFormData.subject}
+                        onChange={(e) => setTemplateFormData({ ...templateFormData, subject: e.target.value })}
+                        style={{ height: '40px', fontSize: '0.875rem' }}
+                      />
+                    </div>
+
+                    {/* Multi-Email CC Field */}
+                    <div className="form-group" style={{ marginBottom: 0 }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.25rem' }}>
+                        <label className="form-label" style={{ margin: 0 }}>CC (Carbon Copy)</label>
+                        {templateCcEmails.length > 0 && (
+                          <span style={{ fontSize: '0.7rem', color: '#0284C7', fontWeight: 600 }}>
+                            {templateCcEmails.length} {templateCcEmails.length === 1 ? 'recipient' : 'recipients'}
+                          </span>
+                        )}
+                      </div>
+                      <div style={{
+                        display: 'flex',
+                        flexWrap: 'wrap',
+                        alignItems: 'center',
+                        gap: '0.35rem',
+                        padding: '0.35rem 0.6rem',
+                        border: '1px solid #CBD5E1',
+                        borderRadius: '8px',
+                        backgroundColor: '#FFFFFF',
+                        minHeight: '38px',
+                        boxShadow: '0 1px 2px rgba(6, 54, 105, 0.03)'
+                      }}>
+                        {templateCcEmails.map((email, idx) => (
+                          <span
+                            key={idx}
+                            style={{
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '0.3rem',
+                              backgroundColor: '#E0F2FE',
+                              color: '#0369A1',
+                              border: '1px solid #BAE6FD',
+                              borderRadius: '6px',
+                              padding: '0.15rem 0.45rem',
+                              fontSize: '0.75rem',
+                              fontWeight: 600
+                            }}
+                          >
+                            <span>{email}</span>
+                            <LuX
+                              size={12}
+                              style={{ cursor: 'pointer', opacity: 0.8 }}
+                              onClick={() => handleRemoveTemplateCcEmail(idx)}
+                              title="Remove email"
+                            />
+                          </span>
+                        ))}
+                        <input
+                          type="text"
+                          placeholder={templateCcEmails.length === 0 ? "Add CC emails (type and press Enter or comma)..." : "Add more..."}
+                          value={templateCcInput}
+                          onChange={(e) => setTemplateCcInput(e.target.value)}
+                          onKeyDown={handleTemplateCcKeyDown}
+                          onBlur={handleTemplateCcBlur}
+                          style={{
+                            flex: 1,
+                            minWidth: '160px',
+                            border: 'none',
+                            outline: 'none',
+                            fontSize: '0.825rem',
+                            color: '#1E293B',
+                            padding: '0.2rem 0',
+                            backgroundColor: 'transparent'
+                          }}
+                        />
+                      </div>
+                    </div>
+
+
+                    {/* Email Body Textarea */}
+                    <div className="form-group" style={{ marginBottom: 0, display: 'flex', flexDirection: 'column', flex: 1 }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.35rem' }}>
+                        <label className="form-label" style={{ margin: 0 }}>Email Template Body *</label>
+                        <span style={{ fontSize: '0.725rem', color: '#94A3B8' }}>
+                          {(templateFormData.body || '').length} characters
+                        </span>
+                      </div>
+                      <textarea
+                        rows={10}
+                        required
+                        className="form-textarea"
+                        placeholder="Hi {leadName},&#10;&#10;Thank you for connecting with TechGy..."
+                        value={templateFormData.body}
+                        onChange={(e) => setTemplateFormData({ ...templateFormData, body: e.target.value })}
+                        style={{
+                          flex: 1,
+                          minHeight: '190px',
+                          fontSize: '0.85rem',
+                          lineHeight: '1.6',
+                          fontFamily: 'inherit'
+                        }}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Right Column: Authentic Gmail Message Live Preview */}
+                  <div style={{
+                    backgroundColor: '#FFFFFF',
+                    borderRadius: '12px',
+                    border: '1px solid #CBD5E1',
+                    boxShadow: '0 4px 14px rgba(6, 54, 105, 0.06)',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    overflow: 'hidden',
+                    minHeight: '440px'
+                  }}>
+                    {/* Gmail Header Bar */}
+                    <div style={{
+                      padding: '0.65rem 1rem',
+                      backgroundColor: '#F8FAFC',
+                      borderBottom: '1px solid #E2E8F0',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      flexShrink: 0
+                    }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.55rem' }}>
+                        <div style={{
+                          width: '22px',
+                          height: '22px',
+                          borderRadius: '4px',
+                          backgroundColor: '#EA4335',
+                          color: '#FFFFFF',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          fontWeight: 900,
+                          fontSize: '0.75rem',
+                          boxShadow: '0 1px 3px rgba(234, 67, 53, 0.3)'
+                        }}>
+                          M
+                        </div>
+                        <span style={{ fontSize: '0.85rem', fontWeight: 700, color: '#1E293B' }}>
+                          Gmail Live Preview
+                        </span>
+                      </div>
+                      <span style={{
+                        fontSize: '0.675rem',
+                        fontWeight: 600,
+                        color: '#475569',
+                        backgroundColor: '#E2E8F0',
+                        padding: '0.12rem 0.45rem',
+                        borderRadius: '4px'
+                      }}>
+                        Inbox
+                      </span>
+                    </div>
+
+                    {/* Scrollable Email Thread Container */}
+                    <div style={{
+                      flex: 1,
+                      overflowY: 'auto',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      minHeight: 0
+                    }}>
+                      {/* Thread Subject Row */}
+                      <div style={{
+                        padding: '0.85rem 1.1rem',
+                        borderBottom: '1px solid #F1F5F9',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.75rem',
+                        flexShrink: 0
+                      }}>
+                        <h4 style={{
+                          margin: 0,
+                          fontSize: '0.975rem',
+                          fontWeight: 700,
+                          color: templateFormData.subject.trim() ? '#1E293B' : '#94A3B8',
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                          whiteSpace: 'nowrap',
+                          flex: 1,
+                          minWidth: 0
+                        }}>
+                          {templateFormData.subject.trim() || '(No Subject Line)'}
+                        </h4>
+                      </div>
+
+                      {/* Sender Meta Row */}
+                      <div style={{
+                        padding: '0.8rem 1.1rem',
+                        display: 'flex',
+                        alignItems: 'flex-start',
+                        gap: '0.75rem',
+                        borderBottom: '1px solid #F1F5F9',
+                        flexShrink: 0
+                      }}>
+                        <div style={{
+                          width: '36px',
+                          height: '36px',
+                          borderRadius: '50%',
+                          backgroundColor: '#063669',
+                          color: '#FFFFFF',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          fontSize: '0.9rem',
+                          fontWeight: 700,
+                          flexShrink: 0
+                        }}>
+                          R
+                        </div>
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: '0.5rem' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', flexWrap: 'wrap' }}>
+                              <span style={{ fontSize: '0.85rem', fontWeight: 700, color: '#1E293B' }}>
+                                Rajesh Sharma
+                              </span>
+                              <span style={{ fontSize: '0.725rem', color: '#64748B' }}>
+                                &lt;rajesh@techgylink.internal&gt;
+                              </span>
+                            </div>
+                            <span style={{ fontSize: '0.7rem', color: '#94A3B8', flexShrink: 0 }}>
+                              Today, 10:30 AM
+                            </span>
+                          </div>
+                          <div style={{ fontSize: '0.75rem', color: '#64748B', marginTop: '0.2rem' }}>
+                            to: <span style={{ fontWeight: 600, color: '#334155' }}>
+                              {'{leadName}'} &lt;contact@{'{company}'}.co.in&gt;
+                            </span>
+                          </div>
+                          {templateCcEmails.length > 0 && (
+                            <div style={{ fontSize: '0.735rem', color: '#64748B', marginTop: '0.15rem' }}>
+                              cc: <span style={{ fontWeight: 600, color: '#0369A1' }}>
+                                {templateCcEmails.join(', ')}
+                              </span>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Corporate Email Body */}
+                      <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+                        {/* TechGy Corporate Banner */}
+                        <div style={{
+                          background: 'linear-gradient(135deg, #063669 0%, #0a4a8a 35%, #1565c0 60%, #0d47a1 80%, #063669 100%)',
+                          position: 'relative',
+                          overflow: 'hidden',
+                          height: '72px',
+                          flexShrink: 0
+                        }}>
+                          <div style={{
+                            position: 'absolute', right: 0, top: 0, bottom: 0,
+                            display: 'flex', alignItems: 'stretch'
+                          }}>
+                            {[
+                              { bg: 'rgba(255,255,255,0.04)', skew: '-12deg', width: '80px', right: '200px' },
+                              { bg: 'rgba(255,255,255,0.07)', skew: '-12deg', width: '70px', right: '140px' },
+                              { bg: 'rgba(21,101,192,0.5)', skew: '-12deg', width: '65px', right: '85px' },
+                              { bg: 'rgba(255,255,255,0.09)', skew: '-12deg', width: '55px', right: '38px' },
+                              { bg: 'rgba(255,255,255,0.06)', skew: '-12deg', width: '45px', right: '0px' },
+                            ].map((s, i) => (
+                              <div key={i} style={{
+                                position: 'absolute',
+                                top: 0, bottom: 0,
+                                right: s.right,
+                                width: s.width,
+                                backgroundColor: s.bg,
+                                transform: `skewX(${s.skew})`,
+                                transformOrigin: 'top left'
+                              }} />
+                            ))}
+                          </div>
+                          <div style={{
+                            position: 'relative',
+                            zIndex: 2,
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '0.6rem',
+                            padding: '0 1.25rem',
+                            height: '100%'
+                          }}>
+                            <div style={{
+                              width: '32px',
+                              height: '32px',
+                              borderRadius: '8px',
+                              background: 'rgba(255,255,255,0.18)',
+                              border: '1.5px solid rgba(255,255,255,0.35)',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              backdropFilter: 'blur(4px)'
+                            }}>
+                              <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                                <path d="M12 2L2 7l10 5 10-5-10-5z" fill="white" opacity="0.9"/>
+                                <path d="M2 17l10 5 10-5" stroke="white" strokeWidth="1.8" strokeLinecap="round" opacity="0.7"/>
+                                <path d="M2 12l10 5 10-5" stroke="white" strokeWidth="1.8" strokeLinecap="round" opacity="0.5"/>
+                              </svg>
+                            </div>
+                            <div>
+                              <div style={{ color: '#FFFFFF', fontWeight: 800, fontSize: '1rem', letterSpacing: '0.02em', lineHeight: 1 }}>
+                                TechGy
+                              </div>
+                              <div style={{ color: 'rgba(255,255,255,0.65)', fontSize: '0.6rem', fontWeight: 500, letterSpacing: '0.08em', marginTop: '2px' }}>
+                                ENTERPRISE CRM
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* White Email Body Area */}
+                        <div style={{ padding: '1.1rem 1.25rem', flex: 1, backgroundColor: '#FFFFFF' }}>
+                          <div style={{ fontSize: '0.85rem', color: '#202124', marginBottom: '0.65rem', lineHeight: 1.6 }}>
+                            Dear {'{leadName}'},
+                          </div>
+
+                          {templateFormData.body && templateFormData.body.trim() ? (
+                            <div style={{
+                              fontSize: '0.84rem',
+                              color: '#202124',
+                              lineHeight: '1.7',
+                              whiteSpace: 'pre-wrap',
+                              wordBreak: 'break-word',
+                              marginBottom: '1rem'
+                            }}>
+                              {templateFormData.body}
+                            </div>
+                          ) : (
+                            <div style={{
+                              color: '#94A3B8',
+                              fontStyle: 'italic',
+                              padding: '1.25rem 0.75rem',
+                              textAlign: 'center',
+                              backgroundColor: '#F8FAFC',
+                              borderRadius: '6px',
+                              border: '1px dashed #CBD5E1',
+                              fontSize: '0.8rem',
+                              marginBottom: '1rem'
+                            }}>
+                              Start typing template body on the left to see live preview here...
+                            </div>
+                          )}
+
+                          {/* Sign-off */}
+                          <div style={{ fontSize: '0.84rem', color: '#202124', marginBottom: '0.35rem', lineHeight: 1.7 }}>
+                            Best regards,
+                          </div>
+                          <div style={{ fontSize: '0.84rem', fontWeight: 700, color: '#063669', marginBottom: '0.1rem' }}>
+                            Rajesh Sharma
+                          </div>
+                          <div style={{ fontSize: '0.75rem', color: '#64748B' }}>
+                            TechGy Solutions Enterprise Team
+                          </div>
+
+                          {/* Divider */}
+                          <div style={{ borderTop: '1px solid #E2E8F0', margin: '0.85rem 0' }} />
+
+                          {/* Legal Disclaimer */}
+                          <div style={{
+                            fontSize: '0.7rem',
+                            color: '#64748B',
+                            lineHeight: '1.6',
+                            backgroundColor: '#F8FAFC',
+                            padding: '0.75rem 0.85rem',
+                            borderRadius: '6px'
+                          }}>
+                            This e-mail and any files transmitted with it are confidential and intended solely for the use of the individual or entity to whom they are addressed. If you have received this email in error, please notify TechGy system administration.
+                          </div>
+
+                          {/* Copyright */}
+                          <div style={{ fontSize: '0.68rem', color: '#94A3B8', textAlign: 'center', marginTop: '0.75rem' }}>
+                            © {new Date().getFullYear()} TechGy. All rights reserved.
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Modal Footer */}
+                <div className="modal-footer" style={{ borderTop: '1px solid #E2E8F0', padding: '0.85rem 1.5rem', background: '#F8FAFC' }}>
+                  <button type="button" className="btn-secondary" onClick={closeHandler}>
+                    Cancel
+                  </button>
+                  <button type="submit" className="btn-primary" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}>
+                    <LuCheck size={16} /> {isEditing ? 'Save Template Changes' : 'Create Template'}
+                  </button>
+                </div>
+              </form>
             </div>
-            <form onSubmit={handleCreateRecord}>
-              <div className="modal-body" style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                <div className="form-group">
-                  <label className="form-label">Template Name *</label>
-                  <input
-                    type="text"
-                    required
-                    className="form-input"
-                    value={templateFormData.name}
-                    onChange={(e) => setTemplateFormData({ ...templateFormData, name: e.target.value })}
-                    placeholder="e.g. Enterprise Solution Introduction"
-                  />
-                </div>
-
-                <div className="form-group">
-                  <label className="form-label">Subject Line *</label>
-                  <input
-                    type="text"
-                    required
-                    className="form-input"
-                    value={templateFormData.subject}
-                    onChange={(e) => setTemplateFormData({ ...templateFormData, subject: e.target.value })}
-                    placeholder="e.g. Scaling TechGy CRM Operations for {company}"
-                  />
-                </div>
-
-                <div className="form-group">
-                  <label className="form-label">Email Body</label>
-                  <textarea
-                    rows={6}
-                    className="form-textarea"
-                    value={templateFormData.body}
-                    onChange={(e) => setTemplateFormData({ ...templateFormData, body: e.target.value })}
-                    placeholder="Hi {leadName},&#10;&#10;Following up regarding our solution..."
-                  />
-                </div>
-              </div>
-              <div className="modal-footer">
-                <button type="button" className="btn-secondary" onClick={() => setIsAddModalOpen(false)}>Cancel</button>
-                <button type="submit" className="btn-primary">Create Template</button>
-              </div>
-            </form>
           </div>
-        </div>
-      )}
-
-      {/* ---------------------------------------------------------------------- */}
-      {/* 5. EDIT EMAIL TEMPLATE MODAL (Category Removed)                        */}
-      {/* ---------------------------------------------------------------------- */}
-      {editingTemplate && (
-        <div className="modal-overlay" onClick={() => setEditingTemplate(null)}>
-          <div className="modal-card" style={{ maxWidth: '580px' }} onClick={e => e.stopPropagation()}>
-            <div className="modal-header">
-              <h3 className="modal-title">Edit Email Template</h3>
-              <button className="modal-close-btn" onClick={() => setEditingTemplate(null)}><LuX size={18} /></button>
-            </div>
-            <form onSubmit={handleSaveEditTemplate}>
-              <div className="modal-body" style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                <div className="form-group">
-                  <label className="form-label">Template Name *</label>
-                  <input
-                    type="text"
-                    required
-                    className="form-input"
-                    value={templateFormData.name}
-                    onChange={(e) => setTemplateFormData({ ...templateFormData, name: e.target.value })}
-                  />
-                </div>
-
-                <div className="form-group">
-                  <label className="form-label">Subject Line *</label>
-                  <input
-                    type="text"
-                    required
-                    className="form-input"
-                    value={templateFormData.subject}
-                    onChange={(e) => setTemplateFormData({ ...templateFormData, subject: e.target.value })}
-                  />
-                </div>
-
-                <div className="form-group">
-                  <label className="form-label">Email Body</label>
-                  <textarea
-                    rows={6}
-                    className="form-textarea"
-                    value={templateFormData.body}
-                    onChange={(e) => setTemplateFormData({ ...templateFormData, body: e.target.value })}
-                  />
-                </div>
-              </div>
-              <div className="modal-footer">
-                <button type="button" className="btn-secondary" onClick={() => setEditingTemplate(null)}>Cancel</button>
-                <button type="submit" className="btn-primary">Save Changes</button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
+        );
+      })()}
 
       {/* ---------------------------------------------------------------------- */}
       {/* 6. EDIT STANDARD MASTER RECORD MODAL                                   */}
