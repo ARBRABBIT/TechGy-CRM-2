@@ -169,13 +169,13 @@ export default function CallSessionModal({
             {leadInitials}
             <span
               className="floating-avatar-dot"
-              style={{ backgroundColor: status === 'ringing' ? '#063669' : '#10B981' }}
+              style={{ backgroundColor: status === 'ringing' ? '#0F1A34' : '#10B981' }}
             />
           </div>
 
           <div style={{ display: 'flex', flexDirection: 'column', flex: 1, minWidth: 0 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
-              <span style={{ fontWeight: 700, fontSize: '0.85rem', color: '#063669', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+              <span style={{ fontWeight: 700, fontSize: '0.85rem', color: '#0F1A34', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                 {lead.leadName}
               </span>
               <span style={{ fontSize: '0.72rem', color: '#557396' }}>
@@ -185,8 +185,8 @@ export default function CallSessionModal({
 
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', marginTop: '0.15rem' }}>
               {status === 'ringing' ? (
-                <span style={{ fontSize: '0.75rem', fontWeight: 600, color: '#063669', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
-                  <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#063669', display: 'inline-block', animation: 'pulseRingingDot 1.5s infinite' }} />
+                <span style={{ fontSize: '0.75rem', fontWeight: 600, color: '#0F1A34', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                  <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#0F1A34', display: 'inline-block', animation: 'pulseRingingDot 1.5s infinite' }} />
                   Ringing...
                 </span>
               ) : (
@@ -267,7 +267,7 @@ export default function CallSessionModal({
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                color: '#063669',
+                color: '#0F1A34',
                 boxShadow: '0 0 0 8px rgba(6, 54, 105, 0.06)'
               }}>
                 <LuPhoneCall size={28} />
@@ -275,7 +275,7 @@ export default function CallSessionModal({
             </div>
 
             <div style={{ textAlign: 'center', marginBottom: '1.35rem' }}>
-              <h3 style={{ fontSize: '1.25rem', fontWeight: 800, color: '#063669', margin: '0 0 0.35rem 0' }}>
+              <h3 style={{ fontSize: '1.25rem', fontWeight: 800, color: '#0F1A34', margin: '0 0 0.35rem 0' }}>
                 Confirm Voice Call
               </h3>
               <p style={{ fontSize: '0.875rem', color: '#557396', margin: 0 }}>
@@ -299,7 +299,7 @@ export default function CallSessionModal({
                   width: '40px',
                   height: '40px',
                   borderRadius: '50%',
-                  background: 'linear-gradient(135deg, #063669 0%, #1E5B99 100%)',
+                  background: 'linear-gradient(135deg, #0F1A34 0%, #1E5B99 100%)',
                   color: '#FFFFFF',
                   fontWeight: 800,
                   fontSize: '0.9rem',
@@ -311,7 +311,7 @@ export default function CallSessionModal({
                   {leadInitials}
                 </div>
                 <div style={{ minWidth: 0 }}>
-                  <div style={{ fontWeight: 800, color: '#063669', fontSize: '0.95rem' }}>
+                  <div style={{ fontWeight: 800, color: '#0F1A34', fontSize: '0.95rem' }}>
                     {lead.leadName}
                   </div>
                   <div style={{ fontSize: '0.775rem', color: '#557396' }}>
@@ -326,14 +326,14 @@ export default function CallSessionModal({
                 <span style={{ color: '#557396', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
                   <LuPhone size={13} /> Phone:
                 </span>
-                <strong style={{ color: '#063669', letterSpacing: '0.02em' }}>
+                <strong style={{ color: '#0F1A34', letterSpacing: '0.02em' }}>
                   {lead.phoneNumber || '+91 98765 43210'}
                 </strong>
               </div>
 
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.775rem' }}>
                 <span style={{ color: '#557396' }}>Account Owner:</span>
-                <span style={{ color: '#063669', fontWeight: 600 }}>{lead.leadOwner || 'Rajesh Sharma'}</span>
+                <span style={{ color: '#0F1A34', fontWeight: 600 }}>{lead.leadOwner || 'Rajesh Sharma'}</span>
               </div>
             </div>
 
@@ -407,13 +407,13 @@ export default function CallSessionModal({
                   padding: '0.2rem 0.6rem',
                   borderRadius: '9999px',
                   backgroundColor: status === 'connected' ? (isOnHold ? '#FEF3C7' : '#ECFDF5') : '#EBF3FA',
-                  color: status === 'connected' ? (isOnHold ? '#D97706' : '#059669') : '#063669'
+                  color: status === 'connected' ? (isOnHold ? '#D97706' : '#059669') : '#0F1A34'
                 }}>
                   <span style={{
                     width: 6,
                     height: 6,
                     borderRadius: '50%',
-                    backgroundColor: status === 'connected' ? (isOnHold ? '#D97706' : '#10B981') : '#063669',
+                    backgroundColor: status === 'connected' ? (isOnHold ? '#D97706' : '#10B981') : '#0F1A34',
                     display: 'inline-block',
                     animation: status === 'connected' && !isOnHold ? 'pulseGreenDot 1.5s infinite' : status === 'ringing' ? 'pulseRingingDot 1.5s infinite' : 'none'
                   }} />
@@ -448,7 +448,7 @@ export default function CallSessionModal({
                   style={{
                     background: '#F0F5FA',
                     border: '1px solid #D5E2EE',
-                    color: '#063669',
+                    color: '#0F1A34',
                     cursor: 'pointer',
                     padding: '4px 9px',
                     borderRadius: '7px',
@@ -482,13 +482,13 @@ export default function CallSessionModal({
                 </div>
               </div>
 
-              <h2 style={{ fontSize: '1.35rem', fontWeight: 800, color: '#063669', margin: '0 0 0.25rem 0' }}>
+              <h2 style={{ fontSize: '1.35rem', fontWeight: 800, color: '#0F1A34', margin: '0 0 0.25rem 0' }}>
                 {lead.leadName}
               </h2>
               <div style={{ fontSize: '0.85rem', color: '#557396', marginBottom: '0.35rem' }}>
                 {lead.designation} • {lead.company}
               </div>
-              <div style={{ fontSize: '0.8rem', color: '#063669', fontWeight: 600, letterSpacing: '0.02em' }}>
+              <div style={{ fontSize: '0.8rem', color: '#0F1A34', fontWeight: 600, letterSpacing: '0.02em' }}>
                 {lead.phoneNumber || '+91 98765 43210'}
               </div>
 
@@ -503,7 +503,7 @@ export default function CallSessionModal({
                     fontFamily: 'monospace',
                     fontSize: '1.75rem',
                     fontWeight: 800,
-                    color: isOnHold ? '#D97706' : '#063669',
+                    color: isOnHold ? '#D97706' : '#0F1A34',
                     letterSpacing: '0.05em',
                     fontVariantNumeric: 'tabular-nums'
                   }}>
@@ -537,11 +537,11 @@ export default function CallSessionModal({
                     onClick={onSimulatePickup}
                     style={{
                       background: '#F0F5FA',
-                      border: '1px dashed #063669',
+                      border: '1px dashed #0F1A34',
                       borderRadius: '20px',
                       padding: '0.35rem 0.85rem',
                       fontSize: '0.75rem',
-                      color: '#063669',
+                      color: '#0F1A34',
                       fontWeight: 600,
                       cursor: 'pointer',
                       display: 'inline-flex',

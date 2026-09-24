@@ -149,7 +149,7 @@ export default function DashboardView({
   });
 
   const colors = {
-    Website: '#063669',
+    Website: '#0F1A34',
     Referral: '#1A4F85',
     LinkedIn: '#2F69A1',
     'Inbound Call': '#4C83BD',
@@ -247,21 +247,21 @@ export default function DashboardView({
                   contentStyle={{
                     backgroundColor: '#FFFFFF',
                     borderRadius: '10px',
-                    color: '#063669',
+                    color: '#0F1A34',
                     border: '1px solid #E2E8F0',
                     boxShadow: '0 6px 16px rgba(6, 54, 105, 0.12)',
                     padding: '0.65rem 0.85rem'
                   }}
-                  itemStyle={{ color: '#063669', fontWeight: 600, fontSize: '0.85rem' }}
-                  labelStyle={{ color: '#063669', fontWeight: 700, fontSize: '0.9rem', marginBottom: '0.25rem' }}
+                  itemStyle={{ color: '#0F1A34', fontWeight: 600, fontSize: '0.85rem' }}
+                  labelStyle={{ color: '#0F1A34', fontWeight: 700, fontSize: '0.9rem', marginBottom: '0.25rem' }}
                 />
                 <Line
                   name="Revenue"
                   type="monotone"
                   dataKey="revenue"
-                  stroke="#063669"
+                  stroke="#0F1A34"
                   strokeWidth={3}
-                  dot={{ r: 5, fill: '#063669', strokeWidth: 2, stroke: '#FFFFFF' }}
+                  dot={{ r: 5, fill: '#0F1A34', strokeWidth: 2, stroke: '#FFFFFF' }}
                   activeDot={{ r: 7 }}
                 />
                 <Line
@@ -342,13 +342,13 @@ export default function DashboardView({
                   contentStyle={{
                     backgroundColor: '#FFFFFF',
                     borderRadius: '10px',
-                    color: '#063669',
+                    color: '#0F1A34',
                     border: '1px solid #E2E8F0',
                     boxShadow: '0 6px 16px rgba(6, 54, 105, 0.12)',
                     padding: '0.65rem 0.85rem'
                   }}
-                  itemStyle={{ color: '#063669', fontWeight: 600, fontSize: '0.85rem' }}
-                  labelStyle={{ color: '#063669', fontWeight: 700, fontSize: '0.9rem', marginBottom: '0.25rem' }}
+                  itemStyle={{ color: '#0F1A34', fontWeight: 600, fontSize: '0.85rem' }}
+                  labelStyle={{ color: '#0F1A34', fontWeight: 700, fontSize: '0.9rem', marginBottom: '0.25rem' }}
                 />
               </PieChart>
             </ResponsiveContainer>
@@ -360,7 +360,7 @@ export default function DashboardView({
               textAlign: 'center',
               pointerEvents: 'none'
             }}>
-              <div style={{ fontSize: '1.25rem', fontWeight: 700, color: '#063669' }}>{marketingTotalLeads}</div>
+              <div style={{ fontSize: '1.25rem', fontWeight: 700, color: '#0F1A34' }}>{marketingTotalLeads}</div>
               <div style={{ fontSize: '0.65rem', color: '#557396', textTransform: 'uppercase' }}>Leads</div>
             </div>
           </div>
@@ -380,7 +380,7 @@ export default function DashboardView({
                 style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', cursor: 'pointer' }}
               >
                 <span style={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: item.color, border: '1px solid #E0E6EE', flexShrink: 0 }} />
-                <span style={{ color: '#063669' }}>{item.name}: <strong>{item.count}</strong></span>
+                <span style={{ color: '#0F1A34' }}>{item.name}: <strong>{item.count}</strong></span>
               </div>
             ))}
           </div>
@@ -413,7 +413,7 @@ export default function DashboardView({
           <span className="counter-badge total">TOTAL</span>
         </div>
 
-        {/* OVERDUE LEADS - Alert Counter in Minimal #063669 & #F9F9F9 */}
+        {/* OVERDUE LEADS - Alert Counter in Minimal #0F1A34 & #F8F9FA */}
         <div
           className="counter-card alert-card"
           onClick={() => onNavigateToLeads('OVERDUE')}
@@ -458,7 +458,7 @@ export default function DashboardView({
               font: 'inherit',
               fontWeight: 700,
               fontSize: '0.875rem',
-              color: '#063669',
+              color: '#0F1A34',
               cursor: 'pointer',
               display: 'inline-flex',
               alignItems: 'center',
@@ -468,7 +468,7 @@ export default function DashboardView({
               transition: 'color 0.2s ease'
             }}
             onMouseEnter={(e) => (e.currentTarget.style.color = '#137FEC')}
-            onMouseLeave={(e) => (e.currentTarget.style.color = '#063669')}
+            onMouseLeave={(e) => (e.currentTarget.style.color = '#0F1A34')}
             title="Navigate to All Leads"
           >
             <span>View All Leads</span>
@@ -492,7 +492,7 @@ export default function DashboardView({
               {followUpActions.length === 0 ? (
                 <tr>
                   <td colSpan={6} style={{ textAlign: 'center', padding: '2.75rem 1rem', color: '#557396' }}>
-                    <div style={{ fontWeight: 600, fontSize: '0.95rem', color: '#063669', marginBottom: '0.25rem' }}>
+                    <div style={{ fontWeight: 600, fontSize: '0.95rem', color: '#0F1A34', marginBottom: '0.25rem' }}>
                       No follow-up action items found
                     </div>
                     <div style={{ fontSize: '0.8rem', color: '#64748B' }}>
@@ -540,7 +540,7 @@ export default function DashboardView({
                     <td>
                       <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', flexWrap: 'nowrap' }}>
                         <span style={{
-                          color: item.isOverdue ? '#D93025' : '#063669',
+                          color: item.isOverdue ? '#D93025' : '#0F1A34',
                           fontWeight: 600,
                           display: 'inline-flex',
                           alignItems: 'center',

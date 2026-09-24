@@ -5,13 +5,17 @@ import {
   LuBuilding2,
   LuDatabase,
   LuPanelLeft,
+  LuUserCheck,
+  LuBriefcase,
   LuX
 } from 'react-icons/lu';
 import { animateDrawerEnter } from '../../utils/animations';
 
 const BASE_MODULES = [
   { id: 'dashboard', title: 'Dashboard', icon: LuLayoutDashboard },
-  { id: 'leads', title: 'Leads', icon: LuUsers },
+  { id: 'salesHead', title: 'Sales Head', icon: LuUserCheck },
+  { id: 'salesExecutive', title: 'Sales Executive', icon: LuBriefcase },
+  { id: 'leads', title: 'Manage Leads', icon: LuUsers },
   { id: 'accounts', title: 'Accounts', icon: LuBuilding2 },
   { id: 'masterData', title: 'Master Data', icon: LuDatabase }
 ];
@@ -43,15 +47,30 @@ export default function Sidebar({
     .toUpperCase()
     .slice(0, 2) || 'TM';
 
-  const userRole = currentUser?.role === 'admin'
-    ? 'Administrator'
-    : currentUser?.role === 'manager'
-      ? 'Sales Manager'
-      : currentUser?.role === 'rep'
-        ? 'Sales Representative'
+  const userRole = currentUser?.role === 'admin' || currentUser?.role === 'Sales Admin'
+    ? 'Sales Admin'
+    : currentUser?.role === 'head' || currentUser?.role === 'Sales Head'
+      ? 'Sales Head'
+      : currentUser?.role === 'executive' || currentUser?.role === 'Sales Executive'
+        ? 'Sales Executive'
         : (currentUser?.role || 'Team Member');
 
-  const navModules = BASE_MODULES.map(item => {
+  const navModules = BASE_MODULES.filter(item => {
+    if (userRole === 'Sales Head') {
+      return item.id === 'salesHead' || item.id === 'leads';
+    }
+    if (userRole === 'Sales Executive') {
+      return item.id === 'salesExecutive';
+    }
+    // Sales Admin (and default) sees all modules
+    return true;
+  }).map(item => {
+    if (userRole === 'Sales Head' && item.id === 'salesHead') {
+      return { ...item, title: 'Dashboard', icon: LuLayoutDashboard, badge: null };
+    }
+    if (userRole === 'Sales Executive' && item.id === 'salesExecutive') {
+      return { ...item, title: 'Dashboard', icon: LuLayoutDashboard, badge: null };
+    }
     if (item.id === 'leads') {
       return {
         ...item,
@@ -156,7 +175,7 @@ export default function Sidebar({
             <button
               type="button"
               onClick={() => setMobileOpen(false)}
-              style={{ background: 'none', border: 'none', color: '#063669', cursor: 'pointer', padding: '0.25rem' }}
+              style={{ background: 'none', border: 'none', color: '#0F1A34', cursor: 'pointer', padding: '0.25rem' }}
               title="Close Sidebar"
             >
               <LuX size={20} />
@@ -230,7 +249,7 @@ export default function Sidebar({
                 width: '36px',
                 height: '36px',
                 borderRadius: '50%',
-                background: '#063669',
+                background: '#0022FF',
                 color: '#FFFFFF',
                 display: 'flex',
                 alignItems: 'center',
@@ -244,10 +263,10 @@ export default function Sidebar({
               {initials}
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', minWidth: 0 }}>
-              <span style={{ fontSize: '0.875rem', fontWeight: 700, color: '#063669', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+              <span style={{ fontSize: '0.875rem', fontWeight: 700, color: '#0F1A34', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                 {userName}
               </span>
-              <span style={{ fontSize: '0.725rem', color: '#557396', whiteSpace: 'nowrap' }}>
+              <span style={{ fontSize: '0.725rem', color: '#556987', whiteSpace: 'nowrap' }}>
                 {userRole}
               </span>
             </div>
@@ -273,7 +292,7 @@ export default function Sidebar({
                 width: '36px',
                 height: '36px',
                 borderRadius: '50%',
-                background: '#063669',
+                background: '#0022FF',
                 color: '#FFFFFF',
                 display: 'flex',
                 alignItems: 'center',

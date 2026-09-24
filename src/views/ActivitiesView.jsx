@@ -74,13 +74,13 @@ export default function ActivitiesView({
           <nav style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.875rem', fontWeight: 500, color: '#557396' }}>
             <span
               onClick={onBackToDashboard}
-              style={{ cursor: 'pointer', color: '#063669' }}
+              style={{ cursor: 'pointer', color: '#0F1A34' }}
               title="Go to Dashboard"
             >
               Dashboard
             </span>
             <LuChevronRight size={14} />
-            <span style={{ color: '#063669', fontWeight: 700 }}>
+            <span style={{ color: '#0F1A34', fontWeight: 700 }}>
               Activities & Engagement Timeline
             </span>
           </nav>
@@ -122,13 +122,13 @@ export default function ActivitiesView({
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  color: '#063669',
+                  color: '#0F1A34',
                   marginBottom: '0.25rem'
                 }}
               >
-                <LuCalendarX size={26} color="#063669" />
+                <LuCalendarX size={26} color="#0F1A34" />
               </div>
-              <div style={{ fontSize: '1.05rem', fontWeight: 700, color: '#063669' }}>
+              <div style={{ fontSize: '1.05rem', fontWeight: 700, color: '#0F1A34' }}>
                 No Activity Logs Found
               </div>
               <p style={{ margin: 0, fontSize: '0.875rem', color: '#557396', maxWidth: '400px', lineHeight: 1.5 }}>
@@ -151,12 +151,12 @@ export default function ActivitiesView({
                     cursor: 'pointer',
                     ...(act.isOverdue
                       ? { border: '1px solid #E2E8F0', backgroundColor: '#FFFFFF', borderRadius: '10px' }
-                      : { border: '1px solid transparent', backgroundColor: '#F9F9F9' })
+                      : { border: '1px solid transparent', backgroundColor: '#F8F9FA' })
                   }}
                 >
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.35rem' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                      <span style={{ fontWeight: 700, fontSize: '0.9rem', color: '#063669' }}>{act.type}</span>
+                      <span style={{ fontWeight: 700, fontSize: '0.9rem', color: '#0F1A34' }}>{act.type}</span>
                       <span style={{ fontSize: '0.8rem', color: '#557396' }}>with</span>
                       <span style={{ fontWeight: 700, fontSize: '0.85rem', color: '#084482', textDecoration: 'underline' }}>
                         {act.lead || act.company}
@@ -165,7 +165,7 @@ export default function ActivitiesView({
                     <span style={{ fontSize: '0.75rem', color: '#557396', fontWeight: 500 }}>{act.date}</span>
                   </div>
 
-                  <div style={{ fontSize: '0.825rem', color: '#063669', marginBottom: '0.35rem' }}>
+                  <div style={{ fontSize: '0.825rem', color: '#0F1A34', marginBottom: '0.35rem' }}>
                     {act.notes || act.summary || act.shortPreview || act.meetingNotes}
                   </div>
 

@@ -204,7 +204,7 @@ export default function LeadDetailView({
     const t = (type || '').toLowerCase();
     if (t === 'call' || t === 'calls') {
       return (
-        <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem', color: '#063669', backgroundColor: '#EBF3FA', padding: '0.2rem 0.55rem', borderRadius: '4px', fontSize: '0.75rem', fontWeight: 600 }}>
+        <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem', color: '#0F1A34', backgroundColor: '#EBF3FA', padding: '0.2rem 0.55rem', borderRadius: '4px', fontSize: '0.75rem', fontWeight: 600 }}>
           <LuPhone size={12} /> Call
         </span>
       );
@@ -338,13 +338,13 @@ export default function LeadDetailView({
             <>
               <span
                 onClick={onNavigateToContacts || onBack}
-                style={{ cursor: 'pointer', color: '#063669', fontWeight: 600 }}
+                style={{ cursor: 'pointer', color: '#0F1A34', fontWeight: 600 }}
                 title="Return to Contacts Directory"
               >
                 Contacts Directory
               </span>
               <LuChevronRight size={14} />
-              <span style={{ color: '#063669', fontWeight: 700 }}>
+              <span style={{ color: '#0F1A34', fontWeight: 700 }}>
                 {lead.leadName} ({lead.company})
               </span>
             </>
@@ -352,13 +352,13 @@ export default function LeadDetailView({
             <>
               <span
                 onClick={onNavigateHome}
-                style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.3rem', color: '#063669' }}
+                style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.3rem', color: '#0F1A34' }}
                 title="Go to Dashboard"
               >
                 Dashboard
               </span>
               <LuChevronRight size={14} />
-              <span style={{ color: '#063669', fontWeight: 700 }}>
+              <span style={{ color: '#0F1A34', fontWeight: 700 }}>
                 {lead.leadName} ({lead.company})
               </span>
             </>
@@ -366,13 +366,13 @@ export default function LeadDetailView({
             <>
               <span
                 onClick={onNavigateToActivities || onBack}
-                style={{ cursor: 'pointer', color: '#063669', fontWeight: 600 }}
+                style={{ cursor: 'pointer', color: '#0F1A34', fontWeight: 600 }}
                 title="Return to Activities & Engagement Timeline"
               >
                 Activities & Engagement Timeline
               </span>
               <LuChevronRight size={14} />
-              <span style={{ color: '#063669', fontWeight: 700 }}>
+              <span style={{ color: '#0F1A34', fontWeight: 700 }}>
                 {lead.leadName} ({lead.company})
               </span>
             </>
@@ -381,13 +381,13 @@ export default function LeadDetailView({
             <>
               <span
                 onClick={onBack}
-                style={{ cursor: 'pointer', color: '#063669', fontWeight: 600 }}
+                style={{ cursor: 'pointer', color: '#0F1A34', fontWeight: 600 }}
                 title="Return to Account Record"
               >
                 {lead.company}
               </span>
               <LuChevronRight size={14} />
-              <span style={{ color: '#063669', fontWeight: 700 }}>
+              <span style={{ color: '#0F1A34', fontWeight: 700 }}>
                 {lead.leadName}
               </span>
             </>
@@ -395,13 +395,13 @@ export default function LeadDetailView({
             <>
               <span
                 onClick={onBack}
-                style={{ cursor: 'pointer', color: '#063669', fontWeight: 600 }}
+                style={{ cursor: 'pointer', color: '#0F1A34', fontWeight: 600 }}
                 title="Return to Leads Directory"
               >
                 Leads Directory
               </span>
               <LuChevronRight size={14} />
-              <span style={{ color: '#063669', fontWeight: 700 }}>
+              <span style={{ color: '#0F1A34', fontWeight: 700 }}>
                 {lead.leadName} ({lead.company})
               </span>
             </>
@@ -420,7 +420,7 @@ export default function LeadDetailView({
                 </span>
               </div>
             )}
-            <h1 style={{ fontSize: '1.65rem', fontWeight: 800, color: '#063669', margin: '0 0 0.35rem 0', letterSpacing: '-0.02em' }}>
+            <h1 style={{ fontSize: '1.65rem', fontWeight: 800, color: '#0F1A34', margin: '0 0 0.35rem 0', letterSpacing: '-0.02em' }}>
               {lead.leadName}
             </h1>
             <div style={{ fontSize: '0.95rem', color: '#557396', display: 'flex', alignItems: 'center', gap: '0.65rem', flexWrap: 'wrap' }}>
@@ -428,7 +428,7 @@ export default function LeadDetailView({
               <button
                 type="button"
                 onClick={() => onNavigateToAccount && onNavigateToAccount(lead.company)}
-                style={{ background: 'none', border: 'none', padding: 0, font: 'inherit', fontWeight: 700, color: '#063669', cursor: 'pointer', textDecoration: 'underline' }}
+                style={{ background: 'none', border: 'none', padding: 0, font: 'inherit', fontWeight: 700, color: '#0F1A34', cursor: 'pointer', textDecoration: 'underline' }}
                 title={`Open ${lead.company} account dossier`}
               >
                 {lead.company}
@@ -438,14 +438,14 @@ export default function LeadDetailView({
                 alignItems: 'center',
                 gap: '0.35rem',
                 backgroundColor: '#E6EFF8',
-                color: '#063669',
+                color: '#0F1A34',
                 padding: '0.2rem 0.65rem',
                 borderRadius: '20px',
                 fontSize: '0.75rem',
                 fontWeight: 700,
                 border: '1px solid #D5E2EE'
               }}>
-                <LuLayers size={13} style={{ color: '#063669' }} /> Service Providing: {lead.serviceProviding || 'TechGy CRM Enterprise Suite'}
+                <LuLayers size={13} style={{ color: '#0F1A34' }} /> Service Providing: {lead.serviceProviding || 'TechGy CRM Enterprise Suite'}
               </span>
             </div>
           </div>
@@ -470,12 +470,12 @@ export default function LeadDetailView({
                   alignItems: 'center',
                   justifyContent: 'space-between',
                   gap: '0.5rem',
-                  border: `1px solid ${isStatusDropdownOpen ? '#063669' : '#CBD5E1'}`,
+                  border: `1px solid ${isStatusDropdownOpen ? '#0F1A34' : '#CBD5E1'}`,
                   borderRadius: '7px',
                   padding: '0.32rem 0.65rem',
                   fontSize: '0.82rem',
                   fontWeight: 700,
-                  color: '#063669',
+                  color: '#0F1A34',
                   backgroundColor: '#FFFFFF',
                   cursor: 'pointer',
                   outline: 'none',
@@ -501,7 +501,7 @@ export default function LeadDetailView({
                         'Discussion': '#F59E0B',
                         'Proposal': '#6366F1',
                         'Negotiation': '#EC4899'
-                      }[lead.status] || '#063669',
+                      }[lead.status] || '#0F1A34',
                       flexShrink: 0
                     }}
                   />
@@ -510,7 +510,7 @@ export default function LeadDetailView({
                 <LuChevronDown
                   size={14}
                   style={{
-                    color: '#063669',
+                    color: '#0F1A34',
                     transform: isStatusDropdownOpen ? 'rotate(180deg)' : 'rotate(0deg)',
                     transition: 'transform 0.2s cubic-bezier(0.4, 0, 0.2, 1)'
                   }}
@@ -547,7 +547,7 @@ export default function LeadDetailView({
                       'Discussion': '#F59E0B',
                       'Proposal': '#6366F1',
                       'Negotiation': '#EC4899'
-                    }[s] || '#063669';
+                    }[s] || '#0F1A34';
 
                     return (
                       <button
@@ -569,7 +569,7 @@ export default function LeadDetailView({
                           borderRadius: '6px',
                           border: 'none',
                           backgroundColor: isSelected ? '#EBF3FA' : 'transparent',
-                          color: isSelected ? '#063669' : '#334155',
+                          color: isSelected ? '#0F1A34' : '#334155',
                           fontSize: '0.82rem',
                           fontWeight: isSelected ? 700 : 500,
                           cursor: 'pointer',
@@ -596,7 +596,7 @@ export default function LeadDetailView({
                           <span>{s}</span>
                         </span>
                         {isSelected && (
-                          <LuCheck size={14} color="#063669" style={{ strokeWidth: 2.5, flexShrink: 0 }} />
+                          <LuCheck size={14} color="#0F1A34" style={{ strokeWidth: 2.5, flexShrink: 0 }} />
                         )}
                       </button>
                     );
@@ -627,7 +627,7 @@ export default function LeadDetailView({
                   padding: '0.35rem 0.75rem',
                   fontSize: '0.8rem',
                   fontWeight: 600,
-                  color: '#063669',
+                  color: '#0F1A34',
                   backgroundColor: '#F0F5FA',
                   border: '1px solid #D5E2EE',
                   borderRadius: '6px',
@@ -636,7 +636,7 @@ export default function LeadDetailView({
                 }}
                 onMouseEnter={(e) => {
                   e.currentTarget.style.backgroundColor = '#E6EFF8';
-                  e.currentTarget.style.borderColor = '#063669';
+                  e.currentTarget.style.borderColor = '#0F1A34';
                 }}
                 onMouseLeave={(e) => {
                   e.currentTarget.style.backgroundColor = '#F0F5FA';
@@ -652,14 +652,14 @@ export default function LeadDetailView({
             <div className="detail-fields-grid">
               <div className="drawer-field-group">
                 <div className="field-label">Full Name</div>
-                <div className="field-value" style={{ fontWeight: 700, color: '#063669' }}>{lead.leadName}</div>
+                <div className="field-value" style={{ fontWeight: 700, color: '#0F1A34' }}>{lead.leadName}</div>
               </div>
 
               <div className="drawer-field-group">
                 <div className="field-label">Company Account</div>
                 <div
                   className="field-value"
-                  style={{ fontWeight: 700, color: '#063669', textDecoration: 'underline', cursor: 'pointer' }}
+                  style={{ fontWeight: 700, color: '#0F1A34', textDecoration: 'underline', cursor: 'pointer' }}
                   onClick={() => onNavigateToAccount(lead.company)}
                 >
                   {lead.company}
@@ -673,7 +673,7 @@ export default function LeadDetailView({
 
               <div className="drawer-field-group">
                 <div className="field-label">Service Providing</div>
-                <div className="field-value" style={{ fontWeight: 700, color: '#063669' }}>
+                <div className="field-value" style={{ fontWeight: 700, color: '#0F1A34' }}>
                   <span style={{
                     display: 'inline-flex',
                     alignItems: 'center',
@@ -684,7 +684,7 @@ export default function LeadDetailView({
                     borderRadius: '6px',
                     fontSize: '0.82rem'
                   }}>
-                    <LuLayers size={13} style={{ color: '#063669' }} /> {lead.serviceProviding || 'TechGy CRM Enterprise Suite'}
+                    <LuLayers size={13} style={{ color: '#0F1A34' }} /> {lead.serviceProviding || 'TechGy CRM Enterprise Suite'}
                   </span>
                 </div>
               </div>
@@ -706,7 +706,7 @@ export default function LeadDetailView({
                     display: 'inline-flex',
                     alignItems: 'center',
                     gap: '0.5rem',
-                    color: '#063669'
+                    color: '#0F1A34'
                   }}
                   onClick={() => onQuickAction && onQuickAction('call', lead)}
                   title={`Click to call ${lead.leadName} (${lead.phoneNumber})`}
@@ -716,13 +716,13 @@ export default function LeadDetailView({
                     height: '24px',
                     borderRadius: '50%',
                     backgroundColor: '#E6EFF8',
-                    color: '#063669',
+                    color: '#0F1A34',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
                     flexShrink: 0
                   }}>
-                    <LuPhone size={13} style={{ color: '#063669' }} />
+                    <LuPhone size={13} style={{ color: '#0F1A34' }} />
                   </div>
                   <span style={{ textDecoration: 'underline' }}>{lead.phoneNumber}</span>
                 </div>
@@ -735,7 +735,7 @@ export default function LeadDetailView({
               </div>
               <div className="drawer-field-group">
                 <div className="field-label">Next Scheduled Follow-up</div>
-                <div className="field-value" style={{ color: '#063669', fontWeight: 700 }}>
+                <div className="field-value" style={{ color: '#0F1A34', fontWeight: 700 }}>
                   <LuClock size={14} style={{ display: 'inline', marginRight: 4 }} />
                   {lead.nextFollowup}
                 </div>
@@ -755,7 +755,7 @@ export default function LeadDetailView({
           {/* Notes & Logged Requirements */}
           <div className="section-card" style={{ marginBottom: 0, height: '100%', boxSizing: 'border-box' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.35rem' }}>
-              <h4 style={{ margin: 0, fontSize: '0.9rem', fontWeight: 700, color: '#063669' }}>Notes & Logged Requirements</h4>
+              <h4 style={{ margin: 0, fontSize: '0.9rem', fontWeight: 700, color: '#0F1A34' }}>Notes & Logged Requirements</h4>
               <button
                 className="btn-primary"
                 style={{ fontSize: '0.72rem', padding: '0.55rem 0.75rem', borderRadius: '20px', display: 'flex', alignItems: 'center', gap: '0.3rem', fontWeight: 600 }}
@@ -831,7 +831,7 @@ export default function LeadDetailView({
                   padding: '0.4rem 0.75rem',
                   fontSize: '0.785rem',
                   fontWeight: 600,
-                  color: '#063669',
+                  color: '#0F1A34',
                   cursor: 'pointer',
                   display: 'inline-flex',
                   alignItems: 'center',
@@ -1010,7 +1010,7 @@ export default function LeadDetailView({
                       <td>{renderTypeIcon(act.type)}</td>
                       <td>
                         <div style={{ display: 'flex', flexDirection: 'column' }}>
-                          <span style={{ fontWeight: 600, color: '#063669' }}>
+                          <span style={{ fontWeight: 600, color: '#0F1A34' }}>
                             {act.subject || act.title || `${act.type} with ${lead.leadName}`}
                           </span>
                           {(act.notes || act.summary || act.shortPreview) && (
@@ -1030,7 +1030,7 @@ export default function LeadDetailView({
                       <td style={{ color: '#557396', fontSize: '0.8rem', whiteSpace: 'nowrap' }}>
                         {act.date || act.dueTime || 'Recent'}
                       </td>
-                      <td style={{ fontWeight: 500, color: '#063669' }}>
+                      <td style={{ fontWeight: 500, color: '#0F1A34' }}>
                         {act.owner || lead.leadOwner || 'Rajesh Sharma'}
                       </td>
                       <td>
@@ -1113,7 +1113,7 @@ export default function LeadDetailView({
             }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
                 {renderTypeIcon(selectedActivityForModal.type)}
-                <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 700, color: '#063669' }}>
+                <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 700, color: '#0F1A34' }}>
                   {(['Email', 'Mail', 'email', 'mail'].includes(selectedActivityForModal.type)) ? 'Email Record' : 'Activity Record'}
                 </h3>
               </div>
@@ -1186,7 +1186,7 @@ export default function LeadDetailView({
                   }}>
                     <div style={{
                       width: '36px', height: '36px', borderRadius: '50%',
-                      backgroundColor: '#063669', color: '#FFFFFF',
+                      backgroundColor: '#0F1A34', color: '#FFFFFF',
                       display: 'flex', alignItems: 'center', justifyContent: 'center',
                       fontSize: '0.9rem', fontWeight: 700, flexShrink: 0
                     }}>
@@ -1214,7 +1214,7 @@ export default function LeadDetailView({
 
                   {/* TechGy Corporate Banner */}
                   <div style={{
-                    background: 'linear-gradient(135deg, #063669 0%, #0a4a8a 35%, #1565c0 60%, #0d47a1 80%, #063669 100%)',
+                    background: 'linear-gradient(135deg, #0F1A34 0%, #0a4a8a 35%, #1565c0 60%, #0d47a1 80%, #0F1A34 100%)',
                     height: '68px', position: 'relative', overflow: 'hidden'
                   }}>
                     {[
@@ -1267,7 +1267,7 @@ export default function LeadDetailView({
                       {selectedActivityForModal.notes || selectedActivityForModal.summary || selectedActivityForModal.shortPreview || '(No email body recorded.)'}
                     </div>
                     <div style={{ fontSize: '0.84rem', color: '#202124', marginBottom: '0.3rem', lineHeight: 1.7 }}>Thank you,</div>
-                    <div style={{ fontSize: '0.84rem', fontWeight: 700, color: '#063669', marginBottom: '0.1rem' }}>
+                    <div style={{ fontSize: '0.84rem', fontWeight: 700, color: '#0F1A34', marginBottom: '0.1rem' }}>
                       {selectedActivityForModal.owner || lead.leadOwner || 'System Administrator'}
                     </div>
                     <div style={{ fontSize: '0.73rem', color: '#64748B' }}>
@@ -1292,7 +1292,7 @@ export default function LeadDetailView({
                     <span style={{ fontSize: '0.75rem', fontWeight: 600, color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                       Subject / Summary
                     </span>
-                    <h4 style={{ margin: '0.35rem 0 0 0', fontSize: '1rem', fontWeight: 700, color: '#063669' }}>
+                    <h4 style={{ margin: '0.35rem 0 0 0', fontSize: '1rem', fontWeight: 700, color: '#0F1A34' }}>
                       {selectedActivityForModal.subject || selectedActivityForModal.title || `${selectedActivityForModal.type} with ${lead.leadName}`}
                     </h4>
                   </div>
@@ -1300,11 +1300,11 @@ export default function LeadDetailView({
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', backgroundColor: '#F8FAFC', padding: '1rem', borderRadius: '8px', border: '1px solid #EDF2F7' }}>
                     <div>
                       <div style={{ fontSize: '0.725rem', color: '#64748B', fontWeight: 600 }}>Lead Contact</div>
-                      <div style={{ fontSize: '0.85rem', fontWeight: 700, color: '#063669', marginTop: '0.2rem' }}>{lead.leadName}</div>
+                      <div style={{ fontSize: '0.85rem', fontWeight: 700, color: '#0F1A34', marginTop: '0.2rem' }}>{lead.leadName}</div>
                     </div>
                     <div>
                       <div style={{ fontSize: '0.725rem', color: '#64748B', fontWeight: 600 }}>Company Account</div>
-                      <div style={{ fontSize: '0.85rem', fontWeight: 700, color: '#063669', marginTop: '0.2rem' }}>{lead.company}</div>
+                      <div style={{ fontSize: '0.85rem', fontWeight: 700, color: '#0F1A34', marginTop: '0.2rem' }}>{lead.company}</div>
                     </div>
                     <div>
                       <div style={{ fontSize: '0.725rem', color: '#64748B', fontWeight: 600 }}>Date & Time</div>
@@ -1422,7 +1422,7 @@ export default function LeadDetailView({
                   height: '32px',
                   borderRadius: '8px',
                   backgroundColor: '#E6EFF8',
-                  color: '#063669',
+                  color: '#0F1A34',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center'
@@ -1430,7 +1430,7 @@ export default function LeadDetailView({
                   <LuPencil size={16} />
                 </div>
                 <div>
-                  <h3 style={{ margin: 0, fontSize: '1.05rem', fontWeight: 800, color: '#063669' }}>
+                  <h3 style={{ margin: 0, fontSize: '1.05rem', fontWeight: 800, color: '#0F1A34' }}>
                     Edit Lead Details
                   </h3>
                   <span style={{ fontSize: '0.75rem', color: '#64748B' }}>
@@ -1638,7 +1638,7 @@ export default function LeadDetailView({
                     padding: '0.5rem 1.25rem',
                     fontSize: '0.85rem',
                     fontWeight: 700,
-                    backgroundColor: '#063669',
+                    backgroundColor: '#0F1A34',
                     color: '#FFFFFF'
                   }}
                 >

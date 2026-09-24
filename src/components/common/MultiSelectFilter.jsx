@@ -57,8 +57,8 @@ export default function MultiSelectFilter({
           userSelect: 'none',
           backgroundImage: 'none',
           backgroundColor: selected.length > 0 && selected.length < options.length ? '#EBF3FA' : '#FFFFFF',
-          borderColor: selected.length > 0 && selected.length < options.length ? '#063669' : '#CBD5E1',
-          color: selected.length > 0 && selected.length < options.length ? '#063669' : '#1E293B',
+          borderColor: selected.length > 0 && selected.length < options.length ? '#0F1A34' : '#CBD5E1',
+          color: selected.length > 0 && selected.length < options.length ? '#0F1A34' : '#1E293B',
           fontWeight: selected.length > 0 && selected.length < options.length ? 700 : 500,
           padding: '0.55rem 1.1rem',
           borderRadius: '24px',
@@ -109,7 +109,7 @@ export default function MultiSelectFilter({
               cursor: 'pointer',
               fontSize: '0.835rem',
               fontWeight: isAllSelected ? 700 : 500,
-              color: isAllSelected ? '#063669' : '#64748B',
+              color: isAllSelected ? '#0F1A34' : '#64748B',
               backgroundColor: isAllSelected ? '#F0F5FA' : 'transparent',
               display: 'flex',
               alignItems: 'center',
@@ -119,7 +119,7 @@ export default function MultiSelectFilter({
             }}
           >
             <span>{allLabel}</span>
-            {isAllSelected && <LuCheck size={14} color="#063669" />}
+            {isAllSelected && <LuCheck size={14} color="#0F1A34" />}
           </div>
 
           {/* Option list with checkboxes */}
@@ -135,7 +135,7 @@ export default function MultiSelectFilter({
                   cursor: 'pointer',
                   fontSize: '0.835rem',
                   fontWeight: isChecked ? 600 : 400,
-                  color: isChecked ? '#063669' : '#1E293B',
+                  color: isChecked ? '#0F1A34' : '#1E293B',
                   backgroundColor: isChecked ? '#F0F5FA' : 'transparent',
                   display: 'flex',
                   alignItems: 'center',
@@ -154,8 +154,8 @@ export default function MultiSelectFilter({
                     width: '15px',
                     height: '15px',
                     borderRadius: '3px',
-                    border: isChecked ? '1px solid #063669' : '1px solid #CBD5E1',
-                    backgroundColor: isChecked ? '#063669' : '#FFFFFF',
+                    border: isChecked ? '1px solid #0F1A34' : '1px solid #CBD5E1',
+                    backgroundColor: isChecked ? '#0F1A34' : '#FFFFFF',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',

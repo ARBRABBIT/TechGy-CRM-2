@@ -56,7 +56,7 @@ export default function NewCompanyPromptModal({
           height: '56px',
           borderRadius: '50%',
           backgroundColor: '#EBF3FA',
-          color: '#063669',
+          color: '#0F1A34',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
@@ -65,7 +65,7 @@ export default function NewCompanyPromptModal({
           <LuBuilding2 size={28} />
         </div>
 
-        <h3 style={{ fontSize: '1.25rem', fontWeight: 800, color: '#063669', margin: '0 0 0.5rem 0' }}>
+        <h3 style={{ fontSize: '1.25rem', fontWeight: 800, color: '#0F1A34', margin: '0 0 0.5rem 0' }}>
           New Company Created
         </h3>
 

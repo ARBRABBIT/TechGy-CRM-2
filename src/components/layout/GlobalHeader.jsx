@@ -44,6 +44,8 @@ export default function GlobalHeader({
   const getModuleTitle = () => {
     switch (activeModule) {
       case 'dashboard': return 'Dashboard';
+      case 'salesHead': return 'Sales Head Dashboard';
+      case 'salesExecutive': return 'Sales Executive Dashboard';
       case 'leads': return 'Leads Directory';
       case 'accounts': return 'Company Accounts';
       case 'activities': return 'Activities & Engagement';

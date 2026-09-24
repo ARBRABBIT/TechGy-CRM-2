@@ -10,6 +10,8 @@ import CallSessionModal from './components/modals/CallSessionModal';
 
 // Views
 import DashboardView from './views/DashboardView';
+import SalesHeadView from './views/SalesHeadView';
+import SalesExecutiveView from './views/SalesExecutiveView';
 import LeadsView from './views/LeadsView';
 import AccountsView from './views/AccountsView';
 import ActivitiesView from './views/ActivitiesView';
@@ -29,7 +31,9 @@ import {
   INITIAL_ACTIVITIES,
   INITIAL_CONTACTS,
   INITIAL_NOTIFICATIONS,
-  INITIAL_EMAIL_TEMPLATES
+  INITIAL_EMAIL_TEMPLATES,
+  INITIAL_SALES_HEADS,
+  INITIAL_SALES_EXECUTIVES
 } from './data/mockData';
 import { LuCircleCheck, LuX, LuTriangleAlert, LuCircleAlert, LuInfo } from 'react-icons/lu';
 import { getInitialStageHistory } from './utils/pipelineUtils';
@@ -102,8 +106,20 @@ export default function App() {
     return saved ? JSON.parse(saved) : { role: 'Sales Admin', email: 'admin@techgy.com', name: 'System Administrator' };
   });
 
-  // Navigation & Collapsible Sidebar State
-  const [activeModule, setActiveModule] = useState('dashboard');
+  // Navigation & Collapsible Sidebar State (Role-Based Initial Module)
+  const [activeModule, setActiveModule] = useState(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const savedUser = localStorage.getItem('techgy_user');
+        if (savedUser) {
+          const u = JSON.parse(savedUser);
+          if (u.role === 'Sales Head' || u.role === 'head') return 'salesHead';
+          if (u.role === 'Sales Executive' || u.role === 'executive') return 'salesExecutive';
+        }
+      } catch {}
+    }
+    return 'dashboard';
+  });
   const [mobileOpen, setMobileOpen] = useState(false);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
 
@@ -131,6 +147,8 @@ export default function App() {
   const [contacts, setContacts] = useState(() => loadFromStorage('contacts', INITIAL_CONTACTS));
   const [notifications, setNotifications] = useState(() => loadFromStorage('notifications', INITIAL_NOTIFICATIONS));
   const [emailTemplates, setEmailTemplates] = useState(() => loadFromStorage('email_templates', INITIAL_EMAIL_TEMPLATES));
+  const [salesHeads, setSalesHeads] = useState(() => loadFromStorage('sales_heads', INITIAL_SALES_HEADS));
+  const [salesExecutives, setSalesExecutives] = useState(() => loadFromStorage('sales_executives', INITIAL_SALES_EXECUTIVES));
   const [toastMessage, setToastMessage] = useState(null);
 
   // Automatically synchronize state changes to localStorage
@@ -140,6 +158,8 @@ export default function App() {
   useEffect(() => { saveToStorage('contacts', contacts); }, [contacts]);
   useEffect(() => { saveToStorage('notifications', notifications); }, [notifications]);
   useEffect(() => { saveToStorage('email_templates', emailTemplates); }, [emailTemplates]);
+  useEffect(() => { saveToStorage('sales_heads', salesHeads); }, [salesHeads]);
+  useEffect(() => { saveToStorage('sales_executives', salesExecutives); }, [salesExecutives]);
 
   // Auto-dismiss toast pop-up notification after 5 seconds
   useEffect(() => {
@@ -931,6 +951,19 @@ export default function App() {
           setCurrentUser(user);
           localStorage.setItem('techgy_authenticated', JSON.stringify(true));
           localStorage.setItem('techgy_user', JSON.stringify(user));
+
+          // Role-based landing module
+          if (user.role === 'Sales Head' || user.role === 'head') {
+            setActiveModule('salesHead');
+          } else if (user.role === 'Sales Executive' || user.role === 'executive') {
+            setActiveModule('salesExecutive');
+          } else {
+            setActiveModule('dashboard');
+          }
+
+          setSelectedLead(null);
+          setSelectedAccount(null);
+          setIsProfileActive(false);
           setToastMessage(`Welcome, ${user.name}! Connected to TechGy Link.`);
         }}
       />
@@ -1109,9 +1142,41 @@ export default function App() {
                 />
               )}
 
+              {activeModule === 'salesHead' && (
+                <SalesHeadView
+                  salesHeads={salesHeads}
+                  onUpdateSalesHeads={setSalesHeads}
+                  onTriggerToast={triggerToast}
+                  onNavigateToLead={(lead) => {
+                    setLeadNavSource('salesHead');
+                    setSelectedAccount(null);
+                    setSelectedLead(lead);
+                  }}
+                />
+              )}
+
+              {activeModule === 'salesExecutive' && (
+                <SalesExecutiveView
+                  salesExecutives={salesExecutives}
+                  salesHeads={salesHeads}
+                  onUpdateSalesExecutives={setSalesExecutives}
+                  onTriggerToast={triggerToast}
+                  onNavigateToLead={(lead) => {
+                    setLeadNavSource('salesExecutive');
+                    setSelectedAccount(null);
+                    setSelectedLead(lead);
+                  }}
+                />
+              )}
+
               {activeModule === 'leads' && (
                 <LeadsView
                   leads={leads}
+                  salesHeads={salesHeads}
+                  salesExecutives={salesExecutives}
+                  currentUser={currentUser}
+                  onUpdateLead={handleUpdateLead}
+                  onTriggerToast={triggerToast}
                   onSelectLead={(lead) => {
                     setLeadNavSource('leads');
                     setSelectedAccount(null);

@@ -277,7 +277,7 @@ export const MASTER_CATEGORIES = [
     desc: 'Standardize sales funnel stages and pipeline progression criteria.',
     icon: LuGitCommitVertical,
     iconBg: '#F0F4F9',
-    iconColor: '#063669'
+    iconColor: '#0F1A34'
   },
   {
     id: 'objections',
@@ -800,13 +800,13 @@ export default function MasterDataView({
             <nav style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.875rem', fontWeight: 500, color: '#557396' }}>
               <span
                 onClick={onBackToDashboard}
-                style={{ cursor: 'pointer', color: '#063669', fontWeight: 600 }}
+                style={{ cursor: 'pointer', color: '#0F1A34', fontWeight: 600 }}
                 title="Go to Dashboard"
               >
                 Dashboard
               </span>
               <LuChevronRight size={14} />
-              <span style={{ color: '#063669', fontWeight: 700 }}>
+              <span style={{ color: '#0F1A34', fontWeight: 700 }}>
                 Master Data
               </span>
             </nav>
@@ -893,7 +893,7 @@ export default function MasterDataView({
             <>
               <span
                 onClick={onBackToDashboard}
-                style={{ cursor: 'pointer', color: '#063669', fontWeight: 600 }}
+                style={{ cursor: 'pointer', color: '#0F1A34', fontWeight: 600 }}
                 title="Return to Dashboard"
               >
                 Dashboard
@@ -904,7 +904,7 @@ export default function MasterDataView({
 
           <span
             onClick={() => setSelectedCategory(null)}
-            style={{ cursor: 'pointer', color: '#063669', fontWeight: 600, textDecoration: 'underline' }}
+            style={{ cursor: 'pointer', color: '#0F1A34', fontWeight: 600, textDecoration: 'underline' }}
             title="Return to Master Data Hub"
           >
             Master Data
@@ -912,7 +912,7 @@ export default function MasterDataView({
 
           <LuChevronRight size={14} />
 
-          <span style={{ color: '#063669', fontWeight: 800 }}>
+          <span style={{ color: '#0F1A34', fontWeight: 800 }}>
             {selectedCategoryMeta?.title}
           </span>
         </nav>
@@ -938,14 +938,14 @@ export default function MasterDataView({
             </div>
             <div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
-                <h2 style={{ fontSize: '1.35rem', fontWeight: 800, color: '#063669', margin: 0, letterSpacing: '-0.01em' }}>
+                <h2 style={{ fontSize: '1.35rem', fontWeight: 800, color: '#0F1A34', margin: 0, letterSpacing: '-0.01em' }}>
                   {selectedCategoryMeta?.title}
                 </h2>
                 <span style={{
                   fontSize: '0.75rem',
                   fontWeight: 700,
                   backgroundColor: '#EBF3FA',
-                  color: '#063669',
+                  color: '#0F1A34',
                   padding: '0.2rem 0.55rem',
                   borderRadius: '6px'
                 }}>
@@ -1004,7 +1004,7 @@ export default function MasterDataView({
                   border: '1px solid #CBD5E1',
                   borderRadius: '7px',
                   background: '#FFFFFF',
-                  color: '#063669',
+                  color: '#0F1A34',
                   outline: 'none',
                   display: 'flex',
                   alignItems: 'center'
@@ -1015,7 +1015,7 @@ export default function MasterDataView({
             {/* Agent Checklist: Lead Status drop-down */}
             {selectedCategory === 'agentChecklist' && (
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.55rem' }}>
-                <label htmlFor="agent-checklist-status-select" style={{ fontSize: '0.825rem', fontWeight: 700, color: '#063669', whiteSpace: 'nowrap' }}>
+                <label htmlFor="agent-checklist-status-select" style={{ fontSize: '0.825rem', fontWeight: 700, color: '#0F1A34', whiteSpace: 'nowrap' }}>
                   Lead status:
                 </label>
                 <select
@@ -1031,7 +1031,7 @@ export default function MasterDataView({
                     border: '1px solid #CBD5E1',
                     borderRadius: '7px',
                     background: '#FFFFFF',
-                    color: '#063669',
+                    color: '#0F1A34',
                     cursor: 'pointer',
                     outline: 'none',
                     minWidth: '200px',
@@ -1073,7 +1073,7 @@ export default function MasterDataView({
             marginBottom: '1rem'
           }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <span style={{ fontSize: '0.825rem', fontWeight: 700, color: '#063669' }}>
+              <span style={{ fontSize: '0.825rem', fontWeight: 700, color: '#0F1A34' }}>
                 Points to talk for status:
               </span>
               <span style={{
@@ -1081,7 +1081,7 @@ export default function MasterDataView({
                 fontWeight: 700,
                 padding: '0.2rem 0.6rem',
                 borderRadius: '9999px',
-                background: '#063669',
+                background: '#0F1A34',
                 color: '#FFFFFF'
               }}>
                 {checklistStatusFilter}
@@ -1116,7 +1116,7 @@ export default function MasterDataView({
               }}>
                 <LuMail size={24} />
               </div>
-              <h4 style={{ margin: '0 0 0.35rem 0', color: '#063669', fontSize: '1.05rem', fontWeight: 700 }}>
+              <h4 style={{ margin: '0 0 0.35rem 0', color: '#0F1A34', fontSize: '1.05rem', fontWeight: 700 }}>
                 No Email Templates Found
               </h4>
               <p style={{ margin: 0, color: '#64748B', fontSize: '0.825rem' }}>
@@ -1306,7 +1306,7 @@ export default function MasterDataView({
                     {selectedCategory === 'contentTypes' && (
                       <>
                         <td style={{ padding: '0.75rem 1rem', fontFamily: 'monospace', fontWeight: 600, color: '#557396' }}>{item.code || item.id}</td>
-                        <td style={{ padding: '0.75rem 1rem', fontWeight: 700, color: '#063669' }}>{item.name}</td>
+                        <td style={{ padding: '0.75rem 1rem', fontWeight: 700, color: '#0F1A34' }}>{item.name}</td>
                       </>
                     )}
 
@@ -1314,7 +1314,7 @@ export default function MasterDataView({
                     {selectedCategory === 'followupTypes' && (
                       <>
                         <td style={{ padding: '0.75rem 1rem', fontFamily: 'monospace', fontWeight: 600, color: '#557396' }}>{item.code || item.id}</td>
-                        <td style={{ padding: '0.75rem 1rem', fontWeight: 700, color: '#063669' }}>{item.name}</td>
+                        <td style={{ padding: '0.75rem 1rem', fontWeight: 700, color: '#0F1A34' }}>{item.name}</td>
                       </>
                     )}
 
@@ -1330,7 +1330,7 @@ export default function MasterDataView({
                     {selectedCategory === 'leadStatuses' && (
                       <>
                         <td style={{ padding: '0.75rem 1rem', fontFamily: 'monospace', fontWeight: 600, color: '#557396' }}>{item.code || item.id}</td>
-                        <td style={{ padding: '0.75rem 1rem', fontWeight: 700, color: '#063669' }}>{item.name}</td>
+                        <td style={{ padding: '0.75rem 1rem', fontWeight: 700, color: '#0F1A34' }}>{item.name}</td>
                       </>
                     )}
 
@@ -1338,7 +1338,7 @@ export default function MasterDataView({
                     {selectedCategory === 'objections' && (
                       <>
                         <td style={{ padding: '0.75rem 1rem', fontFamily: 'monospace', fontWeight: 600, color: '#557396' }}>{item.code || item.id}</td>
-                        <td style={{ padding: '0.75rem 1rem', fontWeight: 700, color: '#063669' }}>{item.name}</td>
+                        <td style={{ padding: '0.75rem 1rem', fontWeight: 700, color: '#0F1A34' }}>{item.name}</td>
                       </>
                     )}
 
@@ -1354,7 +1354,7 @@ export default function MasterDataView({
                             padding: '0.2rem 0.55rem',
                             borderRadius: '6px',
                             background: '#EBF3FA',
-                            color: '#063669',
+                            color: '#0F1A34',
                             border: '1px solid #D5E2EE'
                           }}>
                             {item.leadStatus || 'New'}
@@ -1368,7 +1368,7 @@ export default function MasterDataView({
                     {selectedCategory === 'industries' && (
                       <>
                         <td style={{ padding: '0.75rem 1rem', fontFamily: 'monospace', fontWeight: 600, color: '#557396' }}>{item.code || item.id}</td>
-                        <td style={{ padding: '0.75rem 1rem', fontWeight: 700, color: '#063669' }}>{item.name}</td>
+                        <td style={{ padding: '0.75rem 1rem', fontWeight: 700, color: '#0F1A34' }}>{item.name}</td>
                       </>
                     )}
 
@@ -1376,7 +1376,7 @@ export default function MasterDataView({
                     {selectedCategory === 'products' && (
                       <>
                         <td style={{ padding: '0.75rem 1rem', fontFamily: 'monospace', fontWeight: 600, color: '#557396' }}>{item.code || item.id}</td>
-                        <td style={{ padding: '0.75rem 1rem', fontWeight: 700, color: '#063669' }}>{item.name}</td>
+                        <td style={{ padding: '0.75rem 1rem', fontWeight: 700, color: '#0F1A34' }}>{item.name}</td>
                       </>
                     )}
 
@@ -1384,7 +1384,7 @@ export default function MasterDataView({
                     {selectedCategory === 'sources' && (
                       <>
                         <td style={{ padding: '0.75rem 1rem', fontFamily: 'monospace', fontWeight: 600, color: '#557396' }}>{item.code || item.id}</td>
-                        <td style={{ padding: '0.75rem 1rem', fontWeight: 700, color: '#063669' }}>{item.name}</td>
+                        <td style={{ padding: '0.75rem 1rem', fontWeight: 700, color: '#0F1A34' }}>{item.name}</td>
                       </>
                     )}
 
@@ -1401,7 +1401,7 @@ export default function MasterDataView({
                             padding: '0.25rem 0.65rem',
                             fontSize: '0.75rem',
                             fontWeight: 600,
-                            color: '#063669',
+                            color: '#0F1A34',
                             cursor: 'pointer',
                             display: 'inline-flex',
                             alignItems: 'center',
@@ -1474,7 +1474,7 @@ export default function MasterDataView({
                   {/* Category Switcher if opened from Overview Hub */}
                   {!selectedCategory && (
                     <div className="form-group" style={{ padding: '0.65rem', background: '#F8FAFC', borderRadius: '8px', border: '1px solid #E2E8F0' }}>
-                      <label className="form-label" style={{ fontSize: '0.75rem', color: '#063669', fontWeight: 700 }}>
+                      <label className="form-label" style={{ fontSize: '0.75rem', color: '#0F1A34', fontWeight: 700 }}>
                         Target Master Section
                       </label>
                       <select
@@ -1722,7 +1722,7 @@ export default function MasterDataView({
                   </div>
                   <div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
-                      <h3 className="modal-title" style={{ fontSize: '1.15rem', fontWeight: 800, color: '#063669', margin: 0 }}>
+                      <h3 className="modal-title" style={{ fontSize: '1.15rem', fontWeight: 800, color: '#0F1A34', margin: 0 }}>
                         {isEditing ? 'Edit Email Template' : 'Create Email Template'}
                       </h3>
                       <span style={{
@@ -1767,7 +1767,7 @@ export default function MasterDataView({
                   }}
                   onMouseEnter={(e) => {
                     e.currentTarget.style.backgroundColor = '#F1F5F9';
-                    e.currentTarget.style.color = '#063669';
+                    e.currentTarget.style.color = '#0F1A34';
                   }}
                   onMouseLeave={(e) => {
                     e.currentTarget.style.backgroundColor = 'transparent';
@@ -2025,7 +2025,7 @@ export default function MasterDataView({
                           width: '36px',
                           height: '36px',
                           borderRadius: '50%',
-                          backgroundColor: '#063669',
+                          backgroundColor: '#0F1A34',
                           color: '#FFFFFF',
                           display: 'flex',
                           alignItems: 'center',
@@ -2069,7 +2069,7 @@ export default function MasterDataView({
                       <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
                         {/* TechGy Corporate Banner */}
                         <div style={{
-                          background: 'linear-gradient(135deg, #063669 0%, #0a4a8a 35%, #1565c0 60%, #0d47a1 80%, #063669 100%)',
+                          background: 'linear-gradient(135deg, #0F1A34 0%, #0a4a8a 35%, #1565c0 60%, #0d47a1 80%, #0F1A34 100%)',
                           position: 'relative',
                           overflow: 'hidden',
                           height: '72px',
@@ -2171,7 +2171,7 @@ export default function MasterDataView({
                           <div style={{ fontSize: '0.84rem', color: '#202124', marginBottom: '0.35rem', lineHeight: 1.7 }}>
                             Best regards,
                           </div>
-                          <div style={{ fontSize: '0.84rem', fontWeight: 700, color: '#063669', marginBottom: '0.1rem' }}>
+                          <div style={{ fontSize: '0.84rem', fontWeight: 700, color: '#0F1A34', marginBottom: '0.1rem' }}>
                             Rajesh Sharma
                           </div>
                           <div style={{ fontSize: '0.75rem', color: '#64748B' }}>

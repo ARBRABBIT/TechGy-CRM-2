@@ -151,7 +151,7 @@ export default function LeadPipelineProgress({
                     height: '38px',
                     borderRadius: '50%',
                     backgroundColor: '#FFFFFF',
-                    color: '#063669',
+                    color: '#0F1A34',
                     fontSize: '0.95rem',
                     fontWeight: 800,
                     border: '2px solid #E2E8F0',
@@ -179,7 +179,7 @@ export default function LeadPipelineProgress({
                     transform: 'translateY(-50%)',
                     width: '12px',
                     height: '2px',
-                    backgroundColor: isLatest ? '#063669' : '#CBD5E1',
+                    backgroundColor: isLatest ? '#0F1A34' : '#CBD5E1',
                     zIndex: 1
                   }}
                 />
@@ -202,7 +202,7 @@ export default function LeadPipelineProgress({
                 >
                   {/* Left: Action Title (Line 1) + Stage Transition starting on next line */}
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
-                    <span style={{ fontSize: '0.95rem', fontWeight: 700, color: '#063669' }}>
+                    <span style={{ fontSize: '0.95rem', fontWeight: 700, color: '#0F1A34' }}>
                       {isCreation ? 'Lead created with status' : 'Lead status changed'}
                     </span>
 
@@ -213,7 +213,7 @@ export default function LeadPipelineProgress({
                           style={{
                             fontSize: '0.75rem',
                             fontWeight: 700,
-                            color: '#063669',
+                            color: '#0F1A34',
                             backgroundColor: '#EBF3FA',
                             padding: '0.15rem 0.55rem',
                             borderRadius: '4px',
@@ -238,12 +238,12 @@ export default function LeadPipelineProgress({
                         >
                           {item.fromStage || 'New'}
                         </span>
-                        <LuArrowRight size={12} style={{ color: '#063669' }} />
+                        <LuArrowRight size={12} style={{ color: '#0F1A34' }} />
                         <span
                           style={{
                             fontSize: '0.75rem',
                             fontWeight: 700,
-                            color: '#063669',
+                            color: '#0F1A34',
                             backgroundColor: '#EBF3FA',
                             padding: '0.15rem 0.55rem',
                             borderRadius: '4px',
@@ -277,7 +277,7 @@ export default function LeadPipelineProgress({
                         style={{
                           fontSize: '0.7rem',
                           fontWeight: 600,
-                          color: isLatest ? '#063669' : '#64748B',
+                          color: isLatest ? '#0F1A34' : '#64748B',
                           backgroundColor: isLatest ? '#EBF3FA' : '#F1F5F9',
                           padding: '0.15rem 0.5rem',
                           borderRadius: '10px'

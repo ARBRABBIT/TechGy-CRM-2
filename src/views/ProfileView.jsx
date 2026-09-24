@@ -91,13 +91,13 @@ export default function ProfileView({
         <nav style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.875rem', fontWeight: 500, color: '#557396' }}>
           <span
             onClick={onNavigateHome}
-            style={{ cursor: 'pointer', color: '#063669' }}
+            style={{ cursor: 'pointer', color: '#0F1A34' }}
             title="Go to Dashboard"
           >
             Dashboard
           </span>
           <LuChevronRight size={14} />
-          <span style={{ color: '#063669', fontWeight: 700 }}>
+          <span style={{ color: '#0F1A34', fontWeight: 700 }}>
             User Profile & Settings
           </span>
         </nav>
@@ -131,7 +131,7 @@ export default function ProfileView({
       {/* Hero Profile Banner Header */}
       <div
         style={{
-          background: 'linear-gradient(135deg, #063669 0%, #0A4B8F 55%, #04264A 100%)',
+          background: 'linear-gradient(135deg, #0F1A34 0%, #0022FF 55%, #04264A 100%)',
           borderRadius: '16px',
           padding: '1.75rem',
           color: '#FFFFFF',
@@ -150,7 +150,7 @@ export default function ProfileView({
                   height: '80px',
                   borderRadius: '50%',
                   backgroundColor: '#FFFFFF',
-                  color: '#063669',
+                  color: '#0F1A34',
                   fontWeight: 800,
                   fontSize: '2rem',
                   display: 'flex',
@@ -171,7 +171,7 @@ export default function ProfileView({
                   height: '16px',
                   backgroundColor: '#10B981',
                   borderRadius: '50%',
-                  border: '2px solid #063669'
+                  border: '2px solid #0F1A34'
                 }}
                 title="Online & Active"
               />
@@ -372,21 +372,21 @@ export default function ProfileView({
             <div className="counter-card">
               <div>
                 <div className="counter-title">Achieved YTD</div>
-                <div className="counter-value" style={{ color: '#063669' }}>{ytdClosedRevenue}</div>
+                <div className="counter-value" style={{ color: '#0F1A34' }}>{ytdClosedRevenue}</div>
               </div>
               <span className="counter-badge total">Progress</span>
             </div>
             <div className="counter-card">
               <div>
                 <div className="counter-title">Win Rate</div>
-                <div className="counter-value" style={{ color: '#063669' }}>{winRate}</div>
+                <div className="counter-value" style={{ color: '#0F1A34' }}>{winRate}</div>
               </div>
               <span className="counter-badge tasks">Efficiency</span>
             </div>
             <div className="counter-card">
               <div>
                 <div className="counter-title">Avg Deal Size</div>
-                <div className="counter-value" style={{ color: '#063669' }}>{avgDealSizeVal}</div>
+                <div className="counter-value" style={{ color: '#0F1A34' }}>{avgDealSizeVal}</div>
               </div>
               <span className="counter-badge total">Enterprise</span>
             </div>
@@ -400,28 +400,28 @@ export default function ProfileView({
               <div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', fontWeight: 600, marginBottom: '0.35rem' }}>
                   <span>Q1 FY26 Target (₹40 L)</span>
-                  <span style={{ color: '#063669', fontWeight: 700 }}>₹39 L (97.5%)</span>
+                  <span style={{ color: '#0F1A34', fontWeight: 700 }}>₹39 L (97.5%)</span>
                 </div>
                 <div style={{ height: '8px', backgroundColor: '#E2E8F0', borderRadius: '9999px', overflow: 'hidden' }}>
-                  <div style={{ width: '97.5%', height: '100%', backgroundColor: '#063669' }} />
+                  <div style={{ width: '97.5%', height: '100%', backgroundColor: '#0F1A34' }} />
                 </div>
               </div>
               <div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', fontWeight: 600, marginBottom: '0.35rem' }}>
                   <span>Q2 FY26 Target (₹42 L)</span>
-                  <span style={{ color: '#063669', fontWeight: 700 }}>₹44 L (104.7%)</span>
+                  <span style={{ color: '#0F1A34', fontWeight: 700 }}>₹44 L (104.7%)</span>
                 </div>
                 <div style={{ height: '8px', backgroundColor: '#E2E8F0', borderRadius: '9999px', overflow: 'hidden' }}>
-                  <div style={{ width: '100%', height: '100%', backgroundColor: '#063669' }} />
+                  <div style={{ width: '100%', height: '100%', backgroundColor: '#0F1A34' }} />
                 </div>
               </div>
               <div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', fontWeight: 600, marginBottom: '0.35rem' }}>
                   <span>Q3 FY26 Target (₹45 L)</span>
-                  <span style={{ color: '#063669', fontWeight: 700 }}>₹48.5 L (107.7%)</span>
+                  <span style={{ color: '#0F1A34', fontWeight: 700 }}>₹48.5 L (107.7%)</span>
                 </div>
                 <div style={{ height: '8px', backgroundColor: '#E2E8F0', borderRadius: '9999px', overflow: 'hidden' }}>
-                  <div style={{ width: '100%', height: '100%', backgroundColor: '#063669' }} />
+                  <div style={{ width: '100%', height: '100%', backgroundColor: '#0F1A34' }} />
                 </div>
               </div>
             </div>
@@ -453,7 +453,7 @@ export default function ProfileView({
                     <div style={{ fontSize: '0.75rem', color: '#557396' }}>{acc.location}</div>
                   </td>
                   <td>{acc.industry}</td>
-                  <td style={{ fontWeight: 700, color: '#063669' }}>{acc.estimatedAccountValue}</td>
+                  <td style={{ fontWeight: 700, color: '#0F1A34' }}>{acc.estimatedAccountValue}</td>
                   <td>{acc.leadsCount} Active</td>
                   <td>
                     <button
@@ -480,7 +480,7 @@ export default function ProfileView({
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.85rem', backgroundColor: '#F8FAFC', borderRadius: '10px' }}>
               <div>
-                <div style={{ fontSize: '0.875rem', fontWeight: 700, color: '#063669' }}>Overdue Follow-up Email Alerts</div>
+                <div style={{ fontSize: '0.875rem', fontWeight: 700, color: '#0F1A34' }}>Overdue Follow-up Email Alerts</div>
                 <div style={{ fontSize: '0.775rem', color: '#557396' }}>Receive immediate notification when lead actions pass their due date.</div>
               </div>
               <input
@@ -493,7 +493,7 @@ export default function ProfileView({
 
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.85rem', backgroundColor: '#F8FAFC', borderRadius: '10px' }}>
               <div>
-                <div style={{ fontSize: '0.875rem', fontWeight: 700, color: '#063669' }}>New Lead Assignment Alerts</div>
+                <div style={{ fontSize: '0.875rem', fontWeight: 700, color: '#0F1A34' }}>New Lead Assignment Alerts</div>
                 <div style={{ fontSize: '0.775rem', color: '#557396' }}>Notify when a new lead is assigned to {profileData.fullName}.</div>
               </div>
               <input
@@ -506,7 +506,7 @@ export default function ProfileView({
 
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.85rem', backgroundColor: '#F8FAFC', borderRadius: '10px' }}>
               <div>
-                <div style={{ fontSize: '0.875rem', fontWeight: 700, color: '#063669' }}>Two-Factor Authentication (2FA)</div>
+                <div style={{ fontSize: '0.875rem', fontWeight: 700, color: '#0F1A34' }}>Two-Factor Authentication (2FA)</div>
                 <div style={{ fontSize: '0.775rem', color: '#557396' }}>Secured via Authenticator App & OTP.</div>
               </div>
               <span className="status-chip won" style={{ fontSize: '0.7rem' }}>Enabled</span>

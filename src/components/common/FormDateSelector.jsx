@@ -169,15 +169,15 @@ export default function FormDateSelector({
         aria-label="Select Date"
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
-          <CalendarIcon size={15} style={{ color: '#063669', opacity: 0.85 }} />
-          <span style={{ fontWeight: 600, color: '#063669', fontSize: '0.875rem' }}>
+          <CalendarIcon size={15} style={{ color: '#0F1A34', opacity: 0.85 }} />
+          <span style={{ fontWeight: 600, color: '#0F1A34', fontSize: '0.875rem' }}>
             {value ? formatReadableDate(value) : placeholder}
           </span>
         </div>
         <LuChevronDown
           size={15}
           style={{
-            color: '#063669',
+            color: '#0F1A34',
             transition: 'transform 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
             transform: isOpen ? 'rotate(180deg)' : 'none'
           }}

@@ -94,7 +94,7 @@ export default function ContactsView({
                       delay: Math.min(idx * 0.022, 0.1)
                     }}
                   >
-                    <td style={{ fontWeight: 700, color: '#063669' }}>{con.name}</td>
+                    <td style={{ fontWeight: 700, color: '#0F1A34' }}>{con.name}</td>
                     <td>
                       <span
                         style={{ fontWeight: 600, cursor: 'pointer', textDecoration: 'underline' }}

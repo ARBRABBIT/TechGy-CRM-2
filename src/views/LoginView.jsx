@@ -10,8 +10,8 @@ import {
 
 const ROLES = [
   { id: 'admin', title: 'Sales Admin', email: 'admin@techgy.com', desc: 'Secure access for authorized Sales Admin. Please authenticate to continue.' },
-  { id: 'rep', title: 'Sales Rep', email: 'rajesh@techgy.com', desc: 'Personalized workspace for Sales Representatives and deal tracking.' },
-  { id: 'manager', title: 'Sales Manager', email: 'manager@techgy.com', desc: 'Executive dashboard, team activity tracking, and commercial pipeline access.' }
+  { id: 'head', title: 'Sales Head', email: 'head@techgy.com', desc: 'Executive dashboard, team activity tracking, and commercial pipeline access.' },
+  { id: 'executive', title: 'Sales Executive', email: 'executive@techgy.com', desc: 'Personalized workspace for Sales Executives and deal tracking.' }
 ];
 
 export default function LoginView({ onLoginSuccess, initialMode = 'login' }) {
@@ -52,7 +52,7 @@ export default function LoginView({ onLoginSuccess, initialMode = 'login' }) {
         onLoginSuccess({
           role: currentRole.title,
           email: loginId || currentRole.email,
-          name: currentRole.id === 'admin' ? 'System Administrator' : (currentRole.id === 'rep' ? 'Rajesh Sharma' : 'Priya Patel')
+          name: currentRole.id === 'admin' ? 'System Administrator' : (currentRole.id === 'head' ? 'Rajesh Sharma' : 'Rahul Verma')
         });
       }
     }, 500);
@@ -209,7 +209,7 @@ export default function LoginView({ onLoginSuccess, initialMode = 'login' }) {
                     fontSize: '0.75rem',
                     fontWeight: selectedRoleId === role.id ? 700 : 500,
                     backgroundColor: selectedRoleId === role.id ? '#FFFFFF' : 'transparent',
-                    color: selectedRoleId === role.id ? '#063669' : '#557396',
+                    color: selectedRoleId === role.id ? '#0022FF' : '#556987',
                     boxShadow: selectedRoleId === role.id ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
                     cursor: 'pointer',
                     transition: 'all 0.15s ease'

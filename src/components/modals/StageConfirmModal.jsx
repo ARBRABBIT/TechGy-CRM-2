@@ -72,7 +72,7 @@ export default function StageConfirmModal({
                 className="logout-modal-icon-inner"
                 style={{
                   background: 'linear-gradient(135deg, #EBF3FA 0%, #D8E7F6 100%)',
-                  color: '#063669',
+                  color: '#0F1A34',
                   boxShadow: '0 4px 14px rgba(6, 54, 105, 0.12)',
                   border: '1px solid #C4DCF2'
                 }}
@@ -106,11 +106,11 @@ export default function StageConfirmModal({
             >
               {/* Lead Info Pill */}
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem' }}>
-                <div style={{ width: '26px', height: '26px', borderRadius: '50%', background: '#063669', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <div style={{ width: '26px', height: '26px', borderRadius: '50%', background: '#0F1A34', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                   <LuUser size={14} />
                 </div>
                 <div>
-                  <div style={{ fontWeight: 700, color: '#063669', lineHeight: 1.2 }}>
+                  <div style={{ fontWeight: 700, color: '#0F1A34', lineHeight: 1.2 }}>
                     {lead.leadName}
                   </div>
                   <div style={{ fontSize: '0.75rem', color: '#64748B' }}>
@@ -140,19 +140,19 @@ export default function StageConfirmModal({
                   </span>
                 </div>
 
-                <div style={{ width: '30px', height: '30px', borderRadius: '50%', background: '#F1F5F9', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#063669' }}>
+                <div style={{ width: '30px', height: '30px', borderRadius: '50%', background: '#F1F5F9', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#0F1A34' }}>
                   <LuArrowRight size={16} />
                 </div>
 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem', alignItems: 'flex-end' }}>
-                  <span style={{ fontSize: '0.7rem', color: '#063669', fontWeight: 600, textTransform: 'uppercase' }}>
+                  <span style={{ fontSize: '0.7rem', color: '#0F1A34', fontWeight: 600, textTransform: 'uppercase' }}>
                     New Stage
                   </span>
                   <span style={{
                     fontSize: '0.85rem',
                     fontWeight: 800,
                     color: '#FFFFFF',
-                    backgroundColor: '#063669',
+                    backgroundColor: '#0F1A34',
                     padding: '0.15rem 0.55rem',
                     borderRadius: '6px'
                   }}>
@@ -175,8 +175,8 @@ export default function StageConfirmModal({
                 type="button"
                 className="logout-btn-confirm"
                 style={{
-                  backgroundColor: '#063669',
-                  borderColor: '#063669',
+                  backgroundColor: '#0F1A34',
+                  borderColor: '#0F1A34',
                   color: '#FFFFFF',
                   boxShadow: '0 2px 6px rgba(6, 54, 105, 0.25)'
                 }}

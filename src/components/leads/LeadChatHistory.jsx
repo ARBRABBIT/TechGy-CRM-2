@@ -627,7 +627,7 @@ export default function LeadChatHistory({ lead, activities = [], onSendMessage }
                     onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#F0FDF4'; }}
                     onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'transparent'; }}
                   >
-                    <div style={{ fontSize: '0.825rem', fontWeight: 600, color: '#063669' }}>
+                    <div style={{ fontSize: '0.825rem', fontWeight: 600, color: '#0F1A34' }}>
                       {tpl.title}
                     </div>
                     <div

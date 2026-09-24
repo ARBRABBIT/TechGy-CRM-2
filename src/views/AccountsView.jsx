@@ -44,13 +44,13 @@ export default function AccountsView({
           <nav style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.875rem', fontWeight: 500, color: '#557396' }}>
             <span
               onClick={onBackToDashboard}
-              style={{ cursor: 'pointer', color: '#063669' }}
+              style={{ cursor: 'pointer', color: '#0F1A34' }}
               title="Go to Dashboard"
             >
               Dashboard
             </span>
             <LuChevronRight size={14} />
-            <span style={{ color: '#063669', fontWeight: 700 }}>
+            <span style={{ color: '#0F1A34', fontWeight: 700 }}>
               Company Accounts
             </span>
           </nav>
@@ -62,7 +62,7 @@ export default function AccountsView({
           <div style={{ width: '52px', height: '52px', borderRadius: '50%', backgroundColor: '#F1F5F9', color: '#64748B', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1rem' }}>
             <LuBuilding2 size={26} />
           </div>
-          <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: '#063669', marginBottom: '0.4rem' }}>
+          <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: '#0F1A34', marginBottom: '0.4rem' }}>
             No Company Accounts Found
           </h3>
           <p style={{ fontSize: '0.85rem', color: '#64748B', maxWidth: '420px', margin: '0 auto' }}>
@@ -80,7 +80,7 @@ export default function AccountsView({
             >
               <div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.75rem' }}>
-                  <div className="kpi-icon-wrap" style={{ background: '#063669', color: 'white' }}>
+                  <div className="kpi-icon-wrap" style={{ background: '#0F1A34', color: 'white' }}>
                     <LuBuilding2 size={20} />
                   </div>
                   <span className="counter-badge tasks">
@@ -88,20 +88,20 @@ export default function AccountsView({
                   </span>
                 </div>
 
-                <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: '#063669', marginBottom: '0.25rem' }}>
+                <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: '#0F1A34', marginBottom: '0.25rem' }}>
                   {acc.companyName}
                 </h3>
                 <div style={{ fontSize: '0.8rem', color: '#557396', marginBottom: '0.5rem' }}>
                   {acc.industry} • {acc.companySize}
                 </div>
 
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', fontSize: '0.75rem', color: '#063669', marginBottom: '0.85rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', fontSize: '0.75rem', color: '#0F1A34', marginBottom: '0.85rem' }}>
                   <span style={{ backgroundColor: '#EBF3FA', border: '1px solid #D5E2EE', padding: '0.2rem 0.55rem', borderRadius: '6px', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}>
                     <LuLayers size={12} /> {acc.serviceProviding || 'TechGy CRM Enterprise Suite'}
                   </span>
                 </div>
 
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem', fontSize: '0.8rem', color: '#063669', marginBottom: '1rem' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem', fontSize: '0.8rem', color: '#0F1A34', marginBottom: '1rem' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
                     <LuGlobe size={14} style={{ color: '#557396' }} /> {acc.website}
                   </div>

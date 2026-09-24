@@ -89,13 +89,13 @@ export default function AccountDetailView({
             <>
               <span
                 onClick={onNavigateToContacts || onBack}
-                style={{ cursor: 'pointer', color: '#063669', fontWeight: 600 }}
+                style={{ cursor: 'pointer', color: '#0F1A34', fontWeight: 600 }}
                 title="Return to Contacts Directory"
               >
                 Contacts Directory
               </span>
               <LuChevronRight size={14} />
-              <span style={{ color: '#063669', fontWeight: 700 }}>
+              <span style={{ color: '#0F1A34', fontWeight: 700 }}>
                 {formData.companyName || account.companyName}
               </span>
             </>
@@ -103,13 +103,13 @@ export default function AccountDetailView({
             <>
               <span
                 onClick={onNavigateHome}
-                style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.3rem', color: '#063669' }}
+                style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.3rem', color: '#0F1A34' }}
                 title="Go to Dashboard"
               >
                 Dashboard
               </span>
               <LuChevronRight size={14} />
-              <span style={{ color: '#063669', fontWeight: 700 }}>
+              <span style={{ color: '#0F1A34', fontWeight: 700 }}>
                 {formData.companyName || account.companyName}
               </span>
             </>
@@ -117,13 +117,13 @@ export default function AccountDetailView({
             <>
               <span
                 onClick={onNavigateToActivities || onBack}
-                style={{ cursor: 'pointer', color: '#063669', fontWeight: 600 }}
+                style={{ cursor: 'pointer', color: '#0F1A34', fontWeight: 600 }}
                 title="Return to Activities & Engagement Timeline"
               >
                 Activities & Engagement Timeline
               </span>
               <LuChevronRight size={14} />
-              <span style={{ color: '#063669', fontWeight: 700 }}>
+              <span style={{ color: '#0F1A34', fontWeight: 700 }}>
                 {formData.companyName || account.companyName}
               </span>
             </>
@@ -132,13 +132,13 @@ export default function AccountDetailView({
             <>
               <span
                 onClick={onNavigateToLeads || onBack}
-                style={{ cursor: 'pointer', color: '#063669', fontWeight: 600 }}
+                style={{ cursor: 'pointer', color: '#0F1A34', fontWeight: 600 }}
                 title="Return to Leads Directory & Sales Pipeline"
               >
                 Leads Directory & Sales Pipeline
               </span>
               <LuChevronRight size={14} />
-              <span style={{ color: '#063669', fontWeight: 700 }}>
+              <span style={{ color: '#0F1A34', fontWeight: 700 }}>
                 {formData.companyName || account.companyName}
               </span>
             </>
@@ -148,7 +148,7 @@ export default function AccountDetailView({
                 <>
                   <span
                     onClick={onNavigateHome}
-                    style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.3rem', color: '#063669' }}
+                    style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.3rem', color: '#0F1A34' }}
                     title="Go to Dashboard"
                   >
                     Dashboard
@@ -158,13 +158,13 @@ export default function AccountDetailView({
               )}
               <span
                 onClick={onBack}
-                style={{ cursor: 'pointer', color: '#063669', fontWeight: 600 }}
+                style={{ cursor: 'pointer', color: '#0F1A34', fontWeight: 600 }}
                 title="Return to Company Accounts"
               >
                 Company Accounts
               </span>
               <LuChevronRight size={14} />
-              <span style={{ color: '#063669', fontWeight: 700 }}>
+              <span style={{ color: '#0F1A34', fontWeight: 700 }}>
                 {formData.companyName || account.companyName}
               </span>
             </>
@@ -176,11 +176,11 @@ export default function AccountDetailView({
       <div className="section-card" style={{ marginBottom: '1.25rem', padding: '1.25rem 1.5rem' }}>
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.35rem', flexWrap: 'wrap' }}>
-            <h2 style={{ fontSize: '1.4rem', margin: 0, color: '#063669', fontWeight: 700 }}>
+            <h2 style={{ fontSize: '1.4rem', margin: 0, color: '#0F1A34', fontWeight: 700 }}>
               {formData.companyName || account.companyName}
             </h2>
             {formData.estimatedAccountValue && (
-              <span className="counter-badge alert" style={{ background: '#E6EFF8', color: '#063669', border: '1px solid rgba(6, 54, 105, 0.15)', fontWeight: 600 }}>
+              <span className="counter-badge alert" style={{ background: '#E6EFF8', color: '#0F1A34', border: '1px solid rgba(6, 54, 105, 0.15)', fontWeight: 600 }}>
                 Est. Worth {formData.estimatedAccountValue}
               </span>
             )}
@@ -192,14 +192,14 @@ export default function AccountDetailView({
               alignItems: 'center',
               gap: '0.35rem',
               backgroundColor: '#E6EFF8',
-              color: '#063669',
+              color: '#0F1A34',
               padding: '0.2rem 0.65rem',
               borderRadius: '20px',
               fontSize: '0.75rem',
               fontWeight: 700,
               border: '1px solid #D5E2EE'
             }}>
-              <LuLayers size={13} style={{ color: '#063669' }} /> Service Providing: {formData.serviceProviding || 'TechGy CRM Enterprise Suite'}
+              <LuLayers size={13} style={{ color: '#0F1A34' }} /> Service Providing: {formData.serviceProviding || 'TechGy CRM Enterprise Suite'}
             </span>
           </div>
         </div>
@@ -219,7 +219,7 @@ export default function AccountDetailView({
         <div className="kpi-card">
           <div className="kpi-header">
             <span className="kpi-title">Estimated Account Value</span>
-            <div className="kpi-icon-wrap" style={{ background: '#063669', color: 'white' }}><LuGlobe size={18} /></div>
+            <div className="kpi-icon-wrap" style={{ background: '#0F1A34', color: 'white' }}><LuGlobe size={18} /></div>
           </div>
           <div className="kpi-value">{formData.estimatedAccountValue || '₹0'}</div>
           <div className="kpi-subtext">{formData.companySize || 'Enterprise Tier'}</div>
@@ -381,7 +381,7 @@ export default function AccountDetailView({
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1.25rem' }}>
               <div className="drawer-field-group">
                 <div className="field-label">Company Name</div>
-                <div className="field-value" style={{ fontWeight: 700, color: '#063669' }}>
+                <div className="field-value" style={{ fontWeight: 700, color: '#0F1A34' }}>
                   {formData.companyName || 'Not Set'}
                 </div>
               </div>
@@ -393,7 +393,7 @@ export default function AccountDetailView({
 
               <div className="drawer-field-group">
                 <div className="field-label">Service Providing</div>
-                <div className="field-value" style={{ fontWeight: 700, color: '#063669' }}>
+                <div className="field-value" style={{ fontWeight: 700, color: '#0F1A34' }}>
                   <span style={{
                     display: 'inline-flex',
                     alignItems: 'center',
@@ -404,7 +404,7 @@ export default function AccountDetailView({
                     borderRadius: '6px',
                     fontSize: '0.82rem'
                   }}>
-                    <LuLayers size={13} style={{ color: '#063669' }} /> {formData.serviceProviding || 'TechGy CRM Enterprise Suite'}
+                    <LuLayers size={13} style={{ color: '#0F1A34' }} /> {formData.serviceProviding || 'TechGy CRM Enterprise Suite'}
                   </span>
                 </div>
               </div>
@@ -416,7 +416,7 @@ export default function AccountDetailView({
 
               <div className="drawer-field-group">
                 <div className="field-label">Estimated Account Value</div>
-                <div className="field-value" style={{ fontWeight: 700, color: '#063669' }}>
+                <div className="field-value" style={{ fontWeight: 700, color: '#0F1A34' }}>
                   {formData.estimatedAccountValue || 'Not Set'}
                 </div>
               </div>
@@ -437,7 +437,7 @@ export default function AccountDetailView({
 
               <div className="drawer-field-group">
                 <div className="field-label">Account Owner</div>
-                <div className="field-value" style={{ fontWeight: 600, color: '#063669' }}>
+                <div className="field-value" style={{ fontWeight: 600, color: '#0F1A34' }}>
                   {formData.accountOwner || 'Not Set'}
                 </div>
               </div>
@@ -488,7 +488,7 @@ export default function AccountDetailView({
                 ) : (
                   accountLeads.map(l => (
                     <tr key={l.id} onClick={() => onSelectLead(l)}>
-                      <td style={{ fontWeight: 700, color: '#063669' }}>{l.leadName}</td>
+                      <td style={{ fontWeight: 700, color: '#0F1A34' }}>{l.leadName}</td>
                       <td>{l.designation}</td>
                       <td><span className="status-chip new">{l.leadSource}</span></td>
                       <td><span className={`status-chip ${l.status.toLowerCase()}`}>{l.status}</span></td>

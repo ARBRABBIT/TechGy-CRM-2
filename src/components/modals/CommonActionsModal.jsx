@@ -181,7 +181,7 @@ function CompanyAutocompleteInput({
             justifyContent: 'space-between'
           }}>
             <span>Existing CRM Companies</span>
-            <span style={{ fontSize: '0.7rem', color: '#063669', fontWeight: 600 }}>{matchingCompanies.length} found</span>
+            <span style={{ fontSize: '0.7rem', color: '#0F1A34', fontWeight: 600 }}>{matchingCompanies.length} found</span>
           </div>
           {matchingCompanies.map((comp, idx) => {
             const isHighlighted = idx === highlightedIndex;
@@ -198,7 +198,7 @@ function CompanyAutocompleteInput({
                   borderRadius: '6px',
                   cursor: 'pointer',
                   backgroundColor: isHighlighted ? '#F0F5FA' : 'transparent',
-                  color: isHighlighted ? '#063669' : '#1E293B',
+                  color: isHighlighted ? '#0F1A34' : '#1E293B',
                   display: 'flex',
                   alignItems: 'center',
                   gap: '8px',
@@ -212,7 +212,7 @@ function CompanyAutocompleteInput({
                   height: '24px',
                   borderRadius: '6px',
                   backgroundColor: isHighlighted ? '#E0ECF8' : '#F1F5F9',
-                  color: '#063669',
+                  color: '#0F1A34',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
@@ -600,7 +600,7 @@ export default function CommonActionsModal({
         }}
       >
         <div className="modal-header">
-          <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: '#063669', margin: 0 }}>
+          <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: '#0F1A34', margin: 0 }}>
             {getModalTitle()}
           </h3>
           <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#557396' }}>
@@ -627,7 +627,7 @@ export default function CommonActionsModal({
                     <span style={{
                       fontSize: '0.725rem',
                       fontWeight: 700,
-                      color: '#063669',
+                      color: '#0F1A34',
                       background: '#E6EFF8',
                       padding: '0.1rem 0.45rem',
                       borderRadius: '10px'
@@ -640,7 +640,7 @@ export default function CommonActionsModal({
                       <span key={l.id} style={{
                         fontSize: '0.75rem',
                         fontWeight: 600,
-                        color: '#063669',
+                        color: '#0F1A34',
                         background: '#FFFFFF',
                         border: '1px solid #D5E2EE',
                         borderRadius: '4px',
@@ -663,7 +663,7 @@ export default function CommonActionsModal({
                   alignItems: 'center'
                 }}>
                   <span style={{ fontSize: '0.8rem', color: '#557396', fontWeight: 500 }}>Target Lead:</span>
-                  <span style={{ fontSize: '0.85rem', fontWeight: 700, color: '#063669' }}>
+                  <span style={{ fontSize: '0.85rem', fontWeight: 700, color: '#0F1A34' }}>
                     {selectedLead.leadName} • {selectedLead.company}
                   </span>
                 </div>
@@ -707,7 +707,7 @@ export default function CommonActionsModal({
                             textAlign: 'left',
                             backgroundColor: isTypeDropdownOpen ? '#FFFFFF' : '#F8FAFC',
                             boxShadow: isTypeDropdownOpen ? '0 0 0 2px rgba(6, 54, 105, 0.15)' : 'none',
-                            color: '#063669',
+                            color: '#0F1A34',
                             fontWeight: 500,
                             fontSize: '0.875rem',
                             padding: '0.65rem 0.85rem',
@@ -720,7 +720,7 @@ export default function CommonActionsModal({
                           <LuChevronDown
                             size={16}
                             style={{
-                              color: '#063669',
+                              color: '#0F1A34',
                               transform: isTypeDropdownOpen ? 'rotate(180deg)' : 'rotate(0deg)',
                               transition: 'transform 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
                               flexShrink: 0
@@ -768,7 +768,7 @@ export default function CommonActionsModal({
                                     borderRadius: '5px',
                                     border: 'none',
                                     backgroundColor: isSelected ? '#EBF3FA' : 'transparent',
-                                    color: isSelected ? '#063669' : '#334155',
+                                    color: isSelected ? '#0F1A34' : '#334155',
                                     fontSize: '0.875rem',
                                     fontWeight: isSelected ? 700 : 500,
                                     cursor: 'pointer',
@@ -784,7 +784,7 @@ export default function CommonActionsModal({
                                 >
                                   <span>{opt.label}</span>
                                   {isSelected && (
-                                    <LuCheck size={16} color="#063669" style={{ strokeWidth: 2.5, flexShrink: 0 }} />
+                                    <LuCheck size={16} color="#0F1A34" style={{ strokeWidth: 2.5, flexShrink: 0 }} />
                                   )}
                                 </button>
                               );
@@ -1178,7 +1178,7 @@ export default function CommonActionsModal({
                         <span style={{
                           fontSize: '0.725rem',
                           fontWeight: 700,
-                          color: '#063669',
+                          color: '#0F1A34',
                           background: '#E6EFF8',
                           padding: '0.1rem 0.45rem',
                           borderRadius: '10px'
@@ -1191,7 +1191,7 @@ export default function CommonActionsModal({
                           <span key={l.id} style={{
                             fontSize: '0.725rem',
                             fontWeight: 600,
-                            color: '#063669',
+                            color: '#0F1A34',
                             background: '#FFFFFF',
                             border: '1px solid #D5E2EE',
                             borderRadius: '4px',
@@ -1213,7 +1213,7 @@ export default function CommonActionsModal({
                       alignItems: 'center'
                     }}>
                       <span style={{ fontSize: '0.8rem', color: '#557396', fontWeight: 500 }}>Target Lead:</span>
-                      <span style={{ fontSize: '0.85rem', fontWeight: 700, color: '#063669' }}>
+                      <span style={{ fontSize: '0.85rem', fontWeight: 700, color: '#0F1A34' }}>
                         {selectedLead.leadName} • {selectedLead.company}
                       </span>
                     </div>
@@ -1572,7 +1572,7 @@ export default function CommonActionsModal({
                         width: '38px',
                         height: '38px',
                         borderRadius: '50%',
-                        backgroundColor: '#063669',
+                        backgroundColor: '#0F1A34',
                         color: '#FFFFFF',
                         display: 'flex',
                         alignItems: 'center',
@@ -1617,7 +1617,7 @@ export default function CommonActionsModal({
 
                       {/* TechGy Corporate Banner */}
                       <div style={{
-                        background: 'linear-gradient(135deg, #063669 0%, #0a4a8a 35%, #1565c0 60%, #0d47a1 80%, #063669 100%)',
+                        background: 'linear-gradient(135deg, #0F1A34 0%, #0a4a8a 35%, #1565c0 60%, #0d47a1 80%, #0F1A34 100%)',
                         padding: '0',
                         position: 'relative',
                         overflow: 'hidden',
@@ -1725,7 +1725,7 @@ export default function CommonActionsModal({
                         <div style={{ fontSize: '0.84rem', color: '#202124', marginBottom: '0.35rem', lineHeight: 1.7 }}>
                           Thank you,
                         </div>
-                        <div style={{ fontSize: '0.84rem', fontWeight: 700, color: '#063669', marginBottom: '0.1rem' }}>
+                        <div style={{ fontSize: '0.84rem', fontWeight: 700, color: '#0F1A34', marginBottom: '0.1rem' }}>
                           {currentUser?.name || 'System Administrator'}
                         </div>
                         <div style={{ fontSize: '0.75rem', color: '#64748B' }}>
