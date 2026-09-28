@@ -39,7 +39,7 @@ import { LuCircleCheck, LuX, LuTriangleAlert, LuCircleAlert, LuInfo } from 'reac
 import { getInitialStageHistory } from './utils/pipelineUtils';
 import { getTodayISO } from './utils/dateUtils';
 
-const DATA_VERSION = 'v4.0_clean_modules';
+const DATA_VERSION = 'v5.0_sales_executive_assigned_leads';
 
 // Clean atomic migration on DATA_VERSION change
 if (typeof window !== 'undefined') {
@@ -49,7 +49,7 @@ if (typeof window !== 'undefined') {
       const keysToRemove = [
         'techgy_leads', 'techgy_accounts', 'techgy_opportunities',
         'techgy_activities', 'techgy_proposals', 'techgy_contacts',
-        'techgy_notifications'
+        'techgy_notifications', 'techgy_sales_executives', 'techgy_sales_heads'
       ];
       keysToRemove.forEach(k => localStorage.removeItem(k));
       localStorage.setItem('techgy_data_version', DATA_VERSION);
@@ -128,10 +128,14 @@ export default function App() {
   const [selectedDateFilter, setSelectedDateFilter] = useState('This Month');
   const [selectedOwnerFilter, setSelectedOwnerFilter] = useState('All Owners');
 
-  // Relational Data State (Hydrated from localStorage with mock fallback)
+  // Relational Data State (Hydrated from localStorage with mock fallback & missing lead auto-hydration)
   const [leads, setLeads] = useState(() => {
     const raw = loadFromStorage('leads', INITIAL_LEADS);
-    return raw.map(l => ({
+    const rawList = Array.isArray(raw) && raw.length > 0 ? raw : INITIAL_LEADS;
+    const existingIds = new Set(rawList.map(r => r.id));
+    const missingLeads = INITIAL_LEADS.filter(il => !existingIds.has(il.id));
+    const combined = [...rawList, ...missingLeads];
+    return combined.map(l => ({
       ...l,
       serviceProviding: l.serviceProviding || 'TechGy CRM Enterprise Suite'
     }));
@@ -991,6 +995,7 @@ export default function App() {
         {/* 2. Global Header with Live Universal Search */}
         <GlobalHeader
           activeModule={activeModule}
+          currentUser={currentUser}
           searchQuery={searchQuery}
           setSearchQuery={setSearchQuery}
           selectedDateFilter={selectedDateFilter}
@@ -1127,9 +1132,13 @@ export default function App() {
                   leads={leads}
                   accounts={accounts}
                   activities={activities}
+                  salesHeads={salesHeads}
+                  salesExecutives={salesExecutives}
                   onNavigateToLeads={handleNavigateToLeads}
                   onNavigateToAccounts={handleNavigateToAccounts}
                   onNavigateToActivities={handleNavigateToActivities}
+                  onNavigateToSalesHead={() => setActiveModule('salesHead')}
+                  onNavigateToSalesExecutive={() => setActiveModule('salesExecutive')}
                   onSelectLead={(lead) => {
                     setLeadNavSource('dashboard');
                     setSelectedAccount(null);
@@ -1145,13 +1154,16 @@ export default function App() {
               {activeModule === 'salesHead' && (
                 <SalesHeadView
                   salesHeads={salesHeads}
+                  salesExecutives={salesExecutives}
                   onUpdateSalesHeads={setSalesHeads}
+                  onUpdateSalesExecutives={setSalesExecutives}
                   onTriggerToast={triggerToast}
                   onNavigateToLead={(lead) => {
                     setLeadNavSource('salesHead');
                     setSelectedAccount(null);
                     setSelectedLead(lead);
                   }}
+                  currentUser={currentUser}
                 />
               )}
 
@@ -1166,6 +1178,7 @@ export default function App() {
                     setSelectedAccount(null);
                     setSelectedLead(lead);
                   }}
+                  currentUser={currentUser}
                 />
               )}
 

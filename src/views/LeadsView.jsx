@@ -53,7 +53,9 @@ export default function LeadsView({
   onClearFilters
 }) {
   // Queue Tab State: 'unassigned' | 'assigned' | 'junk'
-  const [activeQueueTab, setActiveQueueTab] = useState('unassigned');
+  const isSalesExecutiveUser = currentUser?.role === 'Sales Executive' || currentUser?.role === 'executive';
+  const currentSalesExecutiveName = currentUser?.name || 'Rahul Verma';
+  const [activeQueueTab, setActiveQueueTab] = useState(() => (currentUser?.role === 'Sales Executive' || currentUser?.role === 'executive') ? 'assigned' : 'unassigned');
 
   // Search & Filters
   const [localSearch, setLocalSearch] = useState('');
@@ -100,6 +102,13 @@ export default function LeadsView({
     return () => document.removeEventListener('click', handleDocumentClick);
   }, []);
 
+  // Sync tab for sales executive if user switches role
+  useEffect(() => {
+    if (isSalesExecutiveUser && activeQueueTab === 'unassigned') {
+      setActiveQueueTab('assigned');
+    }
+  }, [isSalesExecutiveUser, activeQueueTab]);
+
   // Current User Role Context
   const isSalesHeadUser = currentUser?.role === 'Sales Head' || currentUser?.role === 'head';
   const currentSalesHeadName = currentUser?.name || 'Rajesh Sharma';
@@ -121,8 +130,18 @@ export default function LeadsView({
         return false;
       });
     }
+    if (isSalesExecutiveUser) {
+      const matchName = (currentSalesExecutiveName || '').toLowerCase().trim();
+      return leads.filter(l => {
+        if (l.salesExecutive && l.salesExecutive.toLowerCase().trim() === matchName) return true;
+        if (l.assignedSalesExecutive && l.assignedSalesExecutive.toLowerCase().trim() === matchName) return true;
+        if (l.executive && l.executive.toLowerCase().trim() === matchName) return true;
+        if (l.leadOwner && l.leadOwner.toLowerCase().trim() === matchName) return true;
+        return false;
+      });
+    }
     return leads;
-  }, [leads, isSalesHeadUser, currentSalesHeadName, salesExecutives]);
+  }, [leads, isSalesHeadUser, currentSalesHeadName, isSalesExecutiveUser, currentSalesExecutiveName, salesExecutives]);
 
   // Sales Executives scoped to this Sales Head
   const availableExecutives = useMemo(() => {
@@ -175,7 +194,9 @@ export default function LeadsView({
       const isLeadJunk = lead.isJunk === true || lead.status === 'JUNK';
       const isLeadAssigned = Boolean(
         (lead.salesExecutive && lead.salesExecutive !== 'Unassigned' && lead.salesExecutive.trim() !== '') ||
-        (lead.assignedSalesExecutive && lead.assignedSalesExecutive !== 'Unassigned' && lead.assignedSalesExecutive.trim() !== '')
+        (lead.assignedSalesExecutive && lead.assignedSalesExecutive !== 'Unassigned' && lead.assignedSalesExecutive.trim() !== '') ||
+        (lead.executive && lead.executive !== 'Unassigned' && lead.executive.trim() !== '') ||
+        (isSalesExecutiveUser && !isLeadJunk)
       );
 
       if (activeQueueTab === 'junk') {
@@ -525,24 +546,26 @@ export default function LeadsView({
         </div>
 
         {/* Top-Right CTA: Create New Lead */}
-        <button
-          type="button"
-          className="btn-primary"
-          onClick={() => onOpenCreateModal && onOpenCreateModal('createLead')}
-          style={{
-            padding: '0.6rem 1.35rem',
-            fontSize: '0.875rem',
-            fontWeight: 700,
-            borderRadius: '9999px',
-            boxShadow: '0 4px 14px rgba(0, 34, 255, 0.25)',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.45rem'
-          }}
-        >
-          <LuPlus size={16} />
-          <span>Create New Lead</span>
-        </button>
+        {!isSalesExecutiveUser && (
+          <button
+            type="button"
+            className="btn-primary"
+            onClick={() => onOpenCreateModal && onOpenCreateModal('createLead')}
+            style={{
+              padding: '0.6rem 1.35rem',
+              fontSize: '0.875rem',
+              fontWeight: 700,
+              borderRadius: '9999px',
+              boxShadow: '0 4px 14px rgba(0, 34, 255, 0.25)',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.45rem'
+            }}
+          >
+            <LuPlus size={16} />
+            <span>Create New Lead</span>
+          </button>
+        )}
       </div>
 
       {/* SEARCH AND QUEUE TABS BAR */}
@@ -601,42 +624,44 @@ export default function LeadsView({
             gap: '4px'
           }}
         >
-          <button
-            type="button"
-            className={`toggle-btn ${activeQueueTab === 'unassigned' ? 'active' : ''}`}
-            onClick={() => setActiveQueueTab('unassigned')}
-            style={{
-              padding: '0.45rem 1.35rem',
-              fontSize: '0.825rem',
-              fontWeight: 700,
-              borderRadius: '9999px',
-              border: 'none',
-              cursor: 'pointer',
-              transition: 'all 0.2s ease',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.4rem',
-              background: activeQueueTab === 'unassigned' ? '#FFFFFF' : 'transparent',
-              color: activeQueueTab === 'unassigned' ? '#0022FF' : '#556987',
-              boxShadow: activeQueueTab === 'unassigned' ? '0 2px 8px rgba(0,0,0,0.08)' : 'none'
-            }}
-          >
-            <span>Unassigned</span>
-            {queueCounts.unassigned > 0 && (
-              <span
-                style={{
-                  fontSize: '0.7rem',
-                  padding: '0.1rem 0.45rem',
-                  borderRadius: '9999px',
-                  background: activeQueueTab === 'unassigned' ? '#EBF0FF' : '#E2E8F0',
-                  color: activeQueueTab === 'unassigned' ? '#0022FF' : '#475569',
-                  fontWeight: 800
-                }}
-              >
-                {queueCounts.unassigned}
-              </span>
-            )}
-          </button>
+          {!isSalesExecutiveUser && (
+            <button
+              type="button"
+              className={`toggle-btn ${activeQueueTab === 'unassigned' ? 'active' : ''}`}
+              onClick={() => setActiveQueueTab('unassigned')}
+              style={{
+                padding: '0.45rem 1.35rem',
+                fontSize: '0.825rem',
+                fontWeight: 700,
+                borderRadius: '9999px',
+                border: 'none',
+                cursor: 'pointer',
+                transition: 'all 0.2s ease',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.4rem',
+                background: activeQueueTab === 'unassigned' ? '#FFFFFF' : 'transparent',
+                color: activeQueueTab === 'unassigned' ? '#0022FF' : '#556987',
+                boxShadow: activeQueueTab === 'unassigned' ? '0 2px 8px rgba(0,0,0,0.08)' : 'none'
+              }}
+            >
+              <span>Unassigned</span>
+              {queueCounts.unassigned > 0 && (
+                <span
+                  style={{
+                    fontSize: '0.7rem',
+                    padding: '0.1rem 0.45rem',
+                    borderRadius: '9999px',
+                    background: activeQueueTab === 'unassigned' ? '#EBF0FF' : '#E2E8F0',
+                    color: activeQueueTab === 'unassigned' ? '#0022FF' : '#475569',
+                    fontWeight: 800
+                  }}
+                >
+                  {queueCounts.unassigned}
+                </span>
+              )}
+            </button>
+          )}
 
           <button
             type="button"
@@ -855,29 +880,31 @@ export default function LeadsView({
             </button>
 
             {/* Bulk Import Button */}
-            <button
-              type="button"
-              className="btn-secondary"
-              onClick={() => setIsImportModalOpen(true)}
-              style={{
-                padding: '0.45rem 1.15rem',
-                fontSize: '0.8rem',
-                fontWeight: 700,
-                borderRadius: '9999px',
-                background: '#0F1A34',
-                color: '#FFFFFF',
-                borderColor: '#0F1A34',
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '0.45rem'
-              }}
-            >
-              <LuUpload size={14} />
-              <span>Bulk Import</span>
-            </button>
+            {!isSalesExecutiveUser && (
+              <button
+                type="button"
+                className="btn-secondary"
+                onClick={() => setIsImportModalOpen(true)}
+                style={{
+                  padding: '0.45rem 1.15rem',
+                  fontSize: '0.8rem',
+                  fontWeight: 700,
+                  borderRadius: '9999px',
+                  background: '#0F1A34',
+                  color: '#FFFFFF',
+                  borderColor: '#0F1A34',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '0.45rem'
+                }}
+              >
+                <LuUpload size={14} />
+                <span>Bulk Import</span>
+              </button>
+            )}
 
             {/* Bulk Auto-Assign Button (Visible in Unassigned queue) */}
-            {activeQueueTab === 'unassigned' && (
+            {activeQueueTab === 'unassigned' && !isSalesExecutiveUser && (
               <button
                 type="button"
                 className="btn-primary"
@@ -958,7 +985,7 @@ export default function LeadsView({
                   STATUS
                 </th>
                 {/* Assigned Sales Head Column (Only visible to Sales Admin) */}
-                {!isSalesHeadUser && (
+                {!isSalesHeadUser && !isSalesExecutiveUser && (
                   <th style={{ padding: '0.85rem 1rem', fontSize: '0.72rem', fontWeight: 800, color: '#557396', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
                     {activeQueueTab === 'junk' ? 'ASSIGNED RM' : 'ASSIGNED SALES HEAD'}
                   </th>
@@ -977,10 +1004,12 @@ export default function LeadsView({
                   </>
                 ) : (
                   <>
-                    <th style={{ padding: '0.85rem 1rem', fontSize: '0.72rem', fontWeight: 800, color: '#557396', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                      ASSIGNED SALES EXECUTIVE
-                    </th>
-                    {activeQueueTab === 'assigned' && (
+                    {!isSalesExecutiveUser && (
+                      <th style={{ padding: '0.85rem 1rem', fontSize: '0.72rem', fontWeight: 800, color: '#557396', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                        ASSIGNED SALES EXECUTIVE
+                      </th>
+                    )}
+                    {activeQueueTab === 'assigned' && !isSalesExecutiveUser && (
                       <th style={{ padding: '0.85rem 1.25rem', fontSize: '0.72rem', fontWeight: 800, color: '#557396', textTransform: 'uppercase', letterSpacing: '0.04em', textAlign: 'right' }}>
                         ACTIONS
                       </th>
@@ -1159,7 +1188,7 @@ export default function LeadsView({
                       </td>
 
                       {/* Assigned Sales Head (Only visible to Sales Admin) */}
-                      {!isSalesHeadUser && (
+                      {!isSalesHeadUser && !isSalesExecutiveUser && (
                         <td style={{ padding: '1rem' }}>
                           {lead.salesHead ? (
                             <div
@@ -1256,58 +1285,60 @@ export default function LeadsView({
                         </>
                       ) : (
                         <>
-                          <td style={{ padding: '1rem' }}>
-                            {lead.salesExecutive && lead.salesExecutive !== 'Unassigned' ? (
-                              <div
-                                onClick={(e) => handleOpenAssignExecModal(lead, e)}
-                                style={{
-                                  display: 'inline-flex',
-                                  alignItems: 'center',
-                                  gap: '0.45rem',
-                                  background: '#EBF0FF',
-                                  color: '#0022FF',
-                                  border: '1px solid #C7D7FE',
-                                  padding: '0.25rem 0.75rem',
-                                  borderRadius: '9999px',
-                                  fontSize: '0.75rem',
-                                  fontWeight: 700,
-                                  cursor: 'pointer'
-                                }}
-                                title="Click to reassign Sales Executive"
-                              >
-                                <LuBriefcase size={12} />
-                                <span style={{ whiteSpace: 'nowrap' }}>{lead.salesExecutive}</span>
-                              </div>
-                            ) : (
-                              /* CTA: Assign Sales Executive */
-                              <button
-                                type="button"
-                                className="btn-primary"
-                                onClick={(e) => handleOpenAssignExecModal(lead, e)}
-                                style={{
-                                  padding: '0.4rem 0.95rem',
-                                  fontSize: '0.775rem',
-                                  fontWeight: 700,
-                                  borderRadius: '9999px',
-                                  background: '#0022FF',
-                                  color: '#FFFFFF',
-                                  border: 'none',
-                                  cursor: 'pointer',
-                                  display: 'inline-flex',
-                                  alignItems: 'center',
-                                  gap: '0.4rem',
-                                  whiteSpace: 'nowrap',
-                                  boxShadow: '0 2px 8px rgba(0, 34, 255, 0.25)'
-                                }}
-                              >
-                                <LuUserPlus size={13} />
-                                <span>Assign Sales Executive</span>
-                              </button>
-                            )}
-                          </td>
+                          {!isSalesExecutiveUser && (
+                            <td style={{ padding: '1rem' }}>
+                              {lead.salesExecutive && lead.salesExecutive !== 'Unassigned' ? (
+                                <div
+                                  onClick={(e) => handleOpenAssignExecModal(lead, e)}
+                                  style={{
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    gap: '0.45rem',
+                                    background: '#EBF0FF',
+                                    color: '#0022FF',
+                                    border: '1px solid #C7D7FE',
+                                    padding: '0.25rem 0.75rem',
+                                    borderRadius: '9999px',
+                                    fontSize: '0.75rem',
+                                    fontWeight: 700,
+                                    cursor: 'pointer'
+                                  }}
+                                  title="Click to reassign Sales Executive"
+                                >
+                                  <LuBriefcase size={12} />
+                                  <span style={{ whiteSpace: 'nowrap' }}>{lead.salesExecutive}</span>
+                                </div>
+                              ) : (
+                                /* CTA: Assign Sales Executive */
+                                <button
+                                  type="button"
+                                  className="btn-primary"
+                                  onClick={(e) => handleOpenAssignExecModal(lead, e)}
+                                  style={{
+                                    padding: '0.4rem 0.95rem',
+                                    fontSize: '0.775rem',
+                                    fontWeight: 700,
+                                    borderRadius: '9999px',
+                                    background: '#0022FF',
+                                    color: '#FFFFFF',
+                                    border: 'none',
+                                    cursor: 'pointer',
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    gap: '0.4rem',
+                                    whiteSpace: 'nowrap',
+                                    boxShadow: '0 2px 8px rgba(0, 34, 255, 0.25)'
+                                  }}
+                                >
+                                  <LuUserPlus size={13} />
+                                  <span>Assign Sales Executive</span>
+                                </button>
+                              )}
+                            </td>
+                          )}
 
                           {/* Actions Column (Assigned queue) */}
-                          {activeQueueTab === 'assigned' && (
+                          {activeQueueTab === 'assigned' && !isSalesExecutiveUser && (
                             <td style={{ padding: '1rem 1.25rem', textAlign: 'right' }}>
                               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '0.5rem', position: 'relative' }}>
                                 <button

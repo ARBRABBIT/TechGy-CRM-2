@@ -22,6 +22,7 @@ import {
 import {
   SALES_HEAD_PROJECTS,
   INITIAL_SALES_HEADS,
+  INITIAL_SALES_EXECUTIVES,
   SALES_HEAD_PERFORMERS,
   SALES_HEAD_CALLS_SUMMARY,
   SALES_HEAD_LEAD_STATUSES,
@@ -34,10 +35,15 @@ import {
 
 export default function SalesHeadView({
   salesHeads = INITIAL_SALES_HEADS,
+  salesExecutives = INITIAL_SALES_EXECUTIVES,
   onUpdateSalesHeads,
+  onUpdateSalesExecutives,
   onTriggerToast,
-  onNavigateToLead: _onNavigateToLead
+  onNavigateToLead: _onNavigateToLead,
+  currentUser
 }) {
+  const isAdmin = currentUser?.role === 'admin' || currentUser?.role === 'Sales Admin';
+
   // Current tab: 'dashboard' | 'registry'
   const [currentTab, setCurrentTab] = useState('dashboard');
 
@@ -59,44 +65,47 @@ export default function SalesHeadView({
   const [isStaleLeadsModalOpen, setIsStaleLeadsModalOpen] = useState(false);
   const [isBookingsModalOpen, setIsBookingsModalOpen] = useState(false);
   const [assignedModalData, setAssignedModalData] = useState(null);
-  const [editingSalesHead, setEditingSalesHead] = useState(null);
+  const [editingExecutive, setEditingExecutive] = useState(null);
 
   // Status Search inside Statuses Modal
   const [statusSearchQuery, setStatusSearchQuery] = useState('');
 
-  // Form State for Create / Edit Sales Head
+  // Form State for Editing/Creating Sales Executive
   const [formFirstName, setFormFirstName] = useState('');
   const [formLastName, setFormLastName] = useState('');
-  const [formRole, setFormRole] = useState('Regional Sales Head');
+  const [formRole, setFormRole] = useState('Enterprise Sales Executive');
   const [formEmail, setFormEmail] = useState('');
   const [formPhone, setFormPhone] = useState('');
   const [formProject, setFormProject] = useState('TechGy CRM Enterprise Suite');
+  const [formReportingHead, setFormReportingHead] = useState(salesHeads[0]?.name || 'Rajesh Sharma');
   const [formErrors, setFormErrors] = useState({});
 
   const resetForm = () => {
     setFormFirstName('');
     setFormLastName('');
-    setFormRole('Regional Sales Head');
+    setFormRole('Enterprise Sales Executive');
     setFormEmail('');
     setFormPhone('');
     setFormProject('TechGy CRM Enterprise Suite');
+    setFormReportingHead(salesHeads[0]?.name || 'Rajesh Sharma');
     setFormErrors({});
-    setEditingSalesHead(null);
+    setEditingExecutive(null);
   };
 
-  const handleOpenCreateDrawer = () => {
+  const handleOpenCreateModal = () => {
     resetForm();
     setIsCreateDrawerOpen(true);
   };
 
-  const handleOpenEditModal = (head) => {
-    setEditingSalesHead(head);
-    setFormFirstName(head.firstName || head.name.split(' ')[0] || '');
-    setFormLastName(head.lastName || head.name.split(' ').slice(1).join(' ') || '');
-    setFormRole(head.role || 'Regional Sales Head');
-    setFormEmail(head.email || '');
-    setFormPhone(head.phone || '');
-    setFormProject(head.project || 'TechGy CRM Enterprise Suite');
+  const handleOpenEditModal = (exec) => {
+    setEditingExecutive(exec);
+    setFormFirstName(exec.firstName || exec.name.split(' ')[0] || '');
+    setFormLastName(exec.lastName || exec.name.split(' ').slice(1).join(' ') || '');
+    setFormRole(exec.role || 'Enterprise Sales Executive');
+    setFormEmail(exec.email || '');
+    setFormPhone(exec.phone || '');
+    setFormProject(exec.project || 'TechGy CRM Enterprise Suite');
+    setFormReportingHead(exec.reportingSalesHead || (salesHeads[0]?.name || 'Rajesh Sharma'));
     setFormErrors({});
     setIsCreateDrawerOpen(true);
   };
@@ -124,9 +133,9 @@ export default function SalesHeadView({
     const fullName = `${formFirstName.trim()} ${formLastName.trim()}`;
     const initials = `${formFirstName.trim()[0] || ''}${formLastName.trim()[0] || ''}`.toUpperCase();
 
-    if (editingSalesHead) {
-      const updated = salesHeads.map(item => {
-        if (item.id === editingSalesHead.id) {
+    if (editingExecutive) {
+      const updated = salesExecutives.map(item => {
+        if (item.id === editingExecutive.id) {
           return {
             ...item,
             firstName: formFirstName.trim(),
@@ -137,69 +146,54 @@ export default function SalesHeadView({
             email: formEmail.trim(),
             phone: formPhone.trim().replace(/\D/g, ''),
             formattedPhone: formPhone.trim().startsWith('+') ? formPhone.trim() : `+91 ${formPhone.trim()}`,
-            project: formProject
+            project: formProject,
+            reportingSalesHead: formReportingHead
           };
         }
         return item;
       });
-      if (onUpdateSalesHeads) onUpdateSalesHeads(updated);
-      if (onTriggerToast) onTriggerToast(`Sales Head "${fullName}" updated successfully!`);
+      if (onUpdateSalesExecutives) onUpdateSalesExecutives(updated);
+      if (onTriggerToast) onTriggerToast(`Sales Executive "${fullName}" updated successfully!`);
     } else {
-      const palette = [
-        { bg: '#E0F2FE', color: '#0369A1' },
-        { bg: '#FFE4E6', color: '#E11D48' },
-        { bg: '#DCFCE7', color: '#15803D' },
-        { bg: '#DBEAFE', color: '#1D4ED8' },
-        { bg: '#FCE7F3', color: '#BE185D' },
-        { bg: '#CCFBF1', color: '#0F766E' },
-        { bg: '#FEF3C7', color: '#B45309' }
-      ];
-      const randomTone = palette[Math.floor(Math.random() * palette.length)];
-
-      const now = new Date();
-      const dd = String(now.getDate()).padStart(2, '0');
-      const mm = String(now.getMonth() + 1).padStart(2, '0');
-      const yyyy = now.getFullYear();
-      const creationDateStr = `${dd}-${mm}-${yyyy}`;
-
-      const newHead = {
-        id: `SH-${Date.now().toString().slice(-4)}`,
+      const newExec = {
+        id: `EXEC-${Date.now()}`,
         firstName: formFirstName.trim(),
         lastName: formLastName.trim(),
         name: fullName,
-        role: formRole.trim() || 'Regional Sales Head',
-        initials: initials || 'SH',
-        avatarBg: randomTone.bg,
-        avatarColor: randomTone.color,
+        role: formRole.trim(),
+        initials: initials || 'SE',
+        email: formEmail.trim(),
         phone: formPhone.trim().replace(/\D/g, ''),
         formattedPhone: formPhone.trim().startsWith('+') ? formPhone.trim() : `+91 ${formPhone.trim()}`,
-        email: formEmail.trim(),
         project: formProject,
-        creationDate: creationDateStr,
-        assignedSalesExecutivesCount: 0,
-        assignedExecutives: []
+        creationDate: new Date().toISOString().split('T')[0],
+        reportingSalesHead: formReportingHead,
+        assignedLeadsCount: 0,
+        assignedLeads: [],
+        avatarBg: '#E0F2FE',
+        avatarColor: '#0369A1'
       };
-
-      const updated = [newHead, ...salesHeads];
-      if (onUpdateSalesHeads) onUpdateSalesHeads(updated);
-      if (onTriggerToast) onTriggerToast(`Sales Head "${fullName}" registered successfully!`);
+      const updated = [newExec, ...salesExecutives];
+      if (onUpdateSalesExecutives) onUpdateSalesExecutives(updated);
+      if (onTriggerToast) onTriggerToast(`Sales Executive "${fullName}" created successfully!`);
     }
 
     setIsCreateDrawerOpen(false);
     resetForm();
   };
 
-  // Filtered Registry List
-  const filteredSalesHeads = useMemo(() => {
-    return salesHeads.filter(head => {
+  // Filtered Registry List for Sales Executives
+  const filteredSalesExecutives = useMemo(() => {
+    return salesExecutives.filter(exec => {
       const q = registrySearch.toLowerCase().trim();
       if (!q) return true;
       return (
-        head.name.toLowerCase().includes(q) ||
-        (head.role && head.role.toLowerCase().includes(q)) ||
-        head.email.toLowerCase().includes(q) ||
-        head.phone.includes(q) ||
-        head.project.toLowerCase().includes(q)
+        exec.name.toLowerCase().includes(q) ||
+        (exec.role && exec.role.toLowerCase().includes(q)) ||
+        exec.email.toLowerCase().includes(q) ||
+        exec.phone.includes(q) ||
+        exec.project.toLowerCase().includes(q) ||
+        (exec.reportingSalesHead && exec.reportingSalesHead.toLowerCase().includes(q))
       );
     }).sort((a, b) => {
       if (sortField === 'name') {
@@ -214,7 +208,7 @@ export default function SalesHeadView({
       }
       return 0;
     });
-  }, [salesHeads, registrySearch, sortField, sortOrder]);
+  }, [salesExecutives, registrySearch, sortField, sortOrder]);
 
   // Lead Statuses filtered by modal search
   const filteredLeadStatuses = useMemo(() => {
@@ -249,21 +243,23 @@ export default function SalesHeadView({
         {/* Right: Action or Filter Controls */}
         {currentTab === 'dashboard' ? (
           <div className="sh-filters-wrap">
-            {/* Manager Filter */}
-            <div className="sh-select-wrap">
-              <select
-                className="sh-select-pill"
-                value={selectedManager}
-                onChange={(e) => setSelectedManager(e.target.value)}
-                title="Filter by Sales Head"
-              >
-                <option value="All Sales Heads">All Sales Heads</option>
-                {salesHeads.map(sh => (
-                  <option key={sh.id} value={sh.name}>{sh.name}</option>
-                ))}
-              </select>
-              <LuChevronDown size={13} className="sh-select-arrow" />
-            </div>
+            {/* Manager Filter (Admin Only) */}
+            {isAdmin && (
+              <div className="sh-select-wrap">
+                <select
+                  className="sh-select-pill"
+                  value={selectedManager}
+                  onChange={(e) => setSelectedManager(e.target.value)}
+                  title="Filter by Sales Head"
+                >
+                  <option value="All Sales Heads">All Sales Heads</option>
+                  {salesHeads.map(sh => (
+                    <option key={sh.id} value={sh.name}>{sh.name}</option>
+                  ))}
+                </select>
+                <LuChevronDown size={13} className="sh-select-arrow" />
+              </div>
+            )}
 
             {/* Solution Filter */}
             <div className="sh-select-wrap">
@@ -310,12 +306,12 @@ export default function SalesHeadView({
         ) : (
           <div className="sh-filters-wrap">
             {/* Search Input for Registry */}
-            <div className="search-box" style={{ width: '260px' }}>
+            <div className="search-box" style={{ width: '280px' }}>
               <LuSearch className="search-icon" />
               <input
                 type="text"
                 className="search-input"
-                placeholder="Search sales heads..."
+                placeholder="Search sales executives..."
                 value={registrySearch}
                 onChange={(e) => setRegistrySearch(e.target.value)}
               />
@@ -473,49 +469,43 @@ export default function SalesHeadView({
             
             {/* Card 3: Status wise Leads count */}
             <div className="section-card" style={{ marginBottom: 0, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
-              <div>
-                <div className="section-header" style={{ marginBottom: '1rem' }}>
-                  <div>
-                    <h3 className="section-title">Status wise Leads count</h3>
-                    <div style={{ fontSize: '0.725rem', color: '#557396', marginTop: '0.15rem' }}>
-                      Active pipeline progression across customer lifecycle
-                    </div>
+              <div className="section-header" style={{ marginBottom: '1.25rem' }}>
+                <div>
+                  <h3 className="section-title">Status wise Leads count</h3>
+                  <div style={{ fontSize: '0.725rem', color: '#557396', marginTop: '0.15rem' }}>
+                    Active pipeline progression across customer lifecycle
                   </div>
-                  <button
-                    type="button"
-                    onClick={() => setIsLeadStatusesModalOpen(true)}
-                    className="btn-secondary"
-                    style={{ padding: '0.25rem 0.65rem', fontSize: '0.75rem', borderRadius: '9999px' }}
-                  >
-                    View All
-                  </button>
                 </div>
+                <button
+                  type="button"
+                  onClick={() => setIsLeadStatusesModalOpen(true)}
+                  className="btn-secondary"
+                  style={{ padding: '0.25rem 0.65rem', fontSize: '0.75rem', borderRadius: '9999px' }}
+                >
+                  View All
+                </button>
+              </div>
 
-                {/* Status Progress Bars (First 4 rows as in design) */}
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                  {SALES_HEAD_LEAD_STATUSES.slice(0, 4).map((status) => (
-                    <div key={status.id}>
-                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.3rem' }}>
-                        <span style={{ fontSize: '0.8rem', fontWeight: 800, color: '#0F1A34' }}>
-                          {status.name} <span style={{ color: '#557396', fontWeight: 600 }}>({status.count})</span>
-                        </span>
-                        <span style={{ fontSize: '0.82rem', fontWeight: 800, color: '#0F1A34' }}>
-                          {status.percentage}%
-                        </span>
-                      </div>
-                      
-                      <div className="sh-progress-track">
-                        <div
-                          className="sh-progress-fill"
-                          style={{
-                            width: `${Math.max(status.percentage, 3)}%`,
-                            backgroundColor: status.color || '#0F1A34'
-                          }}
-                        />
-                      </div>
-                    </div>
-                  ))}
-                </div>
+              {/* Status Rows with Equal Spacing */}
+              <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', flex: 1, paddingBottom: '0.25rem' }}>
+                {SALES_HEAD_LEAD_STATUSES.slice(0, 4).map((status) => (
+                  <div
+                    key={status.id}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      padding: '0.65rem 0'
+                    }}
+                  >
+                    <span style={{ fontSize: '0.82rem', fontWeight: 800, color: '#0F1A34', letterSpacing: '0.02em', textTransform: 'uppercase' }}>
+                      {status.name}
+                    </span>
+                    <span style={{ fontSize: '0.88rem', fontWeight: 800, color: '#0F1A34' }}>
+                      {status.count}
+                    </span>
+                  </div>
+                ))}
               </div>
             </div>
 
@@ -698,13 +688,13 @@ export default function SalesHeadView({
         </>
       ) : (
         /* ======================================================== */
-        /* SUB-VIEW 2: SALES HEADS REGISTRY & MANAGEMENT            */
+        /* SUB-VIEW 2: SALES EXECUTIVES REGISTRY                    */
         /* ======================================================== */
         <div className="section-card" style={{ marginBottom: 0 }}>
-          <div className="section-header" style={{ marginBottom: '1.25rem', flexWrap: 'wrap', gap: '0.75rem' }}>
+          <div className="section-header" style={{ marginBottom: '1.25rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.75rem' }}>
             <div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <h3 className="section-title">Active Relationship Managers & Sales Heads</h3>
+                <h3 className="section-title">Active Sales Executives</h3>
                 <span
                   style={{
                     width: '8px',
@@ -717,19 +707,21 @@ export default function SalesHeadView({
                 />
               </div>
               <div style={{ fontSize: '0.78rem', color: '#557396', marginTop: '0.2rem' }}>
-                Manage territory heads, solution alignment, and monitor delegated executive teams.
+                Monitor enterprise sales executives, solution alignment, and reporting sales heads.
               </div>
             </div>
 
-            <button
-              type="button"
-              className="btn-primary"
-              onClick={handleOpenCreateDrawer}
-              style={{ borderRadius: '9999px', padding: '0.45rem 1.15rem', fontSize: '0.825rem' }}
-            >
-              <LuPlus size={15} />
-              <span>Create Sales Head</span>
-            </button>
+            {isAdmin && (
+              <button
+                type="button"
+                className="btn-primary"
+                style={{ padding: '0.45rem 1rem', fontSize: '0.8rem', borderRadius: '9999px', display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}
+                onClick={handleOpenCreateModal}
+              >
+                <LuUserPlus size={14} />
+                <span>Create Sales Executive</span>
+              </button>
+            )}
           </div>
 
           {/* Table */}
@@ -744,10 +736,11 @@ export default function SalesHeadView({
                     }}
                     style={{ cursor: 'pointer' }}
                   >
-                    RM NAME {sortField === 'name' ? (sortOrder === 'asc' ? '↑' : '↓') : '↕'}
+                    EXECUTIVE NAME {sortField === 'name' ? (sortOrder === 'asc' ? '↑' : '↓') : '↕'}
                   </th>
                   <th>CONTACT INFO</th>
                   <th>SOLUTION / VERTICAL</th>
+                  {isAdmin && <th>ASSIGNED SALES HEAD</th>}
                   <th
                     onClick={() => {
                       setSortField('creationDate');
@@ -757,21 +750,21 @@ export default function SalesHeadView({
                   >
                     JOINING DATE {sortField === 'creationDate' ? (sortOrder === 'asc' ? '↑' : '↓') : '↓'}
                   </th>
-                  <th style={{ textAlign: 'center' }}>ASSIGNED EXECUTIVES</th>
-                  <th style={{ textAlign: 'right' }}>ACTIONS</th>
+                  <th style={{ textAlign: isAdmin ? 'left' : 'right' }}>ASSIGNED LEADS</th>
+                  {isAdmin && <th style={{ textAlign: 'right' }}>ACTIONS</th>}
                 </tr>
               </thead>
 
               <tbody>
-                {filteredSalesHeads.length === 0 ? (
+                {filteredSalesExecutives.length === 0 ? (
                   <tr>
-                    <td colSpan={6} style={{ padding: '3rem', textAlign: 'center', color: '#557396' }}>
-                      No sales heads found matching your search.
+                    <td colSpan={isAdmin ? 7 : 5} style={{ padding: '3rem', textAlign: 'center', color: '#557396' }}>
+                      No sales executives found matching your search.
                     </td>
                   </tr>
                 ) : (
-                  filteredSalesHeads.map((head) => (
-                    <tr key={head.id} style={{ transition: 'background-color 0.15s ease' }}>
+                  filteredSalesExecutives.map((exec) => (
+                    <tr key={exec.id} style={{ transition: 'background-color 0.15s ease' }}>
                       {/* Name & Avatar */}
                       <td style={{ verticalAlign: 'middle' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
@@ -780,8 +773,8 @@ export default function SalesHeadView({
                               width: '36px',
                               height: '36px',
                               borderRadius: '50%',
-                              backgroundColor: head.avatarBg || '#E0F2FE',
-                              color: head.avatarColor || '#0369A1',
+                              backgroundColor: exec.avatarBg || '#E0F2FE',
+                              color: exec.avatarColor || '#0369A1',
                               display: 'flex',
                               alignItems: 'center',
                               justifyContent: 'center',
@@ -790,14 +783,14 @@ export default function SalesHeadView({
                               flexShrink: 0
                             }}
                           >
-                            {head.initials}
+                            {exec.initials}
                           </div>
                           <div>
                             <div style={{ fontSize: '0.88rem', fontWeight: 700, color: '#0F1A34' }}>
-                              {head.name}
+                              {exec.name}
                             </div>
                             <div style={{ fontSize: '0.72rem', color: '#557396' }}>
-                              {head.role}
+                              {exec.role}
                             </div>
                           </div>
                         </div>
@@ -808,10 +801,10 @@ export default function SalesHeadView({
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.15rem' }}>
                           <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', fontSize: '0.8rem', color: '#334155' }}>
                             <LuPhone size={12} style={{ color: '#557396' }} />
-                            <span>{head.formattedPhone || head.phone}</span>
+                            <span>{exec.formattedPhone || exec.phone}</span>
                           </div>
                           <div style={{ fontSize: '0.75rem', color: '#557396' }}>
-                            {head.email}
+                            {exec.email}
                           </div>
                         </div>
                       </td>
@@ -819,22 +812,31 @@ export default function SalesHeadView({
                       {/* Project / Vertical */}
                       <td style={{ verticalAlign: 'middle' }}>
                         <span style={{ fontSize: '0.825rem', fontWeight: 600, color: '#0F1A34' }}>
-                          {head.project}
+                          {exec.project}
                         </span>
                       </td>
+
+                      {/* Assigned Sales Head (Admin Only) */}
+                      {isAdmin && (
+                        <td style={{ verticalAlign: 'middle' }}>
+                          <span style={{ fontSize: '0.825rem', fontWeight: 600, color: '#0F1A34' }}>
+                            {exec.reportingSalesHead || 'Rajesh Sharma'}
+                          </span>
+                        </td>
+                      )}
 
                       {/* Creation Date */}
                       <td style={{ verticalAlign: 'middle' }}>
                         <span style={{ fontSize: '0.825rem', color: '#557396' }}>
-                          {head.creationDate}
+                          {exec.creationDate}
                         </span>
                       </td>
 
-                      {/* Assigned Executives Count */}
-                      <td style={{ verticalAlign: 'middle', textAlign: 'center' }}>
+                      {/* Assigned Leads */}
+                      <td style={{ verticalAlign: 'middle', textAlign: isAdmin ? 'left' : 'right' }}>
                         <button
                           type="button"
-                          onClick={() => setAssignedModalData(head)}
+                          onClick={() => setAssignedModalData(exec)}
                           className="btn-secondary"
                           style={{
                             padding: '0.2rem 0.65rem',
@@ -844,35 +846,35 @@ export default function SalesHeadView({
                             color: '#0F1A34',
                             display: 'inline-flex'
                           }}
-                          title="Click to view assigned sales executives"
+                          title="Click to view assigned leads"
                         >
-                          {head.assignedSalesExecutivesCount !== undefined ? head.assignedSalesExecutivesCount : (head.assignedExecutives ? head.assignedExecutives.length : 0)} Executives
+                          {exec.assignedLeadsCount !== undefined ? exec.assignedLeadsCount : (exec.assignedLeads ? exec.assignedLeads.length : 0)} Leads
                         </button>
                       </td>
 
-                      {/* Action buttons */}
-                      <td style={{ verticalAlign: 'middle', textAlign: 'right' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '0.4rem' }}>
+                      {/* Actions (Admin Only) */}
+                      {isAdmin && (
+                        <td style={{ verticalAlign: 'middle', textAlign: 'right' }}>
                           <button
                             type="button"
-                            onClick={() => handleOpenEditModal(head)}
                             className="btn-secondary"
-                            style={{ padding: '0.35rem', borderRadius: '6px' }}
-                            title="Edit details"
+                            onClick={() => handleOpenEditModal(exec)}
+                            style={{
+                              padding: '0.25rem 0.6rem',
+                              fontSize: '0.75rem',
+                              fontWeight: 600,
+                              borderRadius: '6px',
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '0.35rem'
+                            }}
+                            title="Edit Sales Executive"
                           >
-                            <LuPencil size={14} />
+                            <LuPencil size={12} />
+                            <span>Edit</span>
                           </button>
-                          <button
-                            type="button"
-                            onClick={() => setAssignedModalData(head)}
-                            className="btn-secondary"
-                            style={{ padding: '0.35rem', borderRadius: '6px' }}
-                            title="Manage executive team"
-                          >
-                            <LuUserPlus size={14} />
-                          </button>
-                        </div>
-                      </td>
+                        </td>
+                      )}
                     </tr>
                   ))
                 )}
@@ -883,7 +885,7 @@ export default function SalesHeadView({
       )}
 
       {/* ======================================================== */}
-      {/* DRAWER: CREATE / EDIT SALES HEAD                         */}
+      {/* DRAWER: EDIT SALES EXECUTIVE                             */}
       {/* ======================================================== */}
       <AnimatePresence>
         {isCreateDrawerOpen && (
@@ -906,10 +908,12 @@ export default function SalesHeadView({
               <div className="drawer-header">
                 <div>
                   <h3 className="section-title" style={{ margin: 0 }}>
-                    {editingSalesHead ? 'Edit Sales Head' : 'Create Sales Head'}
+                    {editingExecutive ? 'Edit Sales Executive' : 'Create New Sales Executive'}
                   </h3>
                   <div style={{ fontSize: '0.78rem', color: '#557396', marginTop: '0.2rem' }}>
-                    {editingSalesHead ? 'Update account and vertical assignments' : 'Register a new sales head or regional relationship manager'}
+                    {editingExecutive
+                      ? 'Update account, vertical, and reporting sales head assignments'
+                      : 'Add a new sales executive with solution and reporting sales head assignments'}
                   </div>
                 </div>
                 <button
@@ -931,7 +935,7 @@ export default function SalesHeadView({
                       type="text"
                       className="search-input"
                       style={{ width: '100%', padding: '0.55rem 0.75rem', borderRadius: '8px', border: formErrors.firstName ? '1px solid #DC2626' : '1px solid #D5E2EE' }}
-                      placeholder="Vikram"
+                      placeholder="Rahul"
                       value={formFirstName}
                       onChange={(e) => setFormFirstName(e.target.value)}
                     />
@@ -944,7 +948,7 @@ export default function SalesHeadView({
                       type="text"
                       className="search-input"
                       style={{ width: '100%', padding: '0.55rem 0.75rem', borderRadius: '8px', border: formErrors.lastName ? '1px solid #DC2626' : '1px solid #D5E2EE' }}
-                      placeholder="Singh"
+                      placeholder="Verma"
                       value={formLastName}
                       onChange={(e) => setFormLastName(e.target.value)}
                     />
@@ -959,7 +963,7 @@ export default function SalesHeadView({
                     type="text"
                     className="search-input"
                     style={{ width: '100%', padding: '0.55rem 0.75rem', borderRadius: '8px', border: '1px solid #D5E2EE' }}
-                    placeholder="Regional Sales Head"
+                    placeholder="Senior Enterprise Sales Executive"
                     value={formRole}
                     onChange={(e) => setFormRole(e.target.value)}
                   />
@@ -972,7 +976,7 @@ export default function SalesHeadView({
                     type="email"
                     className="search-input"
                     style={{ width: '100%', padding: '0.55rem 0.75rem', borderRadius: '8px', border: formErrors.email ? '1px solid #DC2626' : '1px solid #D5E2EE' }}
-                    placeholder="vikram.s@techgy.com"
+                    placeholder="rahul.v@techgy.com"
                     value={formEmail}
                     onChange={(e) => setFormEmail(e.target.value)}
                   />
@@ -986,7 +990,7 @@ export default function SalesHeadView({
                     type="tel"
                     className="search-input"
                     style={{ width: '100%', padding: '0.55rem 0.75rem', borderRadius: '8px', border: formErrors.phone ? '1px solid #DC2626' : '1px solid #D5E2EE' }}
-                    placeholder="+91 98765 43210"
+                    placeholder="+91 98765 11001"
                     value={formPhone}
                     onChange={(e) => setFormPhone(e.target.value)}
                   />
@@ -1008,6 +1012,21 @@ export default function SalesHeadView({
                   </select>
                 </div>
 
+                {/* Reporting Sales Head */}
+                <div className="drawer-field-group" style={{ marginBottom: 0 }}>
+                  <label className="field-label">REPORTING SALES HEAD</label>
+                  <select
+                    className="select-filter"
+                    style={{ width: '100%', padding: '0.55rem 0.75rem', borderRadius: '8px' }}
+                    value={formReportingHead}
+                    onChange={(e) => setFormReportingHead(e.target.value)}
+                  >
+                    {salesHeads.map(h => (
+                      <option key={h.id || h.name} value={h.name}>{h.name}</option>
+                    ))}
+                  </select>
+                </div>
+
               </div>
 
               <div style={{ padding: '1.25rem 1.5rem', borderTop: '1px solid #E5EBF2', background: '#F8FAFC' }}>
@@ -1018,7 +1037,7 @@ export default function SalesHeadView({
                   style={{ width: '100%', justifyContent: 'center', padding: '0.75rem', borderRadius: '8px' }}
                 >
                   <LuCircleCheck size={16} />
-                  <span>{editingSalesHead ? 'Save Changes' : 'Create Sales Head'}</span>
+                  <span>{editingExecutive ? 'Save Changes' : 'Create Sales Executive'}</span>
                 </button>
               </div>
             </motion.div>
@@ -1094,10 +1113,10 @@ export default function SalesHeadView({
                     <div key={st.id}>
                       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.35rem' }}>
                         <span style={{ fontSize: '0.8rem', fontWeight: 800, color: '#0F1A34' }}>
-                          {st.name} <span style={{ color: '#557396', fontWeight: 600 }}>({st.count})</span>
+                          {st.name}
                         </span>
                         <span style={{ fontSize: '0.825rem', fontWeight: 800, color: '#0F1A34' }}>
-                          {st.percentage}%
+                          {st.count}
                         </span>
                       </div>
                       
@@ -1495,7 +1514,7 @@ export default function SalesHeadView({
       </AnimatePresence>
 
       {/* ======================================================== */}
-      {/* MODAL: ASSIGNED SALES EXECUTIVES FOR A SALES HEAD        */}
+      {/* MODAL: ASSIGNED LEADS DIRECTORY                          */}
       {/* ======================================================== */}
       <AnimatePresence>
         {assignedModalData && (
@@ -1523,13 +1542,15 @@ export default function SalesHeadView({
               animate={{ scale: 1, opacity: 1, y: 0 }}
               exit={{ scale: 0.95, opacity: 0, y: 15 }}
               onClick={(e) => e.stopPropagation()}
-              style={{ width: '560px', maxWidth: '100%', maxHeight: '85vh', display: 'flex', flexDirection: 'column' }}
+              style={{ width: '640px', maxWidth: '100%', maxHeight: '85vh', display: 'flex', flexDirection: 'column' }}
             >
               <div className="modal-header">
                 <div>
-                  <h3 className="section-title" style={{ margin: 0 }}>Delegated Sales Executives</h3>
-                  <div style={{ fontSize: '0.75rem', color: '#557396' }}>
-                    Reporting to <strong>{assignedModalData.name}</strong> ({assignedModalData.project})
+                  <h3 className="section-title" style={{ margin: 0 }}>
+                    Assigned Leads: {assignedModalData.name}
+                  </h3>
+                  <div style={{ fontSize: '0.78rem', color: '#557396', marginTop: '0.2rem' }}>
+                    {assignedModalData.role} • {assignedModalData.project} • Reporting to {assignedModalData.reportingSalesHead || 'Rajesh Sharma'}
                   </div>
                 </div>
                 <button
@@ -1542,46 +1563,60 @@ export default function SalesHeadView({
               </div>
 
               <div className="modal-body" style={{ overflowY: 'auto', flex: 1, display: 'flex', flexDirection: 'column', gap: '0.75rem', padding: '1.25rem' }}>
-                {(!assignedModalData.assignedExecutives || assignedModalData.assignedExecutives.length === 0) ? (
-                  <div style={{ padding: '2.5rem', textAlign: 'center', color: '#557396' }}>
-                    <LuUsers size={32} style={{ margin: '0 auto 0.5rem auto', display: 'block', opacity: 0.4 }} />
-                    <div style={{ fontSize: '0.9rem', fontWeight: 700, color: '#0F1A34' }}>No Sales Executives Delegated</div>
-                    <div style={{ fontSize: '0.78rem', color: '#557396', marginTop: '0.2rem' }}>
-                      Assign sales executives to delegate pipeline accounts and manage client coverage.
-                    </div>
+                {(!assignedModalData.assignedLeads || assignedModalData.assignedLeads.length === 0) ? (
+                  <div style={{ textAlign: 'center', padding: '2.5rem 1rem', color: '#557396' }}>
+                    <LuUsers size={32} style={{ opacity: 0.4, marginBottom: '0.5rem', display: 'block', margin: '0 auto 0.5rem' }} />
+                    <div style={{ fontWeight: 700, color: '#0F1A34' }}>No leads assigned yet</div>
+                    <div style={{ fontSize: '0.8rem', marginTop: '0.25rem' }}>Assign active pipeline leads to this executive from the Leads module.</div>
                   </div>
                 ) : (
-                  assignedModalData.assignedExecutives.map((exec) => (
-                    <div
-                      key={exec.id || exec.name}
-                      style={{
-                        padding: '0.85rem 1rem',
-                        borderRadius: '10px',
-                        backgroundColor: '#F8FAFC',
-                        border: '1px solid #EDF2F7',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'space-between'
-                      }}
-                    >
-                      <div>
-                        <div style={{ fontSize: '0.88rem', fontWeight: 800, color: '#0F1A34' }}>
-                          {exec.name}
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                    {assignedModalData.assignedLeads.map((lead) => (
+                      <div
+                        key={lead.id}
+                        style={{
+                          padding: '0.85rem',
+                          background: '#F8FAFC',
+                          border: '1px solid #E2E8F0',
+                          borderRadius: '10px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'space-between',
+                          gap: '0.75rem'
+                        }}
+                      >
+                        <div>
+                          <div style={{ fontWeight: 700, color: '#0F1A34', fontSize: '0.875rem' }}>
+                            {lead.name}
+                          </div>
+                          <div style={{ fontSize: '0.75rem', color: '#557396', marginTop: '0.15rem' }}>
+                            {lead.company}
+                          </div>
+                          <div style={{ fontSize: '0.725rem', color: '#0284C7', fontWeight: 600, marginTop: '0.2rem' }}>
+                            Next: {lead.nextFollowup}
+                          </div>
                         </div>
-                        <div style={{ fontSize: '0.74rem', color: '#557396', marginTop: '0.15rem' }}>
-                          {exec.role} · {exec.phone}
-                        </div>
-                      </div>
 
-                      {exec.leads !== undefined && (
                         <div style={{ textAlign: 'right' }}>
-                          <span style={{ fontSize: '0.75rem', fontWeight: 800, color: '#0F1A34', backgroundColor: '#E0F2FE', padding: '0.2rem 0.55rem', borderRadius: '4px' }}>
-                            {exec.leads} Active Leads
+                          <div style={{ fontSize: '0.875rem', fontWeight: 800, color: '#0F1A34' }}>
+                            {lead.value}
+                          </div>
+                          <span style={{
+                            fontSize: '0.675rem',
+                            padding: '0.15rem 0.5rem',
+                            borderRadius: '9999px',
+                            fontWeight: 700,
+                            background: lead.quality === 'Hot' ? '#FEE2E2' : '#EFF6FF',
+                            color: lead.quality === 'Hot' ? '#DC2626' : '#2563EB',
+                            display: 'inline-block',
+                            marginTop: '0.25rem'
+                          }}>
+                            {lead.status}
                           </span>
                         </div>
-                      )}
-                    </div>
-                  ))
+                      </div>
+                    ))}
+                  </div>
                 )}
               </div>
             </motion.div>

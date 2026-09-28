@@ -60,7 +60,7 @@ export default function Sidebar({
       return item.id === 'salesHead' || item.id === 'leads';
     }
     if (userRole === 'Sales Executive') {
-      return item.id === 'salesExecutive';
+      return item.id === 'salesExecutive' || item.id === 'leads';
     }
     // Sales Admin (and default) sees all modules
     return true;

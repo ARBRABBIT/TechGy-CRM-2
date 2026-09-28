@@ -42,7 +42,6 @@ import {
   SALES_EXECUTIVE_MISSED_FOLLOWUPS,
   SALES_EXECUTIVE_QUALITY_DISTRIBUTION,
   SALES_EXECUTIVE_LEAD_STATUSES,
-  SALES_EXECUTIVE_SITE_VISITS_TODAY,
   SALES_EXECUTIVE_OBJECTIONS
 } from '../data/mockData';
 
@@ -51,8 +50,11 @@ export default function SalesExecutiveView({
   salesHeads = INITIAL_SALES_HEADS,
   onUpdateSalesExecutives,
   onTriggerToast,
-  onNavigateToLead: _onNavigateToLead
+  onNavigateToLead: _onNavigateToLead,
+  currentUser
 }) {
+  const isAdmin = currentUser?.role === 'admin' || currentUser?.role === 'Sales Admin';
+
   // Current view: 'dashboard' | 'registry'
   const [currentTab, setCurrentTab] = useState('dashboard');
 
@@ -70,10 +72,8 @@ export default function SalesExecutiveView({
   const [isCreateDrawerOpen, setIsCreateDrawerOpen] = useState(false);
   const [isMissedFollowupsModalOpen, setIsMissedFollowupsModalOpen] = useState(false);
   const [isTodayFollowupsModalOpen, setIsTodayFollowupsModalOpen] = useState(false);
-  const [isSiteVisitsModalOpen, setIsSiteVisitsModalOpen] = useState(false);
   const [isLeadStatusesModalOpen, setIsLeadStatusesModalOpen] = useState(false);
   const [isObjectionsModalOpen, setIsObjectionsModalOpen] = useState(false);
-  const [isBookingsModalOpen, setIsBookingsModalOpen] = useState(false);
   const [assignedModalData, setAssignedModalData] = useState(null);
   const [editingExecutive, setEditingExecutive] = useState(null);
 
@@ -262,10 +262,6 @@ export default function SalesExecutiveView({
 
   const missedCount = activeExec ? activeExec.missedFollowupsCount : 34;
   const avgDelay = activeExec ? activeExec.avgDelayHours : '4.8 hrs';
-  const siteScheduled = activeExec ? activeExec.siteVisitsScheduled : 5;
-  const siteCompleted = activeExec ? activeExec.siteVisitsCompleted : 7;
-  const bookingsCount = activeExec ? activeExec.totalBookingsUnits : 4;
-  const bookingsValue = activeExec ? activeExec.totalBookingsValue : '₹1,80,00,000';
 
   return (
     <div className="sales-head-view">
@@ -292,21 +288,23 @@ export default function SalesExecutiveView({
         {/* Right: Action or Filter Controls */}
         {currentTab === 'dashboard' ? (
           <div className="sh-filters-wrap">
-            {/* Executive Filter */}
-            <div className="sh-select-wrap">
-              <select
-                className="sh-select-pill"
-                value={selectedExecutive}
-                onChange={(e) => setSelectedExecutive(e.target.value)}
-                title="Filter by Sales Executive"
-              >
-                <option value="All Sales Executives">All Sales Executives</option>
-                {salesExecutives.map(exec => (
-                  <option key={exec.id} value={exec.name}>{exec.name}</option>
-                ))}
-              </select>
-              <LuChevronDown size={13} className="sh-select-arrow" />
-            </div>
+            {/* Executive Filter (Admin Only) */}
+            {isAdmin && (
+              <div className="sh-select-wrap">
+                <select
+                  className="sh-select-pill"
+                  value={selectedExecutive}
+                  onChange={(e) => setSelectedExecutive(e.target.value)}
+                  title="Filter by Sales Executive"
+                >
+                  <option value="All Sales Executives">All Sales Executives</option>
+                  {salesExecutives.map(exec => (
+                    <option key={exec.id} value={exec.name}>{exec.name}</option>
+                  ))}
+                </select>
+                <LuChevronDown size={13} className="sh-select-arrow" />
+              </div>
+            )}
 
             {/* Solution Filter */}
             <div className="sh-select-wrap">
@@ -339,16 +337,18 @@ export default function SalesExecutiveView({
               <LuChevronDown size={13} className="sh-select-arrow" />
             </div>
 
-            {/* Switch to Registry CTA */}
-            <button
-              type="button"
-              className="btn-primary"
-              style={{ padding: '0.45rem 1rem', fontSize: '0.8rem', borderRadius: '9999px' }}
-              onClick={() => setCurrentTab('registry')}
-            >
-              <LuUsers size={14} />
-              <span>View Sales Executives</span>
-            </button>
+            {/* Switch to Registry CTA (Admin Only) */}
+            {isAdmin && (
+              <button
+                type="button"
+                className="btn-primary"
+                style={{ padding: '0.45rem 1rem', fontSize: '0.8rem', borderRadius: '9999px' }}
+                onClick={() => setCurrentTab('registry')}
+              >
+                <LuUsers size={14} />
+                <span>View Sales Executives</span>
+              </button>
+            )}
           </div>
         ) : (
           <div className="sh-filters-wrap">
@@ -376,121 +376,119 @@ export default function SalesExecutiveView({
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '1rem', marginBottom: '1rem' }}>
             
             {/* Card 1: Missed Follow-ups */}
-            <div className="section-card" style={{ marginBottom: 0, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
-              <div>
-                <div className="section-header" style={{ marginBottom: '1rem' }}>
-                  <div>
-                    <h3 className="section-title">Missed Follow-ups</h3>
-                    <div style={{ fontSize: '0.725rem', fontWeight: 700, color: '#557396', textTransform: 'uppercase', letterSpacing: '0.04em', marginTop: '0.15rem' }}>
-                      SLA BREACHES & OVERDUE CALLS
-                    </div>
+            <div className="section-card" style={{ marginBottom: 0, display: 'flex', flexDirection: 'column', justifyContent: 'space-between', height: '100%' }}>
+              <div className="section-header" style={{ marginBottom: '0.75rem' }}>
+                <div>
+                  <h3 className="section-title">Missed Follow-ups</h3>
+                  <div style={{ fontSize: '0.725rem', fontWeight: 700, color: '#557396', textTransform: 'uppercase', letterSpacing: '0.04em', marginTop: '0.15rem' }}>
+                    SLA BREACHES & OVERDUE CALLS
                   </div>
-                  <motion.button
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    type="button"
-                    onClick={() => setIsMissedFollowupsModalOpen(true)}
-                    className="btn-secondary"
-                    style={{ padding: '0.25rem 0.65rem', fontSize: '0.75rem', borderRadius: '9999px' }}
-                  >
-                    View All
-                  </motion.button>
                 </div>
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  type="button"
+                  onClick={() => setIsMissedFollowupsModalOpen(true)}
+                  className="btn-secondary"
+                  style={{ padding: '0.25rem 0.65rem', fontSize: '0.75rem', borderRadius: '9999px' }}
+                >
+                  View All
+                </motion.button>
+              </div>
 
-                {/* Donut / Overdue Ring Centerpiece with smooth pulse animation */}
-                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '0.85rem 0 0.5rem 0' }}>
+              {/* Donut / Overdue Ring Centerpiece centered equally */}
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', flex: 1, padding: '1.25rem 0' }}>
+                <motion.div
+                  initial={{ scale: 0.92, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
+                  style={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                >
+                  {/* Smooth radiating pulse halo ring */}
                   <motion.div
-                    initial={{ scale: 0.92, opacity: 0 }}
-                    animate={{ scale: 1, opacity: 1 }}
-                    transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
-                    style={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-                  >
-                    {/* Smooth radiating pulse halo ring */}
-                    <motion.div
-                      animate={{
-                        scale: [1, 1.18, 1],
-                        opacity: [0.35, 0.08, 0.35]
-                      }}
-                      transition={{
-                        duration: 3,
-                        repeat: Infinity,
-                        ease: 'easeInOut'
-                      }}
-                      style={{
-                        position: 'absolute',
-                        width: '136px',
-                        height: '136px',
-                        borderRadius: '50%',
-                        border: '2px solid #EF4444',
-                        pointerEvents: 'none'
-                      }}
-                    />
-
-                    {/* Main Overdue Ring */}
-                    <motion.div
-                      whileHover={{ scale: 1.04, boxShadow: '0 8px 25px rgba(239, 68, 68, 0.28)' }}
-                      whileTap={{ scale: 0.98 }}
-                      transition={{ type: 'spring', stiffness: 350, damping: 22 }}
-                      onClick={() => setIsMissedFollowupsModalOpen(true)}
-                      style={{
-                        width: '120px',
-                        height: '120px',
-                        borderRadius: '50%',
-                        background: 'radial-gradient(circle, #FFFFFF 62%, #FEE2E2 63%, #FEF2F2 100%)',
-                        border: '4px solid #EF4444',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        boxShadow: '0 4px 16px rgba(239, 68, 68, 0.18)',
-                        cursor: 'pointer',
-                        position: 'relative',
-                        zIndex: 2
-                      }}
-                      title="Click to view missed follow-ups"
-                    >
-                      <motion.span
-                        key={missedCount}
-                        initial={{ scale: 0.8, opacity: 0 }}
-                        animate={{ scale: 1, opacity: 1 }}
-                        transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
-                        style={{ fontSize: '1.85rem', fontWeight: 800, color: '#0F1A34', lineHeight: 1 }}
-                      >
-                        {missedCount}
-                      </motion.span>
-                      <span style={{ fontSize: '0.7rem', fontWeight: 800, color: '#DC2626', letterSpacing: '0.05em', marginTop: '0.2rem' }}>
-                        OVERDUE
-                      </span>
-                    </motion.div>
-                  </motion.div>
-
-                  {/* Delay Pill with pulsing indicator */}
-                  <motion.div
-                    initial={{ opacity: 0, y: 6 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.35, delay: 0.15 }}
-                    style={{
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: '0.45rem',
-                      background: '#F8FAFC',
-                      border: '1px solid #E2E8F0',
-                      padding: '0.35rem 0.85rem',
-                      borderRadius: '9999px',
-                      fontSize: '0.75rem',
-                      fontWeight: 700,
-                      color: '#0F1A34',
-                      marginTop: '0.9rem'
+                    animate={{
+                      scale: [1, 1.18, 1],
+                      opacity: [0.35, 0.08, 0.35]
                     }}
+                    transition={{
+                      duration: 3,
+                      repeat: Infinity,
+                      ease: 'easeInOut'
+                    }}
+                    style={{
+                      position: 'absolute',
+                      width: '136px',
+                      height: '136px',
+                      borderRadius: '50%',
+                      border: '2px solid #EF4444',
+                      pointerEvents: 'none'
+                    }}
+                  />
+
+                  {/* Main Overdue Ring */}
+                  <motion.div
+                    whileHover={{ scale: 1.04, boxShadow: '0 8px 25px rgba(239, 68, 68, 0.28)' }}
+                    whileTap={{ scale: 0.98 }}
+                    transition={{ type: 'spring', stiffness: 350, damping: 22 }}
+                    onClick={() => setIsMissedFollowupsModalOpen(true)}
+                    style={{
+                      width: '124px',
+                      height: '124px',
+                      borderRadius: '50%',
+                      background: 'radial-gradient(circle, #FFFFFF 62%, #FEE2E2 63%, #FEF2F2 100%)',
+                      border: '4px solid #EF4444',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      boxShadow: '0 4px 16px rgba(239, 68, 68, 0.18)',
+                      cursor: 'pointer',
+                      position: 'relative',
+                      zIndex: 2
+                    }}
+                    title="Click to view missed follow-ups"
                   >
                     <motion.span
-                      animate={{ opacity: [1, 0.25, 1], scale: [1, 1.25, 1] }}
-                      transition={{ duration: 1.8, repeat: Infinity, ease: 'easeInOut' }}
-                      style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#EF4444', display: 'inline-block' }}
-                    />
-                    <span>Avg. Delay: {avgDelay}</span>
+                      key={missedCount}
+                      initial={{ scale: 0.8, opacity: 0 }}
+                      animate={{ scale: 1, opacity: 1 }}
+                      transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+                      style={{ fontSize: '1.95rem', fontWeight: 800, color: '#0F1A34', lineHeight: 1 }}
+                    >
+                      {missedCount}
+                    </motion.span>
+                    <span style={{ fontSize: '0.7rem', fontWeight: 800, color: '#DC2626', letterSpacing: '0.05em', marginTop: '0.2rem' }}>
+                      OVERDUE
+                    </span>
                   </motion.div>
-                </div>
+                </motion.div>
+
+                {/* Delay Pill with pulsing indicator */}
+                <motion.div
+                  initial={{ opacity: 0, y: 6 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.35, delay: 0.15 }}
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '0.45rem',
+                    background: '#F8FAFC',
+                    border: '1px solid #E2E8F0',
+                    padding: '0.35rem 0.85rem',
+                    borderRadius: '9999px',
+                    fontSize: '0.75rem',
+                    fontWeight: 700,
+                    color: '#0F1A34',
+                    marginTop: '2rem'
+                  }}
+                >
+                  <motion.span
+                    animate={{ opacity: [1, 0.25, 1], scale: [1, 1.25, 1] }}
+                    transition={{ duration: 1.8, repeat: Infinity, ease: 'easeInOut' }}
+                    style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#EF4444', display: 'inline-block' }}
+                  />
+                  <span>Avg. Delay: {avgDelay}</span>
+                </motion.div>
               </div>
 
               <motion.button
@@ -503,7 +501,6 @@ export default function SalesExecutiveView({
                   width: '100%',
                   padding: '0.65rem 1rem',
                   borderRadius: '9999px',
-                  marginTop: '0.85rem',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
@@ -652,321 +649,114 @@ export default function SalesExecutiveView({
 
           </div>
 
-          {/* ROW 2: Leads by Status & Site Visit Overview */}
-          <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '1rem', marginBottom: '1rem' }}>
-            
-            {/* Card 4: Leads by Status */}
-            <div className="section-card" style={{ marginBottom: 0 }}>
-              <div className="section-header" style={{ marginBottom: '1rem' }}>
-                <div>
-                  <h3 className="section-title">Leads by Status</h3>
-                  <div style={{ fontSize: '0.725rem', fontWeight: 700, color: '#557396', textTransform: 'uppercase', letterSpacing: '0.04em', marginTop: '0.15rem' }}>
-                    ACTIVE PIPELINE STAGE CONVERSIONS
-                  </div>
+          {/* ROW 2: Leads by Status */}
+          <div className="section-card" style={{ marginBottom: '1rem' }}>
+            <div className="section-header" style={{ marginBottom: '1rem' }}>
+              <div>
+                <h3 className="section-title">Leads by Status</h3>
+                <div style={{ fontSize: '0.725rem', fontWeight: 700, color: '#557396', textTransform: 'uppercase', letterSpacing: '0.04em', marginTop: '0.15rem' }}>
+                  ACTIVE PIPELINE STAGE CONVERSIONS
                 </div>
-                <button
-                  type="button"
-                  onClick={() => setIsLeadStatusesModalOpen(true)}
-                  className="btn-secondary"
-                  style={{ padding: '0.25rem 0.65rem', fontSize: '0.75rem', borderRadius: '9999px' }}
-                >
-                  View Pipeline
-                </button>
               </div>
-
-              {/* Status Flow Grid */}
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '0.65rem' }}>
-                {SALES_EXECUTIVE_LEAD_STATUSES.map((st) => (
-                  <div
-                    key={st.id}
-                    style={{
-                      background: '#F8FAFC',
-                      border: '1px solid #E2E8F0',
-                      borderRadius: '10px',
-                      padding: '0.75rem 0.65rem',
-                      display: 'flex',
-                      flexDirection: 'column',
-                      justifyContent: 'space-between',
-                      position: 'relative',
-                      overflow: 'hidden'
-                    }}
-                  >
-                    <div style={{ width: '100%', height: '3px', background: st.color, position: 'absolute', top: 0, left: 0 }} />
-                    <div style={{ fontSize: '0.675rem', fontWeight: 800, color: '#557396', textTransform: 'uppercase', letterSpacing: '0.03em' }}>
-                      {st.name}
-                    </div>
-                    <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginTop: '0.5rem' }}>
-                      <span style={{ fontSize: '1.25rem', fontWeight: 800, color: '#0F1A34' }}>{st.count}</span>
-                      <span style={{ fontSize: '0.7rem', fontWeight: 700, color: st.color }}>{st.percentage}%</span>
-                    </div>
-                  </div>
-                ))}
-              </div>
+              <button
+                type="button"
+                onClick={() => setIsLeadStatusesModalOpen(true)}
+                className="btn-secondary"
+                style={{ padding: '0.25rem 0.65rem', fontSize: '0.75rem', borderRadius: '9999px' }}
+              >
+                View Pipeline
+              </button>
             </div>
 
-            {/* Card 5: Site Visit Overview */}
-            <div className="section-card" style={{ marginBottom: 0, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
-              <div>
-                <div className="section-header" style={{ marginBottom: '1rem' }}>
-                  <div>
-                    <h3 className="section-title">Site Visit Overview</h3>
-                    <div style={{ fontSize: '0.725rem', fontWeight: 700, color: '#557396', textTransform: 'uppercase', letterSpacing: '0.04em', marginTop: '0.15rem' }}>
-                      DEMOS & FIELD APPOINTMENTS
-                    </div>
-                  </div>
-                </div>
-
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
-                  <div style={{
+            {/* Status Flow Grid */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '0.65rem' }}>
+              {SALES_EXECUTIVE_LEAD_STATUSES.map((st) => (
+                <div
+                  key={st.id}
+                  style={{
                     background: '#F8FAFC',
                     border: '1px solid #E2E8F0',
                     borderRadius: '10px',
-                    padding: '1rem',
-                    textAlign: 'center'
-                  }}>
-                    <div style={{ fontSize: '0.7rem', fontWeight: 800, color: '#0284C7', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                      SCHEDULED
-                    </div>
-                    <div style={{ fontSize: '1.75rem', fontWeight: 800, color: '#0F1A34', marginTop: '0.25rem' }}>
-                      {siteScheduled}
-                    </div>
-                  </div>
-
-                  <div style={{
-                    background: '#F0FDF4',
-                    border: '1px solid #DCFCE7',
-                    borderRadius: '10px',
-                    padding: '1rem',
-                    textAlign: 'center'
-                  }}>
-                    <div style={{ fontSize: '0.7rem', fontWeight: 800, color: '#166534', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                      COMPLETED
-                    </div>
-                    <div style={{ fontSize: '1.75rem', fontWeight: 800, color: '#15803D', marginTop: '0.25rem' }}>
-                      {siteCompleted}
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <button
-                type="button"
-                className="btn-secondary"
-                style={{ width: '100%', padding: '0.55rem', borderRadius: '8px', fontSize: '0.8rem', marginTop: '0.75rem' }}
-                onClick={() => setIsSiteVisitsModalOpen(true)}
-              >
-                View Visit Schedule
-              </button>
-            </div>
-
-          </div>
-
-          {/* ROW 3: Site Visits Today, Recent Objections, Total Bookings */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '1rem' }}>
-            
-            {/* Card 6: Site Visits Today */}
-            <div className="section-card" style={{ marginBottom: 0, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
-              <div>
-                <div className="section-header" style={{ marginBottom: '0.85rem' }}>
-                  <div>
-                    <h3 className="section-title">Site Visits Today</h3>
-                    <div style={{ fontSize: '0.725rem', fontWeight: 700, color: '#557396', textTransform: 'uppercase', letterSpacing: '0.04em', marginTop: '0.15rem' }}>
-                      FIELD VISITS & PRODUCT DEMOS
-                    </div>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => setIsSiteVisitsModalOpen(true)}
-                    className="btn-secondary"
-                    style={{ padding: '0.25rem 0.65rem', fontSize: '0.75rem', borderRadius: '9999px' }}
-                  >
-                    View All
-                  </button>
-                </div>
-
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
-                  {SALES_EXECUTIVE_SITE_VISITS_TODAY.map((v) => (
-                    <div
-                      key={v.id}
-                      style={{
-                        padding: '0.75rem',
-                        background: '#F8FAFC',
-                        border: '1px solid #E2E8F0',
-                        borderRadius: '10px',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        gap: '0.35rem'
-                      }}
-                    >
-                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                        <span style={{ fontSize: '0.85rem', fontWeight: 700, color: '#0F1A34' }}>
-                          {v.company}
-                        </span>
-                        <span style={{
-                          fontSize: '0.675rem',
-                          padding: '0.15rem 0.5rem',
-                          borderRadius: '9999px',
-                          fontWeight: 700,
-                          background: v.status === 'Completed' ? '#DCFCE7' : '#E0F2FE',
-                          color: v.status === 'Completed' ? '#15803D' : '#0369A1'
-                        }}>
-                          {v.status}
-                        </span>
-                      </div>
-
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.75rem', color: '#557396' }}>
-                        <LuClock size={12} />
-                        <span>{v.time}</span>
-                        <span>•</span>
-                        <span>{v.executive}</span>
-                      </div>
-
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', fontSize: '0.725rem', color: '#0284C7', fontWeight: 600 }}>
-                        <LuMapPin size={12} />
-                        <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{v.location}</span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            {/* Card 7: Recent Objections */}
-            <div className="section-card" style={{ marginBottom: 0, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
-              <div>
-                <div className="section-header" style={{ marginBottom: '0.85rem' }}>
-                  <div>
-                    <h3 className="section-title">Recent Objections</h3>
-                    <div style={{ fontSize: '0.725rem', fontWeight: 700, color: '#557396', textTransform: 'uppercase', letterSpacing: '0.04em', marginTop: '0.15rem' }}>
-                      AI BATTLECARDS & RESOLUTIONS
-                    </div>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => setIsObjectionsModalOpen(true)}
-                    className="btn-secondary"
-                    style={{ padding: '0.25rem 0.65rem', fontSize: '0.75rem', borderRadius: '9999px' }}
-                  >
-                    View All
-                  </button>
-                </div>
-
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
-                  {SALES_EXECUTIVE_OBJECTIONS.map((obj) => (
-                    <div
-                      key={obj.id}
-                      style={{
-                        padding: '0.75rem',
-                        background: '#F8FAFC',
-                        border: '1px solid #E2E8F0',
-                        borderRadius: '10px',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        gap: '0.35rem'
-                      }}
-                    >
-                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                        <span style={{ fontSize: '0.85rem', fontWeight: 700, color: '#0F1A34' }}>
-                          {obj.customer}
-                        </span>
-                        <span style={{
-                          fontSize: '0.675rem',
-                          padding: '0.15rem 0.5rem',
-                          borderRadius: '9999px',
-                          fontWeight: 700,
-                          background: obj.status === 'Resolved' ? '#DCFCE7' : '#FEF3C7',
-                          color: obj.status === 'Resolved' ? '#15803D' : '#B45309'
-                        }}>
-                          {obj.status}
-                        </span>
-                      </div>
-
-                      <div style={{ fontSize: '0.775rem', fontWeight: 600, color: '#DC2626' }}>
-                        ⚠ {obj.objection}
-                      </div>
-
-                      <div style={{ fontSize: '0.725rem', color: '#557396', background: '#FFFFFF', padding: '0.35rem 0.5rem', borderRadius: '6px', border: '1px solid #E2E8F0' }}>
-                        💡 {obj.solution}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            {/* Card 8: Total Bookings (TechGy Navy Theme) */}
-            <div
-              style={{
-                background: 'linear-gradient(135deg, #0F1A34 0%, #0022FF 100%)',
-                color: '#FFFFFF',
-                borderRadius: '12px',
-                padding: '1.25rem',
-                boxShadow: '0 4px 14px rgba(6, 54, 105, 0.25)',
-                display: 'flex',
-                flexDirection: 'column',
-                justifyContent: 'space-between',
-                position: 'relative',
-                overflow: 'hidden'
-              }}
-            >
-              <div style={{ position: 'absolute', top: '-20px', right: '-20px', width: '120px', height: '120px', borderRadius: '50%', background: 'rgba(255, 255, 255, 0.05)' }} />
-
-              <div>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem' }}>
-                  <div>
-                    <h3 style={{ fontSize: '1rem', fontWeight: 800, color: '#FFFFFF', margin: 0 }}>Total Bookings</h3>
-                    <div style={{ fontSize: '0.7rem', fontWeight: 700, color: '#93C5FD', textTransform: 'uppercase', letterSpacing: '0.04em', marginTop: '0.15rem' }}>
-                      MONTHLY QUOTA & REVENUE
-                    </div>
-                  </div>
-                  <span style={{ fontSize: '0.7rem', background: 'rgba(255,255,255,0.15)', padding: '0.2rem 0.6rem', borderRadius: '9999px', color: '#FFFFFF', fontWeight: 700 }}>
-                    FY26 Target
-                  </span>
-                </div>
-
-                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '1rem 0' }}>
-                  <div style={{
-                    width: '110px',
-                    height: '110px',
-                    borderRadius: '50%',
-                    border: '4px solid #38BDF8',
+                    padding: '0.75rem 0.65rem',
                     display: 'flex',
                     flexDirection: 'column',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    boxShadow: '0 0 20px rgba(56, 189, 248, 0.3)'
-                  }}>
-                    <span style={{ fontSize: '2.25rem', fontWeight: 800, color: '#FFFFFF', lineHeight: 1 }}>{bookingsCount}</span>
-                    <span style={{ fontSize: '0.675rem', fontWeight: 800, color: '#93C5FD', letterSpacing: '0.05em', marginTop: '0.2rem' }}>UNITS</span>
+                    justifyContent: 'space-between',
+                    position: 'relative',
+                    overflow: 'hidden'
+                  }}
+                >
+                  <div style={{ width: '100%', height: '3px', background: st.color, position: 'absolute', top: 0, left: 0 }} />
+                  <div style={{ fontSize: '0.675rem', fontWeight: 800, color: '#557396', textTransform: 'uppercase', letterSpacing: '0.03em' }}>
+                    {st.name}
                   </div>
-
-                  <div style={{ marginTop: '0.75rem', textAlign: 'center' }}>
-                    <div style={{ fontSize: '1.25rem', fontWeight: 800, color: '#FFFFFF' }}>{bookingsValue}</div>
-                    <div style={{ fontSize: '0.725rem', color: '#93C5FD', fontWeight: 600 }}>Closed Enterprise Value</div>
+                  <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginTop: '0.5rem' }}>
+                    <span style={{ fontSize: '1.25rem', fontWeight: 800, color: '#0F1A34' }}>{st.count}</span>
+                    <span style={{ fontSize: '0.7rem', fontWeight: 700, color: st.color }}>{st.percentage}%</span>
                   </div>
                 </div>
-              </div>
+              ))}
+            </div>
+          </div>
 
+          {/* ROW 3: Recent Objections */}
+          <div className="section-card" style={{ marginBottom: 0 }}>
+            <div className="section-header" style={{ marginBottom: '0.85rem' }}>
+              <div>
+                <h3 className="section-title">Recent Objections</h3>
+                <div style={{ fontSize: '0.725rem', fontWeight: 700, color: '#557396', textTransform: 'uppercase', letterSpacing: '0.04em', marginTop: '0.15rem' }}>
+                  AI BATTLECARDS & RESOLUTIONS
+                </div>
+              </div>
               <button
                 type="button"
-                style={{
-                  width: '100%',
-                  padding: '0.6rem',
-                  borderRadius: '8px',
-                  background: '#FFFFFF',
-                  color: '#0F1A34',
-                  border: 'none',
-                  fontWeight: 800,
-                  fontSize: '0.8rem',
-                  cursor: 'pointer',
-                  boxShadow: '0 2px 6px rgba(0,0,0,0.1)'
-                }}
-                onClick={() => setIsBookingsModalOpen(true)}
+                onClick={() => setIsObjectionsModalOpen(true)}
+                className="btn-secondary"
+                style={{ padding: '0.25rem 0.65rem', fontSize: '0.75rem', borderRadius: '9999px' }}
               >
-                View Closed Deals
+                View All
               </button>
             </div>
 
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '0.75rem' }}>
+              {SALES_EXECUTIVE_OBJECTIONS.map((obj) => (
+                <div
+                  key={obj.id}
+                  style={{
+                    padding: '0.85rem',
+                    background: '#F8FAFC',
+                    border: '1px solid #E2E8F0',
+                    borderRadius: '10px',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '0.4rem'
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <span style={{ fontSize: '0.85rem', fontWeight: 700, color: '#0F1A34' }}>
+                      {obj.customer}
+                    </span>
+                    <span style={{
+                      fontSize: '0.675rem',
+                      padding: '0.15rem 0.5rem',
+                      borderRadius: '9999px',
+                      fontWeight: 700,
+                      background: obj.status === 'Resolved' ? '#DCFCE7' : '#FEF3C7',
+                      color: obj.status === 'Resolved' ? '#15803D' : '#B45309'
+                    }}>
+                      {obj.status}
+                    </span>
+                  </div>
+
+                  <div style={{ fontSize: '0.775rem', fontWeight: 600, color: '#DC2626' }}>
+                    ⚠ {obj.objection}
+                  </div>
+
+                  <div style={{ fontSize: '0.725rem', color: '#557396', background: '#FFFFFF', padding: '0.4rem 0.55rem', borderRadius: '6px', border: '1px solid #E2E8F0' }}>
+                    💡 {obj.solution}
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         </>
       ) : (
@@ -977,7 +767,7 @@ export default function SalesExecutiveView({
           <div className="section-header" style={{ marginBottom: '1.25rem', flexWrap: 'wrap', gap: '0.75rem' }}>
             <div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <h3 className="section-title">Active Experience Managers & Sales Executives</h3>
+                <h3 className="section-title">Active Sales Executives</h3>
                 <span
                   style={{
                     width: '8px',
@@ -1191,7 +981,7 @@ export default function SalesExecutiveView({
                     {editingExecutive ? 'Edit Sales Executive' : 'Create Sales Executive'}
                   </h3>
                   <div style={{ fontSize: '0.78rem', color: '#557396', marginTop: '0.2rem' }}>
-                    {editingExecutive ? 'Update executive assignments and territory' : 'Register a new sales executive or experience manager'}
+                    {editingExecutive ? 'Update executive assignments and territory' : 'Register a new sales executive'}
                   </div>
                 </div>
                 <button
@@ -1300,7 +1090,7 @@ export default function SalesExecutiveView({
                     onChange={(e) => setFormReportingHead(e.target.value)}
                   >
                     {salesHeads.map(sh => (
-                      <option key={sh.id} value={sh.name}>{sh.name} ({sh.role})</option>
+                      <option key={sh.id} value={sh.name}>{sh.name}</option>
                     ))}
                   </select>
                 </div>
@@ -1650,106 +1440,7 @@ export default function SalesExecutiveView({
         )}
       </AnimatePresence>
 
-      {/* ======================================================== */}
-      {/* MODAL: SITE VISITS MODAL                                 */}
-      {/* ======================================================== */}
-      <AnimatePresence>
-        {isSiteVisitsModalOpen && (
-          <motion.div
-            className="modal-overlay"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            onClick={() => setIsSiteVisitsModalOpen(false)}
-            style={{ zIndex: 10000 }}
-          >
-            <motion.div
-              className="modal-card"
-              initial={{ scale: 0.95, opacity: 0, y: 10 }}
-              animate={{ scale: 1, opacity: 1, y: 0 }}
-              exit={{ scale: 0.95, opacity: 0, y: 10 }}
-              onClick={(e) => e.stopPropagation()}
-              style={{ maxWidth: '620px', width: '92%', background: '#FFFFFF', borderRadius: '16px', overflow: 'hidden', boxShadow: '0 25px 50px -12px rgba(6, 54, 105, 0.25)', display: 'flex', flexDirection: 'column' }}
-            >
-              <div className="modal-header" style={{ padding: '1.25rem 1.5rem', borderBottom: '1px solid #E2E8F0', background: '#F8FAFC', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0 }}>
-                <div>
-                  <h3 className="section-title" style={{ margin: 0 }}>
-                    Site Visits & Product Demos Schedule
-                  </h3>
-                  <div style={{ fontSize: '0.78rem', color: '#557396', marginTop: '0.2rem' }}>
-                    Scheduled on-premise reviews and technical pilots
-                  </div>
-                </div>
-                <button
-                  type="button"
-                  className="modal-close-btn"
-                  onClick={() => setIsSiteVisitsModalOpen(false)}
-                >
-                  <LuX size={18} />
-                </button>
-              </div>
 
-              <div className="modal-body" style={{ padding: '1.25rem 1.5rem', maxHeight: '55vh', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '0.75rem', background: '#FFFFFF' }}>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                  {SALES_EXECUTIVE_SITE_VISITS_TODAY.map((v) => (
-                    <div
-                      key={v.id}
-                      style={{
-                        padding: '0.85rem',
-                        background: '#F8FAFC',
-                        border: '1px solid #E2E8F0',
-                        borderRadius: '10px',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        gap: '0.4rem'
-                      }}
-                    >
-                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                        <span style={{ fontWeight: 700, color: '#0F1A34', fontSize: '0.9rem' }}>
-                          {v.company}
-                        </span>
-                        <span style={{
-                          fontSize: '0.675rem',
-                          padding: '0.15rem 0.5rem',
-                          borderRadius: '9999px',
-                          fontWeight: 700,
-                          background: v.status === 'Completed' ? '#DCFCE7' : '#E0F2FE',
-                          color: v.status === 'Completed' ? '#15803D' : '#0369A1'
-                        }}>
-                          {v.status}
-                        </span>
-                      </div>
-
-                      <div style={{ fontSize: '0.775rem', color: '#557396' }}>
-                        Contact: <strong>{v.leadName}</strong> • Executive: <strong>{v.executive}</strong>
-                      </div>
-
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.75rem', color: '#0284C7', fontWeight: 600 }}>
-                        <LuClock size={12} />
-                        <span>{v.time}</span>
-                        <span>•</span>
-                        <LuMapPin size={12} />
-                        <span>{v.location}</span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <div className="modal-footer" style={{ padding: '1rem 1.5rem', borderTop: '1px solid #E2E8F0', background: '#FFFFFF', display: 'flex', justifyContent: 'flex-end', margin: 0, flexShrink: 0 }}>
-                <button
-                  type="button"
-                  className="btn-secondary"
-                  style={{ padding: '0.5rem 1.25rem', fontSize: '0.85rem', borderRadius: '8px', fontWeight: 600 }}
-                  onClick={() => setIsSiteVisitsModalOpen(false)}
-                >
-                  Close
-                </button>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
 
       {/* ======================================================== */}
       {/* MODAL: PIPELINE LEAD STATUSES                            */}
@@ -1949,85 +1640,7 @@ export default function SalesExecutiveView({
         )}
       </AnimatePresence>
 
-      {/* ======================================================== */}
-      {/* MODAL: BOOKINGS DIRECTORY                                */}
-      {/* ======================================================== */}
-      <AnimatePresence>
-        {isBookingsModalOpen && (
-          <motion.div
-            className="modal-overlay"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            onClick={() => setIsBookingsModalOpen(false)}
-            style={{ zIndex: 10000 }}
-          >
-            <motion.div
-              className="modal-card"
-              initial={{ scale: 0.95, opacity: 0, y: 10 }}
-              animate={{ scale: 1, opacity: 1, y: 0 }}
-              exit={{ scale: 0.95, opacity: 0, y: 10 }}
-              onClick={(e) => e.stopPropagation()}
-              style={{ maxWidth: '620px', width: '92%', background: '#FFFFFF', borderRadius: '16px', overflow: 'hidden', boxShadow: '0 25px 50px -12px rgba(6, 54, 105, 0.25)', display: 'flex', flexDirection: 'column' }}
-            >
-              <div className="modal-header" style={{ padding: '1.25rem 1.5rem', borderBottom: '1px solid #E2E8F0', background: '#F8FAFC', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0 }}>
-                <div>
-                  <h3 className="section-title" style={{ margin: 0 }}>
-                    Closed Bookings & Revenue Achieved
-                  </h3>
-                  <div style={{ fontSize: '0.78rem', color: '#557396', marginTop: '0.2rem' }}>
-                    Signed customer accounts and contractual revenue milestones
-                  </div>
-                </div>
-                <button
-                  type="button"
-                  className="modal-close-btn"
-                  onClick={() => setIsBookingsModalOpen(false)}
-                >
-                  <LuX size={18} />
-                </button>
-              </div>
 
-              <div className="modal-body" style={{ padding: '1.25rem 1.5rem', maxHeight: '55vh', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '0.75rem', background: '#FFFFFF' }}>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                  <div style={{ padding: '0.85rem', background: '#F8FAFC', border: '1px solid #E2E8F0', borderRadius: '10px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <div>
-                      <div style={{ fontWeight: 700, color: '#0F1A34', fontSize: '0.9rem' }}>Tata Consultancy Tech Ltd</div>
-                      <div style={{ fontSize: '0.75rem', color: '#557396' }}>Enterprise CRM Suite (500 Seats) • Exec: Rahul Verma</div>
-                    </div>
-                    <div style={{ textAlign: 'right' }}>
-                      <div style={{ fontWeight: 800, color: '#15803D', fontSize: '0.95rem' }}>₹1,80,00,000</div>
-                      <span style={{ fontSize: '0.675rem', background: '#DCFCE7', color: '#15803D', padding: '0.1rem 0.4rem', borderRadius: '4px', fontWeight: 700 }}>Signed</span>
-                    </div>
-                  </div>
-
-                  <div style={{ padding: '0.85rem', background: '#F8FAFC', border: '1px solid #E2E8F0', borderRadius: '10px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <div>
-                      <div style={{ fontWeight: 700, color: '#0F1A34', fontSize: '0.9rem' }}>Reliance Cloud Solutions</div>
-                      <div style={{ fontSize: '0.75rem', color: '#557396' }}>Cloud Infrastructure & Security • Exec: Sneha Rao</div>
-                    </div>
-                    <div style={{ textAlign: 'right' }}>
-                      <div style={{ fontWeight: 800, color: '#15803D', fontSize: '0.95rem' }}>₹3,20,00,000</div>
-                      <span style={{ fontSize: '0.675rem', background: '#DCFCE7', color: '#15803D', padding: '0.1rem 0.4rem', borderRadius: '4px', fontWeight: 700 }}>Signed</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="modal-footer" style={{ padding: '1rem 1.5rem', borderTop: '1px solid #E2E8F0', background: '#FFFFFF', display: 'flex', justifyContent: 'flex-end', margin: 0, flexShrink: 0 }}>
-                <button
-                  type="button"
-                  className="btn-secondary"
-                  style={{ padding: '0.5rem 1.25rem', fontSize: '0.85rem', borderRadius: '8px', fontWeight: 600 }}
-                  onClick={() => setIsBookingsModalOpen(false)}
-                >
-                  Close
-                </button>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
 
     </div>
   );

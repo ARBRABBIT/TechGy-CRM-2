@@ -4,7 +4,10 @@ import {
   LuTrendingUp,
   LuClock,
   LuArrowUpRight,
-  LuChevronRight
+  LuChevronRight,
+  LuUsers,
+  LuBriefcase,
+  LuUserCheck
 } from 'react-icons/lu';
 import {
   ResponsiveContainer,
@@ -18,7 +21,13 @@ import {
   Pie,
   Cell
 } from 'recharts';
-import { REVENUE_DATA, INITIAL_OWNERS, INITIAL_DATE_FILTERS } from '../data/mockData';
+import {
+  REVENUE_DATA,
+  INITIAL_OWNERS,
+  INITIAL_DATE_FILTERS,
+  INITIAL_SALES_HEADS,
+  INITIAL_SALES_EXECUTIVES
+} from '../data/mockData';
 import { isDateInFilter, getFilterLabel } from '../utils/dateUtils';
 import { animateStaggerEntrance } from '../utils/animations';
 
@@ -26,11 +35,15 @@ export default function DashboardView({
   leads = [],
   accounts = [],
   activities = [],
+  salesHeads = INITIAL_SALES_HEADS,
+  salesExecutives = INITIAL_SALES_EXECUTIVES,
   selectedOwnerFilter = 'All Owners',
   selectedDateFilter = 'This Month',
   onNavigateToLeads,
   onNavigateToAccounts,
   onNavigateToActivities,
+  onNavigateToSalesHead,
+  onNavigateToSalesExecutive,
   onSelectLead,
   onSelectAccount
 }) {
@@ -167,16 +180,16 @@ export default function DashboardView({
 
   return (
     <div className="dashboard-view" ref={dashboardRef}>
-      {/* Top 3 Revenue KPI Cards */}
+      {/* Top 3 KPI Cards: Total Leads, Total Sales Heads, Total Sales Executives */}
       <div className="revenue-grid">
         <div className="kpi-card">
           <div className="kpi-header">
-            <span className="kpi-title">Monthly Revenue</span>
+            <span className="kpi-title">Total Leads</span>
             <div className="kpi-icon-wrap">
-              <LuIndianRupee size={18} />
+              <LuUsers size={18} />
             </div>
           </div>
-          <div className="kpi-value">{REVENUE_DATA?.Monthly?.revenue || '₹14,25,000'}</div>
+          <div className="kpi-value">{totalLeadsCount}</div>
           <div className="kpi-subtext">
             <span className="badge-success"><LuArrowUpRight size={14} /> +12.4%</span> vs last month
           </div>
@@ -184,27 +197,27 @@ export default function DashboardView({
 
         <div className="kpi-card">
           <div className="kpi-header">
-            <span className="kpi-title">Quarterly Revenue</span>
+            <span className="kpi-title">Total Sales Heads</span>
             <div className="kpi-icon-wrap">
-              <LuTrendingUp size={18} />
+              <LuBriefcase size={18} />
             </div>
           </div>
-          <div className="kpi-value">{REVENUE_DATA?.Quarterly?.revenue || '₹48,50,000'}</div>
+          <div className="kpi-value">{salesHeads.length}</div>
           <div className="kpi-subtext">
-            <span className="badge-success"><LuArrowUpRight size={14} /> +8.2%</span> vs Q2 target
+            <span className="badge-success"><LuArrowUpRight size={14} /> Active</span> regional heads
           </div>
         </div>
 
         <div className="kpi-card">
           <div className="kpi-header">
-            <span className="kpi-title">FY Revenue</span>
+            <span className="kpi-title">Total Sales Executives</span>
             <div className="kpi-icon-wrap">
-              <LuIndianRupee size={18} />
+              <LuUserCheck size={18} />
             </div>
           </div>
-          <div className="kpi-value">{REVENUE_DATA?.FY?.revenue || REVENUE_DATA?.FY26?.revenue || '₹1,82,00,000'}</div>
+          <div className="kpi-value">{salesExecutives.length}</div>
           <div className="kpi-subtext">
-            <span style={{ color: '#557396' }}>Target: ₹2,00,00,000</span>
+            <span className="badge-success"><LuArrowUpRight size={14} /> Active</span> field reps
           </div>
         </div>
       </div>

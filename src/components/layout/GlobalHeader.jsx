@@ -16,6 +16,7 @@ import CustomDateSelector from '../common/CustomDateSelector';
 
 export default function GlobalHeader({
   activeModule,
+  currentUser,
   searchQuery,
   setSearchQuery,
   selectedDateFilter,
@@ -35,6 +36,7 @@ export default function GlobalHeader({
   onClearAll,
   onSelectNotification
 }) {
+  const isSalesExecutive = currentUser?.role === 'Sales Executive' || currentUser?.role === 'executive';
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
@@ -282,14 +284,16 @@ export default function GlobalHeader({
         </select>
 
         {/* Primary CTA */}
-        <button
-          className="btn-primary"
-          onClick={() => onOpenCreateModal()}
-          title="Common Action: Create New Record"
-        >
-          <LuPlus size={16} />
-          <span>Create New</span>
-        </button>
+        {!isSalesExecutive && (
+          <button
+            className="btn-primary"
+            onClick={() => onOpenCreateModal()}
+            title="Common Action: Create New Record"
+          >
+            <LuPlus size={16} />
+            <span>Create New</span>
+          </button>
+        )}
 
         {/* Notification Icon & Popover */}
         <div style={{ position: 'relative' }}>
