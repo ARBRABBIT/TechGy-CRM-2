@@ -433,20 +433,6 @@ export default function LeadDetailView({
               >
                 {lead.company}
               </button>
-              <span style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '0.35rem',
-                backgroundColor: '#E6EFF8',
-                color: '#0F1A34',
-                padding: '0.2rem 0.65rem',
-                borderRadius: '20px',
-                fontSize: '0.75rem',
-                fontWeight: 700,
-                border: '1px solid #D5E2EE'
-              }}>
-                <LuLayers size={13} style={{ color: '#0F1A34' }} /> Service Providing: {lead.serviceProviding || 'TechGy CRM Enterprise Suite'}
-              </span>
             </div>
           </div>
 
@@ -698,33 +684,8 @@ export default function LeadDetailView({
 
               <div className="drawer-field-group">
                 <div className="field-label">Phone Number</div>
-                <div
-                  className="field-value"
-                  style={{
-                    fontWeight: 700,
-                    cursor: 'pointer',
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '0.5rem',
-                    color: '#0F1A34'
-                  }}
-                  onClick={() => onQuickAction && onQuickAction('call', lead)}
-                  title={`Click to call ${lead.leadName} (${lead.phoneNumber})`}
-                >
-                  <div style={{
-                    width: '24px',
-                    height: '24px',
-                    borderRadius: '50%',
-                    backgroundColor: '#E6EFF8',
-                    color: '#0F1A34',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    flexShrink: 0
-                  }}>
-                    <LuPhone size={13} style={{ color: '#0F1A34' }} />
-                  </div>
-                  <span style={{ textDecoration: 'underline' }}>{lead.phoneNumber}</span>
+                <div className="field-value" style={{ fontWeight: 600, color: '#0F1A34' }}>
+                  {lead.phoneNumber}
                 </div>
               </div>
               <div className="drawer-field-group">

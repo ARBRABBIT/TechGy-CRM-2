@@ -38,6 +38,7 @@ export default function LeadsView({
   salesExecutives = INITIAL_SALES_EXECUTIVES,
   currentUser = null,
   onUpdateLead,
+  onDeleteLead,
   onTriggerToast,
   onSelectLead,
   onSelectAccount,
@@ -56,6 +57,7 @@ export default function LeadsView({
   const isSalesExecutiveUser = currentUser?.role === 'Sales Executive' || currentUser?.role === 'executive';
   const currentSalesExecutiveName = currentUser?.name || 'Rahul Verma';
   const [activeQueueTab, setActiveQueueTab] = useState(() => (currentUser?.role === 'Sales Executive' || currentUser?.role === 'executive') ? 'assigned' : 'unassigned');
+  const [leadToDeleteJunk, setLeadToDeleteJunk] = useState(null);
 
   // Search & Filters
   const [localSearch, setLocalSearch] = useState('');
@@ -375,6 +377,9 @@ export default function LeadsView({
       assigningExecBulkIds.forEach(id => {
         const targetLead = leads.find(l => l.id === id);
         onUpdateLead && onUpdateLead(id, {
+          isJunk: false,
+          status: targetLead?.status === 'JUNK' ? 'NEW LEADS' : (targetLead?.status || 'NEW LEADS'),
+          junkReason: null,
           salesExecutive: execObj.name,
           assignedSalesExecutive: execObj.name,
           leadOwner: execObj.name,
@@ -388,14 +393,18 @@ export default function LeadsView({
       });
       setSelectedLeadIds([]);
     } else if (assigningExecLead) {
+      const wasJunk = assigningExecLead.isJunk || assigningExecLead.status === 'JUNK';
       onUpdateLead && onUpdateLead(assigningExecLead.id, {
+        isJunk: false,
+        status: wasJunk ? 'NEW LEADS' : (assigningExecLead.status || 'NEW LEADS'),
+        junkReason: null,
         salesExecutive: execObj.name,
         assignedSalesExecutive: execObj.name,
         leadOwner: execObj.name,
         salesHead: assigningExecLead.salesHead || currentSalesHeadName
       });
       onTriggerToast && onTriggerToast({
-        title: 'Lead Allocated & Assigned',
+        title: wasJunk ? 'Junk Lead Reassigned & Restored' : 'Lead Allocated & Assigned',
         description: `Lead ${assigningExecLead.id} assigned to Sales Executive "${execObj.name}". Moved to Assigned queue.`,
         type: 'success'
       });
@@ -440,7 +449,7 @@ export default function LeadsView({
     setActiveQueueTab('assigned');
   };
 
-  // Mark as Junk / Restore Handlers
+  // Mark as Junk / Restore / Delete Handlers
   const handleMarkAsJunk = (lead, e) => {
     e?.stopPropagation();
     onUpdateLead && onUpdateLead(lead.id, {
@@ -468,6 +477,24 @@ export default function LeadsView({
       description: `Lead ${lead.id} restored to active queue.`,
       type: 'success'
     });
+  };
+
+  const handleDeleteJunkLead = (lead, e) => {
+    e?.stopPropagation();
+    setLeadToDeleteJunk(lead);
+  };
+
+  const handleConfirmDeleteJunk = () => {
+    if (!leadToDeleteJunk) return;
+    if (onDeleteLead) {
+      onDeleteLead(leadToDeleteJunk.id);
+    }
+    onTriggerToast && onTriggerToast({
+      title: 'Junk Lead Deleted',
+      description: `Lead ${leadToDeleteJunk.id} (${leadToDeleteJunk.leadName}) was permanently deleted.`,
+      type: 'info'
+    });
+    setLeadToDeleteJunk(null);
   };
 
   // Source Badge Color Helper
@@ -540,7 +567,7 @@ export default function LeadsView({
           </h1>
           <p style={{ fontSize: '0.875rem', color: '#557396', margin: 0, fontWeight: 500 }}>
             {activeQueueTab === 'junk'
-              ? 'Streamline and audit the junk lead restoration process'
+              ? 'Review, reassign, or permanently delete junk leads'
               : 'Manage and track your sales pipeline efficiency'}
           </p>
         </div>
@@ -1260,27 +1287,57 @@ export default function LeadsView({
                             {lead.junkReason || 'Marked as Junk'}
                           </td>
 
-                          {/* Restore CTA */}
-                          <td style={{ padding: '1rem 1.25rem', textAlign: 'right' }}>
-                            <button
-                              type="button"
-                              className="btn-secondary"
-                              onClick={(e) => handleRestoreLead(lead, e)}
-                              style={{
-                                padding: '0.35rem 0.85rem',
-                                fontSize: '0.75rem',
-                                fontWeight: 700,
-                                borderRadius: '9999px',
-                                color: '#059669',
-                                borderColor: '#A7F3D0',
-                                display: 'inline-flex',
-                                alignItems: 'center',
-                                gap: '0.35rem'
-                              }}
-                            >
-                              <LuRotateCcw size={13} />
-                              <span>Restore Lead</span>
-                            </button>
+                          {/* Junk Actions (Reassign to Sales Executive & Delete) */}
+                          <td style={{ padding: '0.85rem 1rem', textAlign: 'right' }}>
+                            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', justifyContent: 'flex-end', flexWrap: 'nowrap' }}>
+                              {/* Reassign to Sales Executive */}
+                              <button
+                                type="button"
+                                className="btn-secondary"
+                                onClick={(e) => handleOpenAssignExecModal(lead, e)}
+                                style={{
+                                  padding: '0.35rem 0.85rem',
+                                  fontSize: '0.75rem',
+                                  fontWeight: 700,
+                                  borderRadius: '9999px',
+                                  color: '#0022FF',
+                                  borderColor: '#C7D7FE',
+                                  backgroundColor: '#EBF0FF',
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  gap: '0.35rem',
+                                  cursor: 'pointer'
+                                }}
+                                title="Reassign this junk lead to a Sales Executive"
+                              >
+                                <LuUserCheck size={13} />
+                                <span>Reassign</span>
+                              </button>
+
+                              {/* Delete CTA */}
+                              <button
+                                type="button"
+                                className="btn-secondary"
+                                onClick={(e) => handleDeleteJunkLead(lead, e)}
+                                style={{
+                                  padding: '0.35rem 0.85rem',
+                                  fontSize: '0.75rem',
+                                  fontWeight: 700,
+                                  borderRadius: '9999px',
+                                  color: '#DC2626',
+                                  borderColor: '#FECACA',
+                                  backgroundColor: '#FEF2F2',
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  gap: '0.35rem',
+                                  cursor: 'pointer'
+                                }}
+                                title="Permanently delete this junk lead"
+                              >
+                                <LuTrash2 size={13} />
+                                <span>Delete</span>
+                              </button>
+                            </div>
                           </td>
                         </>
                       ) : (
@@ -2154,6 +2211,96 @@ export default function LeadsView({
                   }}
                 >
                   {isImporting ? 'Processing File...' : 'Import to Unassigned Queue'}
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* ======================================================== */}
+      {/* MODAL 5: DELETE JUNK CONFIRMATION MODAL                  */}
+      {/* ======================================================== */}
+      <AnimatePresence>
+        {leadToDeleteJunk && (
+          <motion.div
+            className="modal-backdrop"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setLeadToDeleteJunk(null)}
+            style={{
+              position: 'fixed',
+              inset: 0,
+              backgroundColor: 'rgba(15, 26, 52, 0.45)',
+              backdropFilter: 'blur(4px)',
+              zIndex: 10000,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: '1.25rem'
+            }}
+          >
+            <motion.div
+              className="modal-card"
+              initial={{ scale: 0.94, opacity: 0, y: 15 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.94, opacity: 0, y: 15 }}
+              onClick={(e) => e.stopPropagation()}
+              style={{
+                background: '#FFFFFF',
+                borderRadius: '16px',
+                width: '440px',
+                maxWidth: '100%',
+                padding: '1.75rem',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '1.25rem',
+                boxShadow: '0 20px 50px rgba(15, 26, 52, 0.2)'
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
+                <div style={{ width: '44px', height: '44px', borderRadius: '50%', background: '#FEF2F2', color: '#DC2626', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <LuTrash2 size={22} />
+                </div>
+                <div>
+                  <h3 style={{ fontSize: '1.15rem', fontWeight: 800, color: '#0F1A34', margin: 0 }}>
+                    Delete Junk Lead
+                  </h3>
+                  <div style={{ fontSize: '0.775rem', color: '#557396', marginTop: '0.15rem' }}>
+                    Permanent removal from CRM
+                  </div>
+                </div>
+              </div>
+
+              <p style={{ fontSize: '0.875rem', color: '#475569', lineHeight: 1.5, margin: 0 }}>
+                Are you sure you want to permanently delete junk lead <strong>{leadToDeleteJunk.leadName}</strong> ({leadToDeleteJunk.id})? This action cannot be undone.
+              </p>
+
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem', marginTop: '0.5rem' }}>
+                <button
+                  type="button"
+                  className="btn-secondary"
+                  onClick={() => setLeadToDeleteJunk(null)}
+                  style={{ padding: '0.5rem 1.15rem', fontSize: '0.825rem' }}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={handleConfirmDeleteJunk}
+                  style={{
+                    padding: '0.5rem 1.35rem',
+                    fontSize: '0.825rem',
+                    fontWeight: 700,
+                    backgroundColor: '#DC2626',
+                    color: '#FFFFFF',
+                    border: 'none',
+                    borderRadius: '8px',
+                    cursor: 'pointer'
+                  }}
+                >
+                  Delete Permanently
                 </button>
               </div>
             </motion.div>

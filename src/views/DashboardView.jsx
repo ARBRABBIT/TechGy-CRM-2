@@ -1,28 +1,26 @@
 import React, { useState, useEffect, useRef } from 'react';
 import {
-  LuIndianRupee,
-  LuTrendingUp,
   LuClock,
   LuArrowUpRight,
   LuChevronRight,
   LuUsers,
   LuBriefcase,
-  LuUserCheck
+  LuUserCheck,
+  LuBuilding2,
+  LuTriangleAlert,
+  LuCalendarCheck,
+  LuCalendar,
+  LuUser
 } from 'react-icons/lu';
 import {
   ResponsiveContainer,
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  Tooltip,
-  CartesianGrid,
   PieChart,
   Pie,
-  Cell
+  Cell,
+  Tooltip
 } from 'recharts';
+import CustomDropdown from '../components/common/CustomDropdown';
 import {
-  REVENUE_DATA,
   INITIAL_OWNERS,
   INITIAL_DATE_FILTERS,
   INITIAL_SALES_HEADS,
@@ -47,7 +45,6 @@ export default function DashboardView({
   onSelectLead,
   onSelectAccount
 }) {
-  const [revenueToggle, setRevenueToggle] = useState('Monthly');
   const dashboardRef = useRef(null);
 
   // Dedicated Marketing Card Filter States (As mandated in PDF: "filters by date and owner")
@@ -60,18 +57,9 @@ export default function DashboardView({
     }
   }, [selectedDateFilter, selectedOwnerFilter]);
 
-  // Sync global header date filter changes directly to revenue chart toggle & card states!
+  // Sync global header date filter changes
   useEffect(() => {
     setMarketingDateFilter(selectedDateFilter);
-    if (typeof selectedDateFilter === 'string') {
-      if (selectedDateFilter === 'This Month') {
-        setRevenueToggle('Monthly');
-      } else if (selectedDateFilter === 'This Quarter') {
-        setRevenueToggle('Quarterly');
-      } else if (selectedDateFilter.startsWith('FY') || selectedDateFilter === 'All Time') {
-        setRevenueToggle('FY');
-      }
-    }
   }, [selectedDateFilter]);
 
   // Sync global owner filter changes
@@ -115,8 +103,6 @@ export default function DashboardView({
   ).length;
 
   // Active revenue data based on toggle
-  const currentRevObj = REVENUE_DATA?.[revenueToggle] || REVENUE_DATA?.FY || REVENUE_DATA?.Monthly || { trend: [] };
-
   // Filter follow-up action items: must match owner filter AND date filter on scheduled follow-up time
   const followUpActions = leads
     .filter(l => {
@@ -129,15 +115,6 @@ export default function DashboardView({
 
   const filterKey = `${selectedOwnerFilter}_${typeof selectedDateFilter === 'object' && selectedDateFilter !== null ? `${selectedDateFilter?.startDate}_${selectedDateFilter?.endDate}_${selectedDateFilter?.label}` : selectedDateFilter}`;
 
-
-  // Y-axis tick formatter for Indian numbers (Lakhs & Crores)
-  const formatYAxis = (val) => {
-    if (val >= 10000000) return `₹${(val / 10000000).toFixed(1)}Cr`;
-    if (val >= 100000) return `₹${(val / 100000).toFixed(1)}L`;
-    if (val >= 1000) return `₹${(val / 1000).toFixed(0)}k`;
-    return `₹${val}`;
-  };
-
   // Dynamic Marketing Lead Source Mix calculation based on Marketing Card Filters (Date & Owner)
   const leadsForMarketing = leads.filter(lead => {
     if (marketingOwnerFilter !== 'All Owners' && lead.leadOwner !== marketingOwnerFilter) {
@@ -146,35 +123,47 @@ export default function DashboardView({
     return isDateInFilter(lead.createdDate, marketingDateFilter);
   });
 
-  const sourceCounts = {
-    Website: 0,
-    Referral: 0,
-    LinkedIn: 0,
-    'Inbound Call': 0,
-    Campaign: 0,
-    Partner: 0
+  const normalizeSource = (src) => {
+    if (!src) return 'Other';
+    const s = src.toString().trim().toUpperCase();
+    if (s.includes('META') || s.includes('FACEBOOK')) return 'Meta';
+    if (s.includes('WHATSAPP')) return 'WhatsApp';
+    if (s.includes('WEBSITE') || s.includes('WEB')) return 'Website';
+    if (s.includes('REFERRAL') || s.includes('REF')) return 'Referral';
+    if (s.includes('LINKEDIN')) return 'LinkedIn';
+    if (s.includes('CAMPAIGN')) return 'Campaign';
+    if (s.includes('CALL') || s.includes('INBOUND')) return 'Inbound Call';
+    if (s.includes('PARTNER')) return 'Partner';
+    return src.charAt(0).toUpperCase() + src.slice(1).toLowerCase();
   };
 
+  const sourceColors = {
+    Meta: '#4F46E5',
+    WhatsApp: '#0D9488',
+    Website: '#0022FF',
+    Referral: '#059669',
+    LinkedIn: '#0284C7',
+    Campaign: '#D97706',
+    'Inbound Call': '#6366F1',
+    Partner: '#8B5CF6',
+    Other: '#64748B'
+  };
+
+  const sourceCountMap = {};
   leadsForMarketing.forEach(lead => {
-    if (sourceCounts[lead.leadSource] !== undefined) {
-      sourceCounts[lead.leadSource] += 1;
-    }
+    const rawSrc = lead.leadSource || lead.source || 'Website';
+    const norm = normalizeSource(rawSrc);
+    sourceCountMap[norm] = (sourceCountMap[norm] || 0) + 1;
   });
 
-  const colors = {
-    Website: '#0F1A34',
-    Referral: '#1A4F85',
-    LinkedIn: '#2F69A1',
-    'Inbound Call': '#4C83BD',
-    Campaign: '#6E9ED9',
-    Partner: '#95B8E6'
-  };
-
-  const dynamicSourceMixData = Object.keys(sourceCounts).map(source => ({
-    name: source,
-    count: sourceCounts[source],
-    color: colors[source]
-  }));
+  const dynamicSourceMixData = Object.keys(sourceCountMap)
+    .filter(source => sourceCountMap[source] > 0)
+    .map(source => ({
+      name: source,
+      count: sourceCountMap[source],
+      color: sourceColors[source] || '#0F1A34'
+    }))
+    .sort((a, b) => b.count - a.count);
 
   const marketingTotalLeads = leadsForMarketing.length;
 
@@ -222,76 +211,9 @@ export default function DashboardView({
         </div>
       </div>
 
-      {/* Dual Charts Section: Revenue Trend Line + Marketing Lead Source Mix Donut */}
+      {/* Dual Cards Section: Marketing Donut Chart + Operational Summary Card */}
       <div className="charts-grid">
-        {/* Revenue Trend Line Chart */}
-        <div className="chart-card">
-          <div className="chart-header">
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.05rem' }}>
-              <h3 className="chart-title" style={{ margin: 0, lineHeight: 1.2 }}>Revenue Trend ({revenueToggle})</h3>
-              <div style={{ fontSize: '0.775rem', color: '#557396', margin: 0, lineHeight: 1.2 }}>
-                Revenue movement across selected period: {getFilterLabel(selectedDateFilter)}
-              </div>
-            </div>
-            {/* Monthly / Quarterly / FY toggle switch */}
-            <div className="toggle-group">
-              {['Monthly', 'Quarterly', 'FY'].map((t) => (
-                <button
-                  key={t}
-                  className={`toggle-btn ${revenueToggle === t ? 'active' : ''}`}
-                  onClick={() => setRevenueToggle(t)}
-                >
-                  {t}
-                </button>
-              ))}
-            </div>
-          </div>
-          <div className="chart-container revenue-chart-container">
-            <ResponsiveContainer width="100%" height="100%" minHeight={280}>
-              <LineChart data={currentRevObj.trend} margin={{ top: 20, right: 35, left: 5, bottom: 20 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#E0E6EE" />
-                <XAxis dataKey="period" stroke="#557396" fontSize={12} tickLine={false} dy={6} />
-                <YAxis stroke="#557396" fontSize={12} tickFormatter={formatYAxis} tickLine={false} width={48} dx={-4} />
-                <Tooltip
-                  formatter={(value, name) => [
-                    `₹${value.toLocaleString('en-IN')}`,
-                    name === 'target' || name === 'Target' ? 'Target' : 'Revenue'
-                  ]}
-                  contentStyle={{
-                    backgroundColor: '#FFFFFF',
-                    borderRadius: '10px',
-                    color: '#0F1A34',
-                    border: '1px solid #E2E8F0',
-                    boxShadow: '0 6px 16px rgba(6, 54, 105, 0.12)',
-                    padding: '0.65rem 0.85rem'
-                  }}
-                  itemStyle={{ color: '#0F1A34', fontWeight: 600, fontSize: '0.85rem' }}
-                  labelStyle={{ color: '#0F1A34', fontWeight: 700, fontSize: '0.9rem', marginBottom: '0.25rem' }}
-                />
-                <Line
-                  name="Revenue"
-                  type="monotone"
-                  dataKey="revenue"
-                  stroke="#0F1A34"
-                  strokeWidth={3}
-                  dot={{ r: 5, fill: '#0F1A34', strokeWidth: 2, stroke: '#FFFFFF' }}
-                  activeDot={{ r: 7 }}
-                />
-                <Line
-                  name="Target"
-                  type="monotone"
-                  dataKey="target"
-                  stroke="#557396"
-                  strokeWidth={2}
-                  strokeDasharray="4 4"
-                  dot={false}
-                />
-              </LineChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
-
-        {/* Marketing Lead Source Mix Donut Chart - PDF Required Card Filters: Date & Owner */}
+        {/* Card 1: Marketing Lead Source Mix Donut Chart */}
         <div className="chart-card">
           <div className="chart-header" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'nowrap', gap: '0.75rem' }}>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.1rem', minWidth: 0 }}>
@@ -301,154 +223,200 @@ export default function DashboardView({
               </div>
             </div>
 
-            {/* Card Specific Filters: Date & Owner */}
-            <div style={{ display: 'flex', gap: '0.35rem', alignItems: 'center', flexShrink: 0 }}>
-              <select
-                className="select-filter card-select-filter"
-                value={typeof marketingDateFilter === 'string' ? marketingDateFilter : 'custom'}
-                onChange={(e) => setMarketingDateFilter(e.target.value)}
-                title="Filter Marketing by Date"
-              >
-                {INITIAL_DATE_FILTERS.map(d => (
-                  <option key={d} value={d}>{d}</option>
-                ))}
-                {typeof marketingDateFilter === 'object' && marketingDateFilter !== null && (
-                  <option value="custom">{marketingDateFilter.label || 'Custom Range'}</option>
-                )}
-              </select>
+            {/* Card Specific Filters: Date & Owner Custom Dropdowns */}
+            <div style={{ display: 'flex', gap: '0.45rem', alignItems: 'center', flexShrink: 0 }}>
+              <CustomDropdown
+                value={marketingDateFilter}
+                options={INITIAL_DATE_FILTERS}
+                onChange={(val) => setMarketingDateFilter(val)}
+                icon={LuCalendar}
+                placeholder="Date"
+                minWidth="140px"
+              />
 
-              <select
-                className="select-filter card-select-filter"
+              <CustomDropdown
                 value={marketingOwnerFilter}
-                onChange={(e) => setMarketingOwnerFilter(e.target.value)}
-                title="Filter Marketing by Owner"
-              >
-                {INITIAL_OWNERS.map(o => (
-                  <option key={o} value={o}>{o}</option>
-                ))}
-              </select>
+                options={INITIAL_OWNERS}
+                onChange={(val) => setMarketingOwnerFilter(val)}
+                icon={LuUser}
+                placeholder="Owner"
+                minWidth="150px"
+              />
             </div>
           </div>
 
-          <div className="chart-container" style={{ position: 'relative' }}>
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie
-                  data={dynamicSourceMixData}
-                  cx="50%"
-                  cy="50%"
-                  innerRadius={55}
-                  outerRadius={85}
-                  paddingAngle={4}
-                  dataKey="count"
-                  onClick={(data) => {
-                    onNavigateToLeads(data.name);
-                  }}
-                  style={{ cursor: 'pointer' }}
-                >
-                  {dynamicSourceMixData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.color} stroke="#FFFFFF" strokeWidth={2} />
-                  ))}
-                </Pie>
-                <Tooltip
-                  formatter={(value, name) => [`${value} leads`, name]}
-                  contentStyle={{
-                    backgroundColor: '#FFFFFF',
-                    borderRadius: '10px',
-                    color: '#0F1A34',
-                    border: '1px solid #E2E8F0',
-                    boxShadow: '0 6px 16px rgba(6, 54, 105, 0.12)',
-                    padding: '0.65rem 0.85rem'
-                  }}
-                  itemStyle={{ color: '#0F1A34', fontWeight: 600, fontSize: '0.85rem' }}
-                  labelStyle={{ color: '#0F1A34', fontWeight: 700, fontSize: '0.9rem', marginBottom: '0.25rem' }}
-                />
-              </PieChart>
-            </ResponsiveContainer>
+          {/* Chart & Legend Centered Horizontal Layout */}
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            flex: 1,
+            gap: '2.5rem',
+            padding: '1rem 0'
+          }}>
+            {/* Left: Pie Chart */}
+            <div style={{ position: 'relative', width: '210px', height: '210px', flexShrink: 0 }}>
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={dynamicSourceMixData}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={55}
+                    outerRadius={85}
+                    paddingAngle={4}
+                    dataKey="count"
+                    isAnimationActive={true}
+                  >
+                    {dynamicSourceMixData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.color} stroke="#FFFFFF" strokeWidth={2} />
+                    ))}
+                  </Pie>
+                  <Tooltip
+                    formatter={(value, name) => [`${value} leads`, name]}
+                    contentStyle={{
+                      backgroundColor: '#FFFFFF',
+                      borderRadius: '10px',
+                      color: '#0F1A34',
+                      border: '1px solid #E2E8F0',
+                      boxShadow: '0 6px 16px rgba(6, 54, 105, 0.12)',
+                      padding: '0.65rem 0.85rem'
+                    }}
+                    itemStyle={{ color: '#0F1A34', fontWeight: 600, fontSize: '0.85rem' }}
+                    labelStyle={{ color: '#0F1A34', fontWeight: 700, fontSize: '0.9rem', marginBottom: '0.25rem' }}
+                  />
+                </PieChart>
+              </ResponsiveContainer>
+              <div style={{
+                position: 'absolute',
+                top: '50%',
+                left: '50%',
+                transform: 'translate(-50%, -50%)',
+                textAlign: 'center',
+                pointerEvents: 'none'
+              }}>
+                <div style={{ fontSize: '1.4rem', fontWeight: 700, color: '#0F1A34', lineHeight: 1 }}>{marketingTotalLeads}</div>
+                <div style={{ fontSize: '0.68rem', color: '#557396', textTransform: 'uppercase', marginTop: '3px', fontWeight: 600 }}>Leads</div>
+              </div>
+            </div>
+
+            {/* Right: Legend Points (View Only) */}
             <div style={{
-              position: 'absolute',
-              top: '50%',
-              left: '50%',
-              transform: 'translate(-50%, -50%)',
-              textAlign: 'center',
-              pointerEvents: 'none'
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '0.65rem',
+              justifyContent: 'center',
+              minWidth: '150px'
             }}>
-              <div style={{ fontSize: '1.25rem', fontWeight: 700, color: '#0F1A34' }}>{marketingTotalLeads}</div>
-              <div style={{ fontSize: '0.65rem', color: '#557396', textTransform: 'uppercase' }}>Leads</div>
+              {dynamicSourceMixData.map((item) => (
+                <div
+                  key={item.name}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    gap: '1.25rem',
+                    padding: '0.25rem 0.5rem',
+                    borderRadius: '6px'
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.55rem' }}>
+                    <span style={{ width: 9, height: 9, borderRadius: '50%', backgroundColor: item.color, flexShrink: 0 }} />
+                    <span style={{ color: '#0F1A34', fontSize: '0.85rem', fontWeight: 500 }}>{item.name}</span>
+                  </div>
+                  <span style={{ color: '#0F1A34', fontSize: '0.9rem', fontWeight: 700 }}>{item.count}</span>
+                </div>
+              ))}
             </div>
           </div>
+        </div>
+
+        {/* Card 2: Operations & Pipeline Summary (Combined 4 KPI Counters) */}
+        <div className="chart-card" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+          <div className="chart-header" style={{ marginBottom: '1.25rem' }}>
+            <div>
+              <h3 className="chart-title" style={{ margin: 0, lineHeight: 1.25 }}>Lead & Pipeline Summary</h3>
+              <div style={{ fontSize: '0.8rem', color: '#557396', margin: 0, marginTop: '2px' }}>
+                Operational counters for selected filters
+              </div>
+            </div>
+          </div>
+
+          {/* 2x2 Subcard Metrics Grid */}
           <div style={{
             display: 'grid',
-            gridTemplateColumns: 'auto auto',
-            columnGap: '8rem',
-            rowGap: '0.4rem',
-            justifyContent: 'center',
-            marginTop: '0.65rem',
-            fontSize: '0.8rem'
+            gridTemplateColumns: 'repeat(2, 1fr)',
+            gap: '1.15rem',
+            flex: 1
           }}>
-            {dynamicSourceMixData.map((item) => (
-              <div
-                key={item.name}
-                onClick={() => onNavigateToLeads(item.name)}
-                style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', cursor: 'pointer' }}
-              >
-                <span style={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: item.color, border: '1px solid #E0E6EE', flexShrink: 0 }} />
-                <span style={{ color: '#0F1A34' }}>{item.name}: <strong>{item.count}</strong></span>
+            {/* 1. Companies */}
+            <div
+              className="summary-subcard"
+              onClick={() => onNavigateToAccounts()}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <span className="counter-title" style={{ margin: 0 }}>COMPANIES</span>
+                <span className="counter-badge total">TOTAL</span>
               </div>
-            ))}
-          </div>
-        </div>
-      </div>
+              <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', marginTop: '1.25rem' }}>
+                <div className="counter-value" style={{ fontSize: '2rem', lineHeight: 1 }}>{totalCompanies}</div>
+                <div style={{ width: '38px', height: '38px', borderRadius: '10px', backgroundColor: '#EFF6FF', color: '#2563EB', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <LuBuilding2 size={20} />
+                </div>
+              </div>
+            </div>
 
-      {/* Lead & Follow-up Summary: 4 KPI Counters Block */}
-      <div className="counters-grid">
-        <div
-          className="counter-card"
-          onClick={() => onNavigateToAccounts()}
-          title="Clicking opens Accounts list"
-        >
-          <div>
-            <div className="counter-title">Companies</div>
-            <div className="counter-value">{totalCompanies}</div>
-          </div>
-          <span className="counter-badge total">TOTAL</span>
-        </div>
+            {/* 2. No. of Leads */}
+            <div
+              className="summary-subcard"
+              onClick={() => onNavigateToLeads()}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <span className="counter-title" style={{ margin: 0 }}>NO. OF LEADS</span>
+                <span className="counter-badge total">TOTAL</span>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', marginTop: '1.25rem' }}>
+                <div className="counter-value" style={{ fontSize: '2rem', lineHeight: 1 }}>{totalLeadsCount}</div>
+                <div style={{ width: '38px', height: '38px', borderRadius: '10px', backgroundColor: '#F0FDF4', color: '#16A34A', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <LuUsers size={20} />
+                </div>
+              </div>
+            </div>
 
-        <div
-          className="counter-card"
-          onClick={() => onNavigateToLeads()}
-          title="Clicking opens Leads list"
-        >
-          <div>
-            <div className="counter-title">No. of Leads</div>
-            <div className="counter-value">{totalLeadsCount}</div>
-          </div>
-          <span className="counter-badge total">TOTAL</span>
-        </div>
+            {/* 3. Overdue Leads */}
+            <div
+              className="summary-subcard alert-subcard"
+              onClick={() => onNavigateToLeads('OVERDUE')}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <span className="counter-title" style={{ margin: 0, color: '#DC2626' }}>OVERDUE LEADS</span>
+                <span className="counter-badge alert">ALERT</span>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', marginTop: '1.25rem' }}>
+                <div className="counter-value" style={{ fontSize: '2rem', lineHeight: 1, color: '#DC2626' }}>{overdueLeadsCount}</div>
+                <div style={{ width: '38px', height: '38px', borderRadius: '10px', backgroundColor: '#FEE2E2', color: '#DC2626', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <LuTriangleAlert size={20} />
+                </div>
+              </div>
+            </div>
 
-        {/* OVERDUE LEADS - Alert Counter in Minimal #0F1A34 & #F8F9FA */}
-        <div
-          className="counter-card alert-card"
-          onClick={() => onNavigateToLeads('OVERDUE')}
-          title="Clicking opens Leads filtered strictly to overdue records"
-        >
-          <div>
-            <div className="counter-title">Overdue Leads</div>
-            <div className="counter-value">{overdueLeadsCount}</div>
+            {/* 4. Today's Follow-ups */}
+            <div
+              className="summary-subcard"
+              onClick={() => onNavigateToActivities('Follow-up')}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <span className="counter-title" style={{ margin: 0 }}>TODAY'S FOLLOW-UPS</span>
+                <span className="counter-badge tasks">TASKS</span>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', marginTop: '1.25rem' }}>
+                <div className="counter-value" style={{ fontSize: '2rem', lineHeight: 1 }}>{todayFollowupsCount}</div>
+                <div style={{ width: '38px', height: '38px', borderRadius: '10px', backgroundColor: '#FAF5FF', color: '#9333EA', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <LuCalendarCheck size={20} />
+                </div>
+              </div>
+            </div>
           </div>
-          <span className="counter-badge alert">ALERT</span>
-        </div>
-
-        <div
-          className="counter-card"
-          onClick={() => onNavigateToActivities('Follow-up')}
-          title="Clicking opens Today's Follow-ups in Activities"
-        >
-          <div>
-            <div className="counter-title">Today's Follow-ups</div>
-            <div className="counter-value">{todayFollowupsCount}</div>
-          </div>
-          <span className="counter-badge tasks">TASKS</span>
         </div>
       </div>
 

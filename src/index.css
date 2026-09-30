@@ -664,7 +664,7 @@ body {
 .select-filter {
   padding: 0.4rem 1.35rem 0.4rem 0.65rem;
   border-radius: 8px;
-  border: none;
+  border: 1px solid rgba(0, 0, 0, 0.05);
   background-color: #FFFFFF;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='11' height='11' viewBox='0 0 24 24' fill='none' stroke='%23063669' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
   background-repeat: no-repeat;
@@ -678,12 +678,17 @@ body {
   cursor: pointer;
   outline: none;
   width: auto;
-  box-shadow: 0 2px 6px rgba(6, 54, 105, 0.05);
-  transition: box-shadow 0.2s;
+  box-shadow: none;
+  transition: border-color 0.2s ease;
+}
+
+.select-filter:hover {
+  border-color: rgba(0, 0, 0, 0.12);
 }
 
 .select-filter:focus {
-  box-shadow: 0 0 0 3px rgba(6, 54, 105, 0.1);
+  border-color: rgba(0, 34, 255, 0.4);
+  box-shadow: none;
 }
 
 /* Apple HIG Translucent Glassmorphic Date Selector */
@@ -1179,6 +1184,8 @@ body {
   background-position: right 0.4rem center !important;
   font-size: 0.775rem !important;
   height: 32px !important;
+  border: 1px solid rgba(0, 0, 0, 0.05) !important;
+  box-shadow: none !important;
 }
 
 .icon-button {
@@ -1408,11 +1415,39 @@ body {
 /* Charts Section - Borderless Soft Elevate */
 .charts-grid {
   display: grid;
-  grid-template-columns: 2fr 1fr;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 1.25rem;
   margin-bottom: 1.5rem;
   width: 100%;
   max-width: 100%;
+}
+
+.summary-subcard {
+  background: #F8FAFC;
+  border-radius: 12px;
+  padding: 1.35rem 1.4rem;
+  border: 1px solid #E2E8F0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  cursor: pointer;
+  transition: background-color 0.15s ease, border-color 0.15s ease;
+  min-height: 120px;
+}
+
+.summary-subcard:hover {
+  background: #F1F5F9;
+  border-color: #CBD5E1;
+}
+
+.summary-subcard.alert-subcard {
+  background-color: #FFF5F5;
+  border-color: #FECACA;
+}
+
+.summary-subcard.alert-subcard:hover {
+  background-color: #FEE2E2;
+  border-color: #FCA5A5;
 }
 
 .chart-card {

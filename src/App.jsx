@@ -566,6 +566,13 @@ export default function App() {
     pushNotification('Lead Details Updated', `Updated information for lead "${updatedFields.leadName || selectedLead?.leadName}"`, 'Lead', 'leads');
   };
 
+  const handleDeleteLead = (leadId) => {
+    setLeads(prev => prev.filter(l => l.id !== leadId));
+    if (selectedLead && selectedLead.id === leadId) {
+      setSelectedLead(null);
+    }
+  };
+
   const handleUpdateAccount = (accountId, updatedFields) => {
     setAccounts(prev => prev.map(acc => {
       if (acc.id === accountId) {
@@ -1189,6 +1196,7 @@ export default function App() {
                   salesExecutives={salesExecutives}
                   currentUser={currentUser}
                   onUpdateLead={handleUpdateLead}
+                  onDeleteLead={handleDeleteLead}
                   onTriggerToast={triggerToast}
                   onSelectLead={(lead) => {
                     setLeadNavSource('leads');

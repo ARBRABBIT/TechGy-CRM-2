@@ -23,24 +23,35 @@ export default function ProfileView({
 }) {
   const [activeTab, setActiveTab] = useState('details');
 
-  const userName = currentUser?.name || 'System Administrator';
-  const userRole = currentUser?.role === 'admin'
-    ? 'Sales Administrator'
-    : currentUser?.role === 'manager'
-      ? 'Sales Operations Manager'
-      : (currentUser?.role || 'Senior Sales Director');
+  const isSuperAdmin = currentUser?.role === 'admin' ||
+    currentUser?.role === 'Sales Admin' ||
+    currentUser?.role === 'superadmin' ||
+    currentUser?.role === 'Super Admin' ||
+    !currentUser?.role ||
+    (currentUser?.role !== 'Sales Head' && currentUser?.role !== 'head' && currentUser?.role !== 'Sales Executive' && currentUser?.role !== 'executive');
+
+  const userName = currentUser?.name || (isSuperAdmin ? 'System Administrator' : 'User');
+  const userRole = isSuperAdmin
+    ? 'Super Administrator'
+    : currentUser?.role === 'head' || currentUser?.role === 'Sales Head'
+      ? 'Sales Head'
+      : currentUser?.role === 'executive' || currentUser?.role === 'Sales Executive'
+        ? 'Sales Executive'
+        : (currentUser?.role || 'Senior Sales Director');
   const userEmail = currentUser?.email || 'admin@techgy.com';
 
   // Profile Form State
   const [profileData, setProfileData] = useState({
     fullName: userName,
-    title: `${userRole} - Enterprise Accounts`,
-    department: 'Enterprise Sales & Partnerships',
+    title: isSuperAdmin ? 'Super Administrator' : `${userRole} - Enterprise Accounts`,
+    department: isSuperAdmin ? 'System Administration' : 'Enterprise Sales & Partnerships',
     email: userEmail,
     phone: '+91 98765 43210',
     location: 'Mumbai HQ, Maharashtra',
     timeZone: 'IST (UTC+05:30)',
-    bio: `${userRole} with proven enterprise domain experience leading cloud solutions, CRM integrations, and strategic client accounts across PAN India.`
+    bio: isSuperAdmin
+      ? 'Super Administrator with full access to manage sales workflows, team hierarchies, accounts, and system configuration across TechGy Link CRM.'
+      : `${userRole} with proven enterprise domain experience leading cloud solutions, CRM integrations, and strategic client accounts across PAN India.`
   });
 
   const [savedSuccess, setSavedSuccess] = useState(false);
@@ -83,6 +94,7 @@ export default function ProfileView({
   const wonLeads = myLeads.filter(l => l.status === 'Won' || l.status === 'Negotiation');
   const winRate = myLeads.length > 0 ? ((wonLeads.length / myLeads.length) * 100).toFixed(1) + '%' : '78.4%';
   const ytdClosedRevenue = '₹1.82 Cr';
+  const avgDealSizeVal = '₹18.5 L';
 
   return (
     <div className="profile-view" style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
@@ -190,7 +202,7 @@ export default function ProfileView({
                     borderRadius: '9999px'
                   }}
                 >
-                  Active Staff
+                  {isSuperAdmin ? 'Super Administrator' : 'Active Staff'}
                 </span>
               </div>
               <p style={{ fontSize: '0.9rem', color: '#D0DCEB', margin: 0, fontWeight: 500 }}>
@@ -209,52 +221,38 @@ export default function ProfileView({
               </div>
             </div>
           </div>
-
-          {/* Quick Metrics Badge Group */}
-          <div style={{ display: 'flex', gap: '0.85rem', flexWrap: 'wrap' }}>
-            <div style={{ background: 'rgba(255, 255, 255, 0.1)', backdropFilter: 'blur(4px)', padding: '0.85rem 1.15rem', borderRadius: '12px', textAlign: 'center', border: '1px solid rgba(255, 255, 255, 0.15)' }}>
-              <div style={{ fontSize: '1.25rem', fontWeight: 800 }}>{ytdClosedRevenue}</div>
-              <div style={{ fontSize: '0.7rem', color: '#D0DCEB', textTransform: 'uppercase', fontWeight: 600 }}>YTD Closed Revenue</div>
-            </div>
-            <div style={{ background: 'rgba(255, 255, 255, 0.1)', backdropFilter: 'blur(4px)', padding: '0.85rem 1.15rem', borderRadius: '12px', textAlign: 'center', border: '1px solid rgba(255, 255, 255, 0.15)' }}>
-              <div style={{ fontSize: '1.25rem', fontWeight: 800 }}>{winRate}</div>
-              <div style={{ fontSize: '0.7rem', color: '#D0DCEB', textTransform: 'uppercase', fontWeight: 600 }}>Deal Win Rate</div>
-            </div>
-            <div style={{ background: 'rgba(255, 255, 255, 0.1)', backdropFilter: 'blur(4px)', padding: '0.85rem 1.15rem', borderRadius: '12px', textAlign: 'center', border: '1px solid rgba(255, 255, 255, 0.15)' }}>
-              <div style={{ fontSize: '1.25rem', fontWeight: 800 }}>{myAccounts.length} Accounts</div>
-              <div style={{ fontSize: '0.7rem', color: '#D0DCEB', textTransform: 'uppercase', fontWeight: 600 }}>Managed Portfolio</div>
-            </div>
-          </div>
         </div>
       </div>
 
-      {/* Profile Navigation Tabs */}
-      <div className="toggle-group" style={{ padding: '4px', alignSelf: 'flex-start' }}>
-        <button
-          className={`toggle-btn ${activeTab === 'details' ? 'active' : ''}`}
-          onClick={() => setActiveTab('details')}
-        >
-          <LuUser size={14} style={{ marginRight: 4, display: 'inline' }} /> Personal Info
-        </button>
-        <button
-          className={`toggle-btn ${activeTab === 'performance' ? 'active' : ''}`}
-          onClick={() => setActiveTab('performance')}
-        >
-          <LuTrendingUp size={14} style={{ marginRight: 4, display: 'inline' }} /> Performance & Targets
-        </button>
-        <button
-          className={`toggle-btn ${activeTab === 'portfolio' ? 'active' : ''}`}
-          onClick={() => setActiveTab('portfolio')}
-        >
-          <LuBriefcase size={14} style={{ marginRight: 4, display: 'inline' }} /> Managed Portfolio ({myAccounts.length})
-        </button>
-        <button
-          className={`toggle-btn ${activeTab === 'security' ? 'active' : ''}`}
-          onClick={() => setActiveTab('security')}
-        >
-          <LuShield size={14} style={{ marginRight: 4, display: 'inline' }} /> Preferences & Security
-        </button>
-      </div>
+      {/* Profile Navigation Tabs (Only rendered when there are multiple tabs for non-superadmin) */}
+      {!isSuperAdmin && (
+        <div className="toggle-group" style={{ padding: '4px', alignSelf: 'flex-start' }}>
+          <button
+            className={`toggle-btn ${activeTab === 'details' ? 'active' : ''}`}
+            onClick={() => setActiveTab('details')}
+          >
+            <LuUser size={14} style={{ marginRight: 4, display: 'inline' }} /> Personal Info
+          </button>
+          <button
+            className={`toggle-btn ${activeTab === 'performance' ? 'active' : ''}`}
+            onClick={() => setActiveTab('performance')}
+          >
+            <LuTrendingUp size={14} style={{ marginRight: 4, display: 'inline' }} /> Performance & Targets
+          </button>
+          <button
+            className={`toggle-btn ${activeTab === 'portfolio' ? 'active' : ''}`}
+            onClick={() => setActiveTab('portfolio')}
+          >
+            <LuBriefcase size={14} style={{ marginRight: 4, display: 'inline' }} /> Managed Portfolio ({myAccounts.length})
+          </button>
+          <button
+            className={`toggle-btn ${activeTab === 'security' ? 'active' : ''}`}
+            onClick={() => setActiveTab('security')}
+          >
+            <LuShield size={14} style={{ marginRight: 4, display: 'inline' }} /> Preferences & Security
+          </button>
+        </div>
+      )}
 
       {/* Saved Toast Notification */}
       {savedSuccess && (
@@ -269,7 +267,7 @@ export default function ProfileView({
       )}
 
       {/* Tab 1: Personal Info Form */}
-      {activeTab === 'details' && (
+      {(isSuperAdmin || activeTab === 'details') && (
         <div className="section-card">
           <div className="section-header">
             <h3 className="section-title">Edit Personal & Professional Details</h3>
@@ -358,8 +356,8 @@ export default function ProfileView({
         </div>
       )}
 
-      {/* Tab 2: Performance & Targets */}
-      {activeTab === 'performance' && (
+      {/* Tab 2: Performance & Targets (Sales Reps / Heads only) */}
+      {!isSuperAdmin && activeTab === 'performance' && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
           <div className="counters-grid">
             <div className="counter-card alert-card">
@@ -429,8 +427,8 @@ export default function ProfileView({
         </div>
       )}
 
-      {/* Tab 3: Managed Portfolio */}
-      {activeTab === 'portfolio' && (
+      {/* Tab 3: Managed Portfolio (Sales Reps / Heads only) */}
+      {!isSuperAdmin && activeTab === 'portfolio' && (
         <div className="section-card">
           <div className="section-header">
             <h3 className="section-title">Accounts Managed by {profileData.fullName} ({myAccounts.length})</h3>
@@ -472,7 +470,7 @@ export default function ProfileView({
       )}
 
       {/* Tab 4: Security & Notification Preferences */}
-      {activeTab === 'security' && (
+      {!isSuperAdmin && activeTab === 'security' && (
         <div className="section-card">
           <div className="section-header">
             <h3 className="section-title">Notification & Security Preferences</h3>
