@@ -10,7 +10,11 @@ export const INITIAL_MASTER_DATA = {
     { id: 'CNT-004', name: 'Commercial Proposal & Service Contract' },
     { id: 'CNT-005', name: 'Inbound Web Inquiry & Form' },
     { id: 'CNT-006', name: 'SMS Alert & Verification OTP' },
-    { id: 'CNT-007', name: 'Interactive Product Demo Deck' }
+    { id: 'CNT-007', name: 'Interactive Product Demo Deck' },
+    { id: 'CNT-008', name: 'Short-Form Reel & Video Hook Asset' },
+    { id: 'CNT-009', name: 'Long-Form Video & YouTube Masterclass' },
+    { id: 'CNT-010', name: 'LinkedIn Carousel & Thought Leadership Deck' },
+    { id: 'CNT-011', name: 'Customer Success Video Story & Testimonial' }
   ],
 
   // 2. Lead Follow-up Types
@@ -208,7 +212,9 @@ export const INITIAL_MASTER_DATA = {
     { id: 'PRD-004', name: 'Enterprise Data Migration & Onboarding' },
     { id: 'PRD-005', name: 'Custom ERP & WhatsApp Gateway Integration' },
     { id: 'PRD-006', name: 'Cloud Infrastructure & Security Solutions' },
-    { id: 'PRD-007', name: 'Dedicated Support & AMC' }
+    { id: 'PRD-007', name: 'Dedicated Support & AMC' },
+    { id: 'PRD-008', name: 'Website Heatmap & Real-Time Click Engine' },
+    { id: 'PRD-009', name: 'Social Content & Video Retention Analytics' }
   ],
 
   // Sources (Cleaned: Channel Type, Attribution Weight, Cost per Lead Removed)
@@ -218,6 +224,31 @@ export const INITIAL_MASTER_DATA = {
     { id: 'SRC-003', name: 'Referral' },
     { id: 'SRC-004', name: 'LinkedIn' },
     { id: 'SRC-005', name: 'Campaign' },
-    { id: 'SRC-006', name: 'Partner' }
+    { id: 'SRC-006', name: 'Partner' },
+    { id: 'SRC-007', name: 'Meta / Facebook Ads' },
+    { id: 'SRC-008', name: 'Instagram Ads & Reels' },
+    { id: 'SRC-009', name: 'YouTube Brand Channel' },
+    { id: 'SRC-010', name: 'WhatsApp Business Inbound' },
+    { id: 'SRC-011', name: 'Website Heatmap Inbound CTA' },
+    { id: 'SRC-012', name: 'X (Twitter) Outbound' },
+    { id: 'SRC-013', name: 'TikTok Business Form' }
+  ],
+
+  // Website Heatmap Monitored Domains
+  heatmapDomains: [
+    { id: 'HTM-001', name: 'techgylink.com (Main Website / Landing Page)' },
+    { id: 'HTM-002', name: 'app.techgylink.com (Cloud CRM Web App Portal)' },
+    { id: 'HTM-003', name: 'docs.techgylink.com (Developer API & Docs Hub)' },
+    { id: 'HTM-004', name: 'greenlandcapital.in (Client Showcase Landing Page)' }
+  ],
+
+  // Connected Social Channels & Video Telemetry Ingest Pipelines
+  socialPlatforms: [
+    { id: 'SOC-001', name: 'Instagram (@techgylink)' },
+    { id: 'SOC-002', name: 'LinkedIn (TechGy Link)' },
+    { id: 'SOC-003', name: 'YouTube (@TechGyLink)' },
+    { id: 'SOC-004', name: 'Meta / Facebook (TechGyLinkOfficial)' },
+    { id: 'SOC-005', name: 'X / Twitter (@TechGyLink)' },
+    { id: 'SOC-006', name: 'TikTok (@techgylink)' }
   ]
 };

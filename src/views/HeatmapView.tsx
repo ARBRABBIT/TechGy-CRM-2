@@ -4,14 +4,8 @@ import {
   LuMousePointerClick,
   LuMousePointer,
   LuLayers,
-  LuSmartphone,
-  LuMonitor,
-  LuTablet,
-  LuTrendingUp,
   LuZap,
   LuEye,
-  LuUsers,
-  LuDollarSign,
   LuSearch,
   LuCircleCheck,
   LuX,
@@ -27,8 +21,7 @@ import {
   LuGlobe,
   LuRefreshCw,
   LuArrowRight,
-  LuPhoneCall,
-  LuShieldCheck
+  LuPhoneCall
 } from 'react-icons/lu';
 import { onKeyActivate } from '../utils/a11y';
 import {
@@ -189,10 +182,13 @@ export default function HeatmapView({ onSelectLead }: HeatmapViewProps) {
   const [heatmapPageId, setHeatmapPageId] = useState('home');
   const [heatmapMode, setHeatmapMode] = useState<'thermal' | 'scatter' | 'scroll' | 'attention'>('thermal');
   const [heatmapDevice, setHeatmapDevice] = useState<'desktop' | 'tablet' | 'mobile'>('desktop');
-  const [heatmapTimeRange, setHeatmapTimeRange] = useState('30d');
   const [selectedFilter, setSelectedFilter] = useState<'all' | 'conversions' | 'rage' | 'dead'>('all');
+  const [showAdvancedControls, setShowAdvancedControls] = useState(false);
+  const [showDetailedReports, setShowDetailedReports] = useState(false);
 
   // Real Website Source Mode: 'proxy' (Active Real Site Fetched from techgylink.com) | 'live' (Direct Iframe) | 'mirror' (Offline Mirror)
+  // Render the real production site through our same-origin proxy by default so
+  // the heatmap overlay can remain interactive without third-party iframe limits.
   const [websiteMode, setWebsiteMode] = useState<'proxy' | 'live' | 'mirror'>('proxy');
   const [isBrowseMode, setIsBrowseMode] = useState(false); // false = Heatmap click capture, true = browse live site
   const [isIframeLoading, setIsIframeLoading] = useState(false);
@@ -324,6 +320,10 @@ export default function HeatmapView({ onSelectLead }: HeatmapViewProps) {
     return raw;
   }, [pointsByPage, heatmapPageId, selectedFilter]);
 
+  const displayedPoints = useMemo(() => selectedElementId
+    ? currentPoints.filter(point => point.element === selectedElementId)
+    : currentPoints, [currentPoints, selectedElementId]);
+
   // Redraw canvas whenever points, radius, opacity, palette or dimensions change
   const renderCanvas = useCallback(() => {
     const canvas = canvasRef.current;
@@ -339,12 +339,12 @@ export default function HeatmapView({ onSelectLead }: HeatmapViewProps) {
     }
 
     if (heatmapMode === 'thermal') {
-      drawThermalHeatmap(canvas, currentPoints, heatRadius, heatOpacity, heatPalette);
+      drawThermalHeatmap(canvas, displayedPoints, heatRadius, heatOpacity, heatPalette);
     } else {
       const ctx = canvas.getContext('2d');
       if (ctx) ctx.clearRect(0, 0, width, height);
     }
-  }, [currentPoints, heatRadius, heatOpacity, heatPalette, heatmapMode]);
+  }, [displayedPoints, heatRadius, heatOpacity, heatPalette, heatmapMode]);
 
   // Update canvas on dependency changes
   useEffect(() => {
@@ -598,208 +598,44 @@ export default function HeatmapView({ onSelectLead }: HeatmapViewProps) {
   }, [aggregatedElementStats, heatmapTableSearch]);
 
   return (
-    <div className="integ-page">
-      {/* Top Header */}
-      <div className="integ-header">
-        <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
-            <span style={{ background: '#FFF7ED', color: '#EA580C', border: '1px solid #FED7AA', padding: '2px 8px', borderRadius: 'var(--radius-popup, 3px)', fontSize: '12px', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-              <LuFlame size={14} />
-              <span>Real Website Telemetry</span>
-            </span>
-            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '12px', color: '#059669', fontWeight: 600 }}>
-              <LuGlobe size={14} />
-              <span>Domain: <strong>techgylink.com</strong></span>
-            </span>
-          </div>
-          <h2 className="integ-title">Website Heatmap &amp; Click Analytics</h2>
-          <p className="integ-subtitle">
-            Authentic live visitor telemetry, thermal heat density, and closed-loop CRM sales attribution for <strong>techgylink.com</strong>
-          </p>
+    <div className="integ-page heatmap-workspace">
+      <header className="hm-heading">
+        <div><span className="hm-eyebrow">WEBSITE INSIGHTS</span><h2>Website heatmap</h2><p>Explore where people click on techgylink.com.</p></div>
+        <div className="hm-heading-actions">
+          <a href={`https://techgylink.com${activeHeatmapPage.path}`} target="_blank" rel="noopener noreferrer" className="btn-secondary btn-sm"><LuExternalLink size={14} />Open website</a>
+          <details className="compact-actions"><summary className="btn-secondary btn-sm">More actions</summary><div className="compact-actions-menu">
+            <button type="button" onClick={() => setShowEmbedModal(true)}><LuCode size={14} />Install tracking</button>
+            <button type="button" onClick={handleExportCsv}><LuDownload size={14} />Export clicks</button>
+            <button type="button" onClick={handleExportPng}><LuDownload size={14} />Save heatmap image</button>
+          </div></details>
         </div>
-
-        {/* Action Header Buttons */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-          <button
-            type="button"
-            className="btn-secondary btn-sm"
-            onClick={() => setShowEmbedModal(true)}
-            title="Install tracking code on techgylink.com"
-          >
-            <LuCode size={14} />
-            <span>Install Tracking Script</span>
-          </button>
-
-          <a
-            href={`https://techgylink.com${activeHeatmapPage.path}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="btn-secondary btn-sm"
-            style={{ textDecoration: 'none' }}
-            title="Open real techgylink.com in new browser tab"
-          >
-            <LuExternalLink size={14} />
-            <span>Open in New Tab</span>
-          </a>
-
-          <button
-            type="button"
-            className="btn-secondary btn-sm"
-            onClick={handleExportCsv}
-            title="Export full coordinate clickstream as CSV"
-          >
-            <LuDownload size={14} />
-            <span>Export CSV</span>
-          </button>
-
-          <button
-            type="button"
-            className="btn-secondary btn-sm"
-            onClick={handleExportPng}
-            title="Export thermal canvas snapshot as PNG image"
-          >
-            <LuDownload size={14} />
-            <span>Export PNG</span>
-          </button>
-        </div>
-      </div>
-
+      </header>
       <div className="heatmap-container">
-        {/* Live Notification Pill */}
-        {lastLoggedNotice && (
-          <div className="heatmap-live-banner" role="status">
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#C2410C', fontWeight: 600 }}>
-              <LuFlame size={15} />
-              <span>{lastLoggedNotice}</span>
-            </div>
-            <span style={{ fontSize: '11px', color: '#9A3412', fontWeight: 700 }}>LIVE SYNC</span>
-          </div>
-        )}
-
-        {/* Controls Bar 1: Navigation & Layer Selection */}
-        <div className="heatmap-controls-bar">
-          {/* Page Selector */}
-          <div className="heatmap-control-group">
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <LuEye size={18} style={{ color: '#10529C' }} />
-              <span style={{ fontWeight: 700, fontSize: '0.875rem', color: '#0F1A34' }}>Tracked Page:</span>
-            </div>
-
-            <select
-              className="form-select"
-              style={{ width: 'auto', minWidth: '240px', fontWeight: 600, fontSize: '0.8125rem' }}
-              value={heatmapPageId}
-              onChange={(e) => {
-                setHeatmapPageId(e.target.value);
-                setSelectedElementId(null);
-              }}
-              aria-label="Select Tracked Website Page"
-            >
-              {WEBSITE_PAGES.map(p => (
-                <option key={p.id} value={p.id}>
-                  {p.name} ({p.path})
-                </option>
-              ))}
+        {lastLoggedNotice && <div className="hm-notice" role="status"><LuCircleCheck size={16} />{lastLoggedNotice}</div>}
+        <div className="hm-toolbar">
+          <label className="hm-page-picker"><LuGlobe size={17} aria-hidden="true" />
+            <select value={heatmapPageId} onChange={e => { setHeatmapPageId(e.target.value); setSelectedElementId(null); }} aria-label="Website page">
+              {WEBSITE_PAGES.map(page => <option key={page.id} value={page.id}>{page.path === '/' ? 'Homepage' : page.path.replaceAll('/', ' ').trim()}</option>)}
             </select>
+          </label>
+          <div className="hm-tabs" role="group" aria-label="Heatmap layer">
+            {([['thermal', 'Heatmap', LuFlame], ['scatter', 'Clicks', LuMousePointerClick], ['scroll', 'Scroll', LuLayers], ['attention', 'Attention', LuEye]] as const).map(([mode, label, Icon]) => (
+              <button key={mode} type="button" className={heatmapMode === mode ? 'active' : ''} aria-pressed={heatmapMode === mode} onClick={() => setHeatmapMode(mode)}><Icon size={15} />{label}</button>
+            ))}
           </div>
-
-          {/* Mode Switcher */}
-          <div className="heatmap-control-group">
-            <span style={{ fontSize: '0.8125rem', fontWeight: 600, color: '#557396' }}>Analysis Mode:</span>
-            <div className="heatmap-segmented-btn-group" role="group" aria-label="Heatmap Mode">
-              <button
-                type="button"
-                className={`heatmap-segmented-btn ${heatmapMode === 'thermal' ? 'active' : ''}`}
-                onClick={() => setHeatmapMode('thermal')}
-                title="Continuous thermal gradient density"
-              >
-                <LuFlame size={14} style={{ color: heatmapMode === 'thermal' ? '#EA580C' : '#557396' }} />
-                <span>Thermal Map</span>
-              </button>
-              <button
-                type="button"
-                className={`heatmap-segmented-btn ${heatmapMode === 'scatter' ? 'active' : ''}`}
-                onClick={() => setHeatmapMode('scatter')}
-                title="Individual click coordinates dots"
-              >
-                <LuMousePointerClick size={14} style={{ color: heatmapMode === 'scatter' ? '#1D4ED8' : '#557396' }} />
-                <span>Click Points</span>
-              </button>
-              <button
-                type="button"
-                className={`heatmap-segmented-btn ${heatmapMode === 'scroll' ? 'active' : ''}`}
-                onClick={() => setHeatmapMode('scroll')}
-                title="Scroll depth zones and retention falloff"
-              >
-                <LuLayers size={14} style={{ color: heatmapMode === 'scroll' ? '#059669' : '#557396' }} />
-                <span>Scroll Depth</span>
-              </button>
-              <button
-                type="button"
-                className={`heatmap-segmented-btn ${heatmapMode === 'attention' ? 'active' : ''}`}
-                onClick={() => setHeatmapMode('attention')}
-                title="Visitor reading attention and dwell time"
-              >
-                <LuMousePointer size={14} style={{ color: heatmapMode === 'attention' ? '#7E22CE' : '#557396' }} />
-                <span>Attention</span>
-              </button>
-            </div>
-          </div>
-
-          {/* Device Viewport Toggle */}
-          <div className="heatmap-control-group">
-            <span style={{ fontSize: '0.8125rem', fontWeight: 600, color: '#557396' }}>Device:</span>
-            <div className="heatmap-segmented-btn-group" role="group" aria-label="Device Viewport">
-              <button
-                type="button"
-                className={`heatmap-segmented-btn ${heatmapDevice === 'desktop' ? 'active' : ''}`}
-                onClick={() => setHeatmapDevice('desktop')}
-              >
-                <LuMonitor size={14} />
-                <span>Desktop</span>
-              </button>
-              <button
-                type="button"
-                className={`heatmap-segmented-btn ${heatmapDevice === 'tablet' ? 'active' : ''}`}
-                onClick={() => setHeatmapDevice('tablet')}
-              >
-                <LuTablet size={14} />
-                <span>Tablet</span>
-              </button>
-              <button
-                type="button"
-                className={`heatmap-segmented-btn ${heatmapDevice === 'mobile' ? 'active' : ''}`}
-                onClick={() => setHeatmapDevice('mobile')}
-              >
-                <LuSmartphone size={14} />
-                <span>Mobile</span>
-              </button>
-            </div>
-          </div>
-
-          {/* Date Range & Live Status */}
-          <div className="heatmap-control-group">
-            <select
-              className="form-select"
-              style={{ width: 'auto', fontSize: '0.8125rem' }}
-              value={heatmapTimeRange}
-              onChange={(e) => setHeatmapTimeRange(e.target.value)}
-              aria-label="Select Date Range"
-            >
-              <option value="7d">Last 7 Days</option>
-              <option value="30d">Last 30 Days</option>
-              <option value="90d">Last 90 Days</option>
-            </select>
-
-            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '0.8125rem', color: '#EA580C', fontWeight: 700, background: '#FFF7ED', padding: '4px 8px', borderRadius: 'var(--radius-popup, 3px)', border: '1px solid #FED7AA' }}>
-              <LuFlame size={14} />
-              <span>{currentPoints.length} Points Logged</span>
-            </span>
-          </div>
+          <select className="hm-device-picker" value={heatmapDevice} onChange={e => setHeatmapDevice(e.target.value as typeof heatmapDevice)} aria-label="Device preview"><option value="desktop">Desktop</option><option value="tablet">Tablet</option><option value="mobile">Mobile</option></select>
+          <button type="button" className={`hm-settings-button ${showAdvancedControls ? 'active' : ''}`} aria-expanded={showAdvancedControls} onClick={() => setShowAdvancedControls(value => !value)}><LuSlidersHorizontal size={16} />Settings</button>
         </div>
 
         {/* Controls Bar 2: Engine Tuning & Source Switcher */}
-        <div className="heatmap-tuning-bar">
+        {showAdvancedControls && <div className="heatmap-tuning-bar">
+          <label className="hm-source-picker">Website source
+            <select className="form-select" value={websiteMode} onChange={e => setWebsiteMode(e.target.value as typeof websiteMode)} aria-label="Website source">
+              <option value="proxy">Real website (fetched)</option>
+              <option value="live">Real website (direct)</option>
+              <option value="mirror">Sample preview</option>
+            </select>
+          </label>
           {/* Segment Filter */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
             <span style={{ fontSize: '12px', fontWeight: 700, color: '#0F1A34' }}>Segment:</span>
@@ -890,7 +726,7 @@ export default function HeatmapView({ onSelectLead }: HeatmapViewProps) {
               title="Toggle automatic real-time traffic clicks"
             >
               {isLiveTrafficStreaming ? <LuSquare size={13} style={{ color: '#DC2626' }} /> : <LuPlay size={13} style={{ color: '#059669' }} />}
-              <span>{isLiveTrafficStreaming ? 'Stop Feed' : 'Live Stream'}</span>
+              <span>{isLiveTrafficStreaming ? 'Stop simulation' : 'Simulate clicks'}</span>
             </button>
 
             <button
@@ -900,7 +736,7 @@ export default function HeatmapView({ onSelectLead }: HeatmapViewProps) {
               title="Simulate 25 rapid visitor clicks"
             >
               <LuZap size={13} />
-              <span>+25 Clicks</span>
+              <span>Add 25 test clicks</span>
             </button>
 
             <button
@@ -910,7 +746,7 @@ export default function HeatmapView({ onSelectLead }: HeatmapViewProps) {
               title="Reset current page to realistic baseline points"
             >
               <LuRotateCcw size={13} />
-              <span>Reset</span>
+              <span>Restore sample clicks</span>
             </button>
 
             <button
@@ -923,160 +759,17 @@ export default function HeatmapView({ onSelectLead }: HeatmapViewProps) {
               <span>Clear</span>
             </button>
           </div>
-        </div>
+        </div>}
 
-        {/* Top KPI Metrics Bar */}
-        <div className="heatmap-kpi-grid">
-          <div className="heatmap-kpi-card">
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <span style={{ fontSize: '11px', fontWeight: 700, color: '#557396', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                Tracked Sessions
-              </span>
-              <span className="heatmap-badge-orange">+14.2% MoM</span>
-            </div>
-            <div style={{ fontSize: '24px', fontWeight: 800, color: '#0F1A34', letterSpacing: '-0.02em' }}>
-              {activeHeatmapPage.sessions}
-            </div>
-            <div style={{ fontSize: '12px', color: '#557396', display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <LuUsers size={13} />
-              <span>Avg Dwell: {activeHeatmapPage.avgTime} &bull; Bounce: {activeHeatmapPage.bounceRate}</span>
+        <div className="hm-analysis-layout">
+        <div className="heatmap-browser-wrapper hm-preview">
+          <div className="hm-preview-toolbar">
+            <div><span className="hm-source-dot" />{websiteMode === 'mirror' ? 'Sample preview' : 'Real website'}<span className="hm-preview-path">{activeHeatmapPage.path}</span></div>
+            <div className="hm-preview-actions">
+              <button type="button" className={isBrowseMode ? 'active' : ''} aria-pressed={isBrowseMode} onClick={() => setIsBrowseMode(value => !value)}><LuMousePointer size={14} />{isBrowseMode ? 'Back to heatmap' : 'Browse page'}</button>
+              <button type="button" aria-label="Reload website" onClick={handleReloadIframe}><LuRefreshCw size={15} className={isIframeLoading ? 'heatmap-spin' : ''} /></button>
             </div>
           </div>
-
-          <div className="heatmap-kpi-card">
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <span style={{ fontSize: '11px', fontWeight: 700, color: '#557396', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                Click Telemetry Registered
-              </span>
-              <span className="heatmap-badge-blue">{currentPoints.length} On Page</span>
-            </div>
-            <div style={{ fontSize: '24px', fontWeight: 800, color: '#0F1A34', letterSpacing: '-0.02em' }}>
-              {(currentPoints.length * 142).toLocaleString()} Total
-            </div>
-            <div style={{ fontSize: '12px', color: '#557396', display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <LuMousePointerClick size={13} />
-              <span>Live clicks registered on real techgylink.com</span>
-            </div>
-          </div>
-
-          <div className="heatmap-kpi-card">
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <span style={{ fontSize: '11px', fontWeight: 700, color: '#557396', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                Top Converting CTA
-              </span>
-              <span className="heatmap-badge-green">15.2% CR</span>
-            </div>
-            <div style={{ fontSize: '24px', fontWeight: 800, color: '#0F1A34', letterSpacing: '-0.02em' }}>
-              {aggregatedElementStats[0]?.element || 'Hero Discovery'}
-            </div>
-            <div style={{ fontSize: '12px', color: '#557396', display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <LuTrendingUp size={13} />
-              <span>{aggregatedElementStats[0]?.count || 0} direct clicks ({aggregatedElementStats[0]?.share || 0}% share)</span>
-            </div>
-          </div>
-
-          <div className="heatmap-kpi-card">
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <span style={{ fontSize: '11px', fontWeight: 700, color: '#557396', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                Attributed CRM Pipeline
-              </span>
-              <span className="heatmap-badge-purple">1,224 Leads</span>
-            </div>
-            <div style={{ fontSize: '24px', fontWeight: 800, color: '#059669', letterSpacing: '-0.02em' }}>
-              ₹1,84,00,000
-            </div>
-            <div style={{ fontSize: '12px', color: '#557396', display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <LuDollarSign size={13} />
-              <span>Direct closed sales &amp; active negotiations</span>
-            </div>
-          </div>
-        </div>
-
-        {/* REAL WEBSITE BROWSER FRAME (Directly rendering techgylink.com) */}
-        <div className="heatmap-browser-wrapper">
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingBottom: '4px', flexWrap: 'wrap', gap: '8px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-              <strong style={{ fontSize: '0.9375rem', color: '#0F1A34' }}>
-                Live Canvas: <span style={{ color: '#0022FF' }}>https://techgylink.com{activeHeatmapPage.path}</span>
-              </strong>
-              <span className="gmap-badge-green" style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                <LuShieldCheck size={13} />
-                <span>SSL Verified &bull; Active Telemetry</span>
-              </span>
-            </div>
-
-            {/* View Mode Switches: Heatmap Overlay vs Browse Real Site */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
-              {/* Interaction Mode Toggle */}
-              <div className="heatmap-segmented-btn-group">
-                <button
-                  type="button"
-                  className={`heatmap-segmented-btn ${!isBrowseMode ? 'active' : ''}`}
-                  onClick={() => setIsBrowseMode(false)}
-                  title="Click anywhere to capture and view heat telemetry"
-                >
-                  <LuFlame size={13} style={{ color: !isBrowseMode ? '#EA580C' : '#557396' }} />
-                  <span>Heatmap &amp; Click Capture</span>
-                </button>
-                <button
-                  type="button"
-                  className={`heatmap-segmented-btn ${isBrowseMode ? 'active' : ''}`}
-                  onClick={() => setIsBrowseMode(true)}
-                  title="Browse and interact with the live website underneath"
-                >
-                  <LuGlobe size={13} style={{ color: isBrowseMode ? '#0022FF' : '#557396' }} />
-                  <span>Browse Website</span>
-                </button>
-              </div>
-
-              {/* Source Switcher: Live Real Site vs Direct Iframe vs Offline Mirror */}
-              <div className="heatmap-segmented-btn-group">
-                <button
-                  type="button"
-                  className={`heatmap-segmented-btn ${websiteMode === 'proxy' ? 'active' : ''}`}
-                  onClick={() => setWebsiteMode('proxy')}
-                  title="Actively fetch and render real production website from https://techgylink.com"
-                >
-                  <LuGlobe size={13} style={{ color: websiteMode === 'proxy' ? '#0022FF' : '#557396' }} />
-                  <span>Real Website (Live Fetch)</span>
-                </button>
-                <button
-                  type="button"
-                  className={`heatmap-segmented-btn ${websiteMode === 'live' ? 'active' : ''}`}
-                  onClick={() => setWebsiteMode('live')}
-                  title="Stream techgylink.com directly in live iframe"
-                >
-                  <span>Direct Site</span>
-                </button>
-                <button
-                  type="button"
-                  className={`heatmap-segmented-btn ${websiteMode === 'mirror' ? 'active' : ''}`}
-                  onClick={() => setWebsiteMode('mirror')}
-                  title="Instant offline fallback mirror"
-                >
-                  <LuZap size={13} style={{ color: websiteMode === 'mirror' ? '#EA580C' : '#557396' }} />
-                  <span>Offline Mirror</span>
-                </button>
-              </div>
-
-              {websiteMode !== 'mirror' && (
-                <button
-                  type="button"
-                  className="btn-secondary btn-sm"
-                  onClick={handleReloadIframe}
-                  title="Re-fetch real website from techgylink.com"
-                >
-                  <LuRefreshCw size={13} className={isIframeLoading ? 'heatmap-spin' : ''} />
-                  <span>Re-fetch Real Site</span>
-                </button>
-              )}
-
-              <span style={{ fontSize: '0.75rem', color: '#64748B', background: '#E2E8F0', padding: '3px 8px', borderRadius: 'var(--radius-popup, 3px)', fontWeight: 600 }}>
-                {heatmapDevice === 'desktop' ? 'Viewport: 1440 × 900px' : heatmapDevice === 'tablet' ? 'Viewport: 768 × 1024px' : 'Viewport: 390 × 844px'}
-              </span>
-            </div>
-          </div>
-
           <div className={`heatmap-browser-frame ${heatmapDevice}`}>
             {/* Browser Chrome Header */}
             <div className="heatmap-browser-chrome">
@@ -1092,7 +785,7 @@ export default function HeatmapView({ onSelectLead }: HeatmapViewProps) {
               </div>
 
               <span className="heatmap-chrome-device-tag" style={{ color: websiteMode === 'proxy' ? '#059669' : undefined, fontWeight: 700 }}>
-                {websiteMode === 'proxy' ? '🟢 Live Fetched (techgylink.com)' : websiteMode === 'live' ? '🌐 Direct Stream' : '⚡ Offline Mirror'}
+                {websiteMode === 'proxy' ? '🟢 Live website' : websiteMode === 'live' ? '🌐 Direct iframe' : '⚡ Reliable preview'}
               </span>
             </div>
 
@@ -1487,7 +1180,7 @@ export default function HeatmapView({ onSelectLead }: HeatmapViewProps) {
                 ))}
 
                 {/* Scatter Point Mode (Individual Glowing Dots) */}
-                {heatmapMode === 'scatter' && currentPoints.map(pt => (
+                {heatmapMode === 'scatter' && displayedPoints.map(pt => (
                   <div
                     key={pt.id}
                     className={`heatmap-scatter-dot ${pt.isConversion ? 'conversion' : pt.isRageClick ? 'rage' : pt.isDeadClick ? 'dead' : ''}`}
@@ -1557,6 +1250,27 @@ export default function HeatmapView({ onSelectLead }: HeatmapViewProps) {
           </div>
         </div>
 
+        <aside className="hm-insights">
+          <div className="hm-insights-heading"><h3>Click overview</h3><span>Sample data + clicks in this preview</span></div>
+          <div className="hm-click-total"><strong>{currentPoints.length.toLocaleString()}</strong><span>clicks displayed</span></div>
+          <div className="hm-legend"><span>Less activity</span><i /><span>More</span></div>
+          <div className="hm-ranking-head"><h4>Most clicked</h4><span>{aggregatedElementStats.length} elements</span></div>
+          <div className="hm-rankings">
+            {aggregatedElementStats.slice(0, 5).map((stat, index) => (
+              <button key={stat.element} type="button" className={selectedElementId === stat.element ? 'active' : ''} onClick={() => setSelectedElementId(value => value === stat.element ? null : stat.element)}>
+                <span className="hm-rank-number">{index + 1}</span>
+                <span className="hm-rank-content"><strong>{stat.element}</strong><span className="hm-rank-track"><i style={{ width: `${stat.share}%` }} /></span></span>
+                <span className="hm-rank-count">{stat.count}<small>{stat.share}%</small></span>
+              </button>
+            ))}
+            {currentPoints.length === 0 && <p className="hm-empty">No clicks to show. Click the page to add a test point, or restore sample clicks in Settings.</p>}
+          </div>
+          <div className="hm-help"><LuMousePointerClick size={17} /><p>{isBrowseMode ? 'Browse the real page. Switch back to the heatmap to view the full overlay.' : 'Warmer colours show more clicks. Click the page to add a test point.'}</p></div>
+          <button type="button" className="hm-report-button" onClick={() => setShowDetailedReports(value => !value)} aria-expanded={showDetailedReports}>{showDetailedReports ? 'Hide detailed report' : 'View detailed report'}<LuArrowRight size={15} /></button>
+        </aside>
+        </div>
+
+        {showDetailedReports && <>
         {/* "What Clicking is Working" - Comprehensive Element Performance Table */}
         <section className="section-card">
           <div className="integ-recent-head" style={{ marginBottom: '1rem', flexWrap: 'wrap', gap: '10px' }}>
@@ -1834,14 +1548,28 @@ export default function HeatmapView({ onSelectLead }: HeatmapViewProps) {
             </table>
           </div>
         </section>
+        </>}
       </div>
 
       {/* TRACKING SCRIPT INSTALLATION MODAL (Very less rounded --radius-popup: 3px) */}
       {showEmbedModal && (
-        <div className="modal-backdrop" onClick={() => setShowEmbedModal(false)}>
+        <div
+          className="modal-overlay modal-backdrop"
+          onClick={() => setShowEmbedModal(false)}
+          style={{
+            position: 'fixed',
+            inset: 0,
+            zIndex: 10000,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '1.25rem 1rem',
+            overflowY: 'auto'
+          }}
+        >
           <div
             className="modal-card"
-            style={{ maxWidth: '640px', borderRadius: 'var(--radius-popup, 3px)' }}
+            style={{ maxWidth: '640px', width: '100%', borderRadius: 'var(--radius-popup, 3px)', margin: 'auto' }}
             onClick={(e) => e.stopPropagation()}
             role="dialog"
             aria-modal="true"
@@ -1858,7 +1586,7 @@ export default function HeatmapView({ onSelectLead }: HeatmapViewProps) {
               </div>
               <button
                 type="button"
-                className="btn-icon"
+                className="modal-close-btn"
                 onClick={() => setShowEmbedModal(false)}
                 aria-label="Close modal"
               >
@@ -1866,7 +1594,7 @@ export default function HeatmapView({ onSelectLead }: HeatmapViewProps) {
               </button>
             </div>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', padding: '16px 0' }}>
+            <div className="modal-body">
               <div>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
                   <span style={{ fontSize: '12px', fontWeight: 700, color: '#0F1A34' }}>
@@ -1916,7 +1644,7 @@ export default function HeatmapView({ onSelectLead }: HeatmapViewProps) {
               </div>
             </div>
 
-            <div className="modal-actions" style={{ justifyContent: 'flex-end', borderTop: '1px solid #E2E8F0', paddingTop: '14px' }}>
+            <div className="modal-footer">
               <button
                 type="button"
                 className="btn-secondary"

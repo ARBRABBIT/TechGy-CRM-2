@@ -5,14 +5,16 @@ import SocialAnalyticsView from './SocialAnalyticsView';
 import { computeSocialSummary, exportSocialAnalysisCsv, INITIAL_SOCIAL_POSTS } from '../data/socialData';
 
 describe('SocialAnalyticsView Component', () => {
-  it('renders the Social Content & Video Performance Analysis header', () => {
+  it('renders the simplified social performance header', () => {
     render(<SocialAnalyticsView />);
-    expect(screen.getByText('Social Content & Video Performance Analysis')).toBeInTheDocument();
-    expect(screen.getByText(/Connect your social media accounts to track what posts and videos are working/i)).toBeInTheDocument();
+    expect(screen.getByText('Social performance')).toBeInTheDocument();
+    expect(screen.getByText(/See what content is working, what needs attention/i)).toBeInTheDocument();
   });
 
-  it('renders connected social platforms cards', () => {
+  it('reveals connected social platforms only when requested', () => {
     render(<SocialAnalyticsView />);
+    expect(screen.queryByText('@techgylink')).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: /Manage accounts/i }));
     expect(screen.getAllByText('Instagram')[0]).toBeInTheDocument();
     expect(screen.getAllByText('@techgylink')[0]).toBeInTheDocument();
     expect(screen.getAllByText('LinkedIn')[0]).toBeInTheDocument();
@@ -67,7 +69,7 @@ describe('SocialAnalyticsView Component', () => {
   it('opens connect social account modal and allows connecting a platform', () => {
     render(<SocialAnalyticsView />);
 
-    const connectBtn = screen.getByRole('button', { name: /Connect Social Account/i });
+    const connectBtn = screen.getByRole('button', { name: /Connect account/i });
     fireEvent.click(connectBtn);
 
     expect(screen.getByRole('heading', { name: /Connect Social Account/i })).toBeInTheDocument();

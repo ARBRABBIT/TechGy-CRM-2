@@ -20,7 +20,7 @@ const openDialogs: object[] = [];
  * - Escape closes the top-most dialog, unless a dropdown inside it is open
  *   (any element with aria-expanded="true" handles Escape itself)
  */
-export default function useDialog(ref: RefObject<HTMLElement | null>, isOpen: boolean, onClose?: () => void): void {
+export function useDialog(ref: RefObject<HTMLElement | null>, isOpen: boolean, onClose?: () => void): void {
   const onCloseRef = useRef(onClose);
   useEffect(() => {
     onCloseRef.current = onClose;
@@ -103,3 +103,5 @@ export function installEscapeToCloseOverlays() {
   window.addEventListener('keydown', onKeyDown);
   return () => window.removeEventListener('keydown', onKeyDown);
 }
+
+export default useDialog;

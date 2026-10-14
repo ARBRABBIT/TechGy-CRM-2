@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   LuPackage,
   LuShare2,
@@ -16,12 +16,15 @@ import {
   LuPhoneCall,
   LuCircleCheck,
   LuClipboardCheck,
-  LuCheck
+  LuCheck,
+  LuFlame,
+  LuVideo
 } from 'react-icons/lu';
 import { STORAGE_KEYS } from '../constants/storageKeys';
 import { INITIAL_MASTER_DATA } from '../data/masterData';
 import { onKeyActivate } from '../utils/a11y';
 import { EmptyRow } from '../components/common/StateViews';
+import { useDialog } from '../hooks/useDialog';
 
 export const MASTER_CATEGORIES = [
   {
@@ -113,6 +116,24 @@ export const MASTER_CATEGORIES = [
     icon: LuShare2,
     iconBg: '#E0F2FE',
     iconColor: '#0284C7'
+  },
+  {
+    id: 'heatmapDomains',
+    title: 'Heatmap Domains',
+    singular: 'Heatmap Domain',
+    desc: 'Configure verified websites, web applications, and landing page domains tracked by the heat map engine.',
+    icon: LuFlame,
+    iconBg: '#EFF6FF',
+    iconColor: '#0284C7'
+  },
+  {
+    id: 'socialPlatforms',
+    title: 'Social Channels',
+    singular: 'Social Channel',
+    desc: 'Manage connected social platforms, brand handles, and API sync endpoints for video analytics.',
+    icon: LuVideo,
+    iconBg: '#FDF2F8',
+    iconColor: '#DB2777'
   }
 ];
 
@@ -172,6 +193,14 @@ export default function MasterDataView({
     sources: {
       code: '',
       name: ''
+    },
+    heatmapDomains: {
+      code: '',
+      name: ''
+    },
+    socialPlatforms: {
+      code: '',
+      name: ''
     }
   };
 
@@ -186,6 +215,8 @@ export default function MasterDataView({
       case 'industries': return 'IND';
       case 'products': return 'PRD';
       case 'sources': return 'SRC';
+      case 'heatmapDomains': return 'HTM';
+      case 'socialPlatforms': return 'SOC';
       case 'emailTemplates': return 'TPL';
       default: return 'MST';
     }
@@ -271,10 +302,16 @@ export default function MasterDataView({
         const stored = localStorage.getItem(MASTER_STORAGE_KEY);
         if (stored) {
           const parsed = JSON.parse(stored);
+          const mergeWithInitial = (storedList, initialList) => {
+            if (!storedList || !Array.isArray(storedList)) return initialList || [];
+            const existingNames = new Set(storedList.map(item => (item.name || item.description || '').trim().toLowerCase()));
+            const missing = (initialList || []).filter(item => !existingNames.has((item.name || item.description || '').trim().toLowerCase()));
+            return [...storedList, ...missing];
+          };
           return {
             ...INITIAL_MASTER_DATA,
             ...parsed,
-            contentTypes: parsed.contentTypes || INITIAL_MASTER_DATA.contentTypes,
+            contentTypes: mergeWithInitial(parsed.contentTypes, INITIAL_MASTER_DATA.contentTypes),
             followupTypes: parsed.followupTypes || INITIAL_MASTER_DATA.followupTypes,
             followupStatuses: parsed.followupStatuses || INITIAL_MASTER_DATA.followupStatuses,
             leadStatuses: parsed.leadStatuses || INITIAL_MASTER_DATA.leadStatuses,
@@ -286,8 +323,10 @@ export default function MasterDataView({
             objections: parsed.objections || INITIAL_MASTER_DATA.objections,
             industries: parsed.industries || INITIAL_MASTER_DATA.industries,
             emailTemplates: parsed.emailTemplates || INITIAL_MASTER_DATA.emailTemplates,
-            products: parsed.products || INITIAL_MASTER_DATA.products,
-            sources: parsed.sources || INITIAL_MASTER_DATA.sources
+            products: mergeWithInitial(parsed.products, INITIAL_MASTER_DATA.products),
+            sources: mergeWithInitial(parsed.sources, INITIAL_MASTER_DATA.sources),
+            heatmapDomains: mergeWithInitial(parsed.heatmapDomains, INITIAL_MASTER_DATA.heatmapDomains),
+            socialPlatforms: mergeWithInitial(parsed.socialPlatforms, INITIAL_MASTER_DATA.socialPlatforms)
           };
         }
       } catch {}
@@ -339,6 +378,19 @@ export default function MasterDataView({
       } catch {}
     }
   };
+
+  // Accessibility & Focus Dialog Hooks (Escape key, focus trap, and autofocus)
+  const addModalRef = useRef(null);
+  useDialog(addModalRef, isAddModalOpen && selectedCategory !== 'emailTemplates', () => setIsAddModalOpen(false));
+
+  const editModalRef = useRef(null);
+  useDialog(editModalRef, Boolean(editingRecord), () => setEditingRecord(null));
+
+  const templateModalRef = useRef(null);
+  useDialog(templateModalRef, Boolean(editingTemplate || (isAddModalOpen && selectedCategory === 'emailTemplates')), () => {
+    if (editingTemplate) setEditingTemplate(null);
+    else setIsAddModalOpen(false);
+  });
 
   const effectiveSearch = (searchQuery || localSearch).toLowerCase().trim();
 
@@ -1071,6 +1123,24 @@ export default function MasterDataView({
                       <th style={{ padding: '0.75rem 1rem', textAlign: 'right' }}>Actions</th>
                     </>
                   )}
+
+                  {/* Heatmap Domains */}
+                  {selectedCategory === 'heatmapDomains' && (
+                    <>
+                      <th style={{ padding: '0.75rem 1rem' }}>Code</th>
+                      <th style={{ padding: '0.75rem 1rem' }}>Monitored Domain / URL</th>
+                      <th style={{ padding: '0.75rem 1rem', textAlign: 'right' }}>Actions</th>
+                    </>
+                  )}
+
+                  {/* Social Channels */}
+                  {selectedCategory === 'socialPlatforms' && (
+                    <>
+                      <th style={{ padding: '0.75rem 1rem' }}>Code</th>
+                      <th style={{ padding: '0.75rem 1rem' }}>Social Channel &amp; Handle</th>
+                      <th style={{ padding: '0.75rem 1rem', textAlign: 'right' }}>Actions</th>
+                    </>
+                  )}
                 </tr>
               </thead>
 
@@ -1163,6 +1233,22 @@ export default function MasterDataView({
                       </>
                     )}
 
+                    {/* Heatmap Domains */}
+                    {selectedCategory === 'heatmapDomains' && (
+                      <>
+                        <td style={{ padding: '0.75rem 1rem', fontFamily: 'monospace', fontWeight: 600, color: '#557396' }}>{item.code || item.id}</td>
+                        <td style={{ padding: '0.75rem 1rem', fontWeight: 700, color: '#0F1A34' }}>{item.name}</td>
+                      </>
+                    )}
+
+                    {/* Social Channels */}
+                    {selectedCategory === 'socialPlatforms' && (
+                      <>
+                        <td style={{ padding: '0.75rem 1rem', fontFamily: 'monospace', fontWeight: 600, color: '#557396' }}>{item.code || item.id}</td>
+                        <td style={{ padding: '0.75rem 1rem', fontWeight: 700, color: '#0F1A34' }}>{item.name}</td>
+                      </>
+                    )}
+
                     {/* Actions Column (Edit ONLY - NO Delete option) */}
                     <td style={{ padding: '0.75rem 1rem', textAlign: 'right' }}>
                       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '0.375rem' }}>
@@ -1218,8 +1304,29 @@ export default function MasterDataView({
         const CatIcon = meta?.icon || LuPackage;
 
         return (
-          <div className="modal-overlay" onClick={() => setIsAddModalOpen(false)}>
-            <div role="dialog" aria-label={`Add ${meta?.singular || meta?.title || 'Record'}`} aria-modal="true" className="modal-card" style={{ maxWidth: '540px' }} onClick={e => e.stopPropagation()}>
+          <div
+            className="modal-overlay modal-backdrop"
+            onClick={() => setIsAddModalOpen(false)}
+            style={{
+              position: 'fixed',
+              inset: 0,
+              zIndex: 10000,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: '1.25rem 1rem',
+              overflowY: 'auto'
+            }}
+          >
+            <div
+              ref={addModalRef}
+              role="dialog"
+              aria-label={`Add ${meta?.singular || meta?.title || 'Record'}`}
+              aria-modal="true"
+              className="modal-card"
+              style={{ maxWidth: '540px', width: '100%', margin: 'auto' }}
+              onClick={e => e.stopPropagation()}
+            >
               <div className="modal-header">
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.625rem' }}>
                   <div style={{
@@ -1435,6 +1542,36 @@ export default function MasterDataView({
                     </div>
                   )}
 
+                  {/* Heatmap Domains */}
+                  {activeCat === 'heatmapDomains' && (
+                    <div className="form-group">
+                      <label className="form-label">Monitored Domain / URL *</label>
+                      <input aria-label="Monitored Domain / URL"
+                        type="text"
+                        required
+                        className="form-input"
+                        placeholder="e.g. techgylink.com, app.techgylink.com"
+                        value={sectionFormData.heatmapDomains?.name || ''}
+                        onChange={(e) => updateSectionField('heatmapDomains', 'name', e.target.value)}
+                      />
+                    </div>
+                  )}
+
+                  {/* Social Channels */}
+                  {activeCat === 'socialPlatforms' && (
+                    <div className="form-group">
+                      <label className="form-label">Social Channel &amp; Handle *</label>
+                      <input aria-label="Social Channel &amp; Handle"
+                        type="text"
+                        required
+                        className="form-input"
+                        placeholder="e.g. Instagram (@techgylink), YouTube (@TechGyLink)"
+                        value={sectionFormData.socialPlatforms?.name || ''}
+                        onChange={(e) => updateSectionField('socialPlatforms', 'name', e.target.value)}
+                      />
+                    </div>
+                  )}
+
                 </div>
                 <div className="modal-footer">
                   <button type="button" className="btn-secondary" onClick={() => setIsAddModalOpen(false)}>Cancel</button>
@@ -1467,8 +1604,25 @@ export default function MasterDataView({
 
 
         return (
-          <div className="modal-overlay" onClick={closeHandler} style={{ zIndex: 1200, animation: 'none' }}>
-            <div role="dialog" aria-label={isEditing ? 'Edit Email Template' : 'Create Email Template'} aria-modal="true"
+          <div
+            className="modal-overlay modal-backdrop"
+            onClick={closeHandler}
+            style={{
+              position: 'fixed',
+              inset: 0,
+              zIndex: 10000,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: '1.25rem 1rem',
+              overflowY: 'auto'
+            }}
+          >
+            <div
+              ref={templateModalRef}
+              role="dialog"
+              aria-label={isEditing ? 'Edit Email Template' : 'Create Email Template'}
+              aria-modal="true"
               className="modal-card"
               style={{
                 maxWidth: '1100px',
@@ -1476,10 +1630,9 @@ export default function MasterDataView({
                 maxHeight: '92vh',
                 display: 'flex',
                 flexDirection: 'column',
-                borderRadius: 'var(--radius)',
+                borderRadius: 'var(--radius-popup, 3px)',
                 overflow: 'hidden',
-                animation: 'none',
-                transform: 'none'
+                margin: 'auto'
               }}
               onClick={e => e.stopPropagation()}
             >
@@ -1996,8 +2149,29 @@ export default function MasterDataView({
       {/* 6. EDIT STANDARD MASTER RECORD MODAL                                   */}
       {/* ---------------------------------------------------------------------- */}
       {editingRecord && (
-        <div className="modal-overlay" onClick={() => setEditingRecord(null)}>
-          <div role="dialog" aria-label={`Edit ${selectedCategoryMeta?.singular || selectedCategoryMeta?.title || 'Record'}`} aria-modal="true" className="modal-card" style={{ maxWidth: '520px' }} onClick={e => e.stopPropagation()}>
+        <div
+          className="modal-overlay modal-backdrop"
+          onClick={() => setEditingRecord(null)}
+          style={{
+            position: 'fixed',
+            inset: 0,
+            zIndex: 10000,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '1.25rem 1rem',
+            overflowY: 'auto'
+          }}
+        >
+          <div
+            ref={editModalRef}
+            role="dialog"
+            aria-label={`Edit ${selectedCategoryMeta?.singular || selectedCategoryMeta?.title || 'Record'}`}
+            aria-modal="true"
+            className="modal-card"
+            style={{ maxWidth: '520px', width: '100%', margin: 'auto' }}
+            onClick={e => e.stopPropagation()}
+          >
             <div className="modal-header">
               <h3 className="modal-title">Edit {selectedCategoryMeta?.singular || selectedCategoryMeta?.title || 'Record'}</h3>
               <button className="modal-close-btn" onClick={() => setEditingRecord(null)}><LuX size={18} /></button>
@@ -2040,6 +2214,8 @@ export default function MasterDataView({
                     {selectedCategory === 'objections' ? 'Objection Concern *' :
                      selectedCategory === 'products' ? 'Product / Service Name *' :
                      selectedCategory === 'sources' ? 'Lead Source Name *' :
+                     selectedCategory === 'heatmapDomains' ? 'Monitored Domain / URL *' :
+                     selectedCategory === 'socialPlatforms' ? 'Social Channel & Handle *' :
                      selectedCategory === 'agentChecklist' ? 'Points to Talk *' :
                      selectedCategory === 'contentTypes' ? 'Content Type Name *' :
                      selectedCategory === 'followupTypes' ? 'Follow-up Type Name *' :
@@ -2082,20 +2258,6 @@ export default function MasterDataView({
                     />
                   )}
                 </div>
-
-                {/* Sources (Only Channel Name Editable) */}
-                {selectedCategory === 'sources' && (
-                  <div className="form-group">
-                    <label className="form-label">Channel Name *</label>
-                    <input aria-label="Channel Name"
-                      type="text"
-                      required
-                      className="form-input"
-                      value={editRecordFormData.name || ''}
-                      onChange={(e) => setEditRecordFormData({ ...editRecordFormData, name: e.target.value })}
-                    />
-                  </div>
-                )}
               </div>
 
               <div className="modal-footer">

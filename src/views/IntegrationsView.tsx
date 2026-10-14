@@ -586,6 +586,7 @@ export default function IntegrationsView({
   initialTab = 'connectors'
 }) {
   const [activeTab, setActiveTab] = useState(initialTab); // 'connectors' | 'googleMaps' | 'heatmap' | 'logs' | 'docs' | 'sandbox'
+  const [showLeadFlow, setShowLeadFlow] = useState(false);
 
   useEffect(() => {
     if (initialTab) {
@@ -688,7 +689,7 @@ export default function IntegrationsView({
         <div>
           <h2 className="integ-title">Integrations</h2>
           <p className="integ-subtitle">
-            Bring leads from ad platforms, Google Maps, and tools straight into your CRM pipeline — mapped, de-duplicated and assigned.
+            Connect lead sources and manage where new leads go.
           </p>
         </div>
       </div>
@@ -701,7 +702,7 @@ export default function IntegrationsView({
           onClick={() => setActiveTab('connectors')}
         >
           <LuSlidersHorizontal size={15} />
-          <span>All Connectors</span>
+          <span>Connections</span>
           <span className="integ-tab-badge">{enabledCount}/{CONNECTORS.length}</span>
         </button>
 
@@ -711,7 +712,7 @@ export default function IntegrationsView({
           onClick={() => setActiveTab('googleMaps')}
         >
           <SiGooglemaps size={15} style={{ color: '#EA4335' }} />
-          <span>Google Maps Analysis</span>
+          <span>Google Maps</span>
           <span className="integ-tab-badge" style={{ background: '#FEECEB', color: '#EA4335' }}>Live</span>
         </button>
 
@@ -721,27 +722,23 @@ export default function IntegrationsView({
           onClick={() => setActiveTab('logs')}
         >
           <LuFileText size={15} />
-          <span>Intake History & Logs</span>
+          <span>Lead activity</span>
           <span className="integ-tab-badge">{captured.length}</span>
         </button>
 
-        <button
-          type="button"
-          className={`integ-tab-button ${activeTab === 'docs' ? 'active' : ''}`}
-          onClick={() => setActiveTab('docs')}
-        >
-          <LuCode size={15} />
-          <span>Webhook & API Guide</span>
-        </button>
-
-        <button
-          type="button"
-          className={`integ-tab-button ${activeTab === 'sandbox' ? 'active' : ''}`}
-          onClick={() => setActiveTab('sandbox')}
-        >
-          <LuTerminal size={15} />
-          <span>Intake Simulator</span>
-        </button>
+        <label className="integ-tools-select">
+          <span className="sr-only">Developer tools</span>
+          <LuCode size={15} aria-hidden="true" />
+          <select
+            value={activeTab === 'docs' || activeTab === 'sandbox' ? activeTab : ''}
+            onChange={(event) => event.target.value && setActiveTab(event.target.value)}
+            aria-label="Open developer tools"
+          >
+            <option value="">Developer tools</option>
+            <option value="docs">Webhook &amp; API guide</option>
+            <option value="sandbox">Intake simulator</option>
+          </select>
+        </label>
       </div>
 
       {!backendReady && activeTab !== 'googleMaps' && (
@@ -779,17 +776,25 @@ export default function IntegrationsView({
             </div>
           </div>
 
-          <div className="integ-flow" aria-label="How connector leads flow into the CRM">
-            {FLOW.map(({ icon: Icon, title, text }, i) => (
-              <div key={title} className="integ-flow-step">
-                <span className="integ-flow-icon"><Icon size={16} aria-hidden="true" /></span>
-                <div>
-                  <strong>{title}</strong>
-                  <span>{text}</span>
-                </div>
-                {i < FLOW.length - 1 && <LuArrowRight className="integ-flow-arrow" size={16} aria-hidden="true" />}
+          <div className="simple-disclosure">
+            <button type="button" className="simple-disclosure-trigger" onClick={() => setShowLeadFlow(value => !value)} aria-expanded={showLeadFlow}>
+              <LuInfo size={15} aria-hidden="true" />
+              <span>{showLeadFlow ? 'Hide how leads are processed' : 'How are incoming leads processed?'}</span>
+            </button>
+            {showLeadFlow && (
+              <div className="integ-flow" aria-label="How connector leads flow into the CRM">
+                {FLOW.map(({ icon: Icon, title, text }, i) => (
+                  <div key={title} className="integ-flow-step">
+                    <span className="integ-flow-icon"><Icon size={16} aria-hidden="true" /></span>
+                    <div>
+                      <strong>{title}</strong>
+                      <span>{text}</span>
+                    </div>
+                    {i < FLOW.length - 1 && <LuArrowRight className="integ-flow-arrow" size={16} aria-hidden="true" />}
+                  </div>
+                ))}
               </div>
-            ))}
+            )}
           </div>
 
           <div className="integ-grid">
