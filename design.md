@@ -140,14 +140,13 @@ Shadows in this design system use a distinct blue tint (`rgba(6, 54, 105, ...)`)
 
 ### 2.4 Border Radii & Corner Geometry
 
+Surfaces are deliberately crisp: every card, popup, modal, dropdown, toast and input shares one small radius. Actions (buttons, chips, search box) keep the pill shape so they read as tappable. All values are CSS custom properties on `:root` in `src/index.css` — change `--radius` to retune every surface at once.
+
 | Radius Token | Value | Applied To |
 |---|---|---|
-| `radius-xs` | `4px` - `6px` | Inline mini tags, calendar today dots |
-| `radius-sm` | `7px` - `8px` | Form inputs, select dropdowns, brand logo squircle |
-| `radius-md` | `10px` - `12px` | Inner calendar badges, timeline cards, segmented container |
-| `radius-lg` | `16px` | Screen cards, modal dialogs, floating call bar |
-| `radius-xl` | `20px` | Master data hub cards, bottom sheet top corners, notifications card |
-| `radius-pill` | `9999px` (Full) | All buttons (`.btn-primary`, `.btn-secondary`), status chips, date trigger, search box |
+| `--radius-sm` | `2px` | Progress tracks, tiny inline markers |
+| `--radius` | `4px` | Cards, modals, popovers, dropdown menus, toasts, form inputs, icon squircles, chat bubbles |
+| `--radius-pill` | `9999px` (Full) | All buttons (`.btn-primary`, `.btn-secondary`), status chips, date trigger, search box |
 | `radius-circle`| `50%` | Contact avatars, timeline node icons, call action buttons |
 
 ---
@@ -255,7 +254,7 @@ All buttons adhere to the **Pill Rule** (`border-radius: 9999px`).
 #### Standard Text Input & Select Box
 - **Container Height:** 48px - 52px
 - **Background:** `#F8FAFC` (Inactive) → `#FFFFFF` (Focused)
-- **Corner Radius:** `10px` - `12px` (Cards) or `32px` (Auth Screens)
+- **Corner Radius:** `var(--radius)` (4px) for cards, auth inputs and the brand panel; only the submit button is pill-shaped
 - **Border:** None (borderless aesthetic)
 - **Focus Ring:** `box-shadow: 0 0 0 2px rgba(6, 54, 105, 0.18)`
 - **Placeholder Text:** `#94A3B8`, Weight 400
@@ -330,7 +329,7 @@ For mobile, the popover adapts into an **iOS-Style Date Wheel / Bottom Sheet**:
 └─────────────────────────────────────────────────────────────┘
 ```
 
-- **Card Surface:** `#FFFFFF` with `border-radius: 16px` and `--shadow-md`
+- **Card Surface:** `#FFFFFF` with `border-radius: var(--radius)` and `--shadow-md`
 - **Value Number:** `24px` - `28px`, Weight 800, Color `#063669`, negative letter spacing `-0.02em`
 - **Label / Title:** `11px` UPPERCASE, Weight 700, Color `#557396`, tracking `+0.05em`
 - **Trend Pill:**
@@ -386,7 +385,7 @@ Wide desktop data tables cannot be horizontally scrolled comfortably on mobile d
 
 1. **Card Container:**
    - Background: `#FFFFFF`
-   - Radius: `16px`
+   - Radius: `var(--radius)`
    - Shadow: `0 2px 10px rgba(6, 54, 105, 0.05)`
    - Padding: `16px`
    - Margin Bottom: `12px`
@@ -423,7 +422,7 @@ On desktop, detail panels slide out as right drawers (`width: 520px`). On mobile
 └─────────────────────────────────────────────────────────────┘
 ```
 
-- **Top Geometry:** `border-top-left-radius: 20px; border-top-right-radius: 20px;`
+- **Top Geometry:** `border-top-left-radius: var(--radius); border-top-right-radius: var(--radius);`
 - **Grabber Handle:** Width 36px, height 4px, background `#CBD5E1`, radius 9999px, centered 8px from top.
 - **Backdrop:** `rgba(6, 54, 105, 0.45)` with `backdrop-filter: blur(8px)`.
 - **Dismiss Behavior:** Drag down by >80px or fast flick downward to dismiss.
@@ -434,9 +433,9 @@ On desktop, detail panels slide out as right drawers (`width: 520px`). On mobile
 ### 4.9 Apple-Style Notifications Dropdown / Sheet
 
 - **Placement:** Desktop popover anchored to bell icon; Mobile full bottom sheet or modal page.
-- **Card Separation:** Each notification is an isolated rounded card (`border-radius: 12px; background: #F8FAFC; border: 1px solid #E2E8F0;`).
+- **Card Separation:** Each notification is an isolated rounded card (`border-radius: var(--radius); background: #F8FAFC; border: 1px solid #E2E8F0;`).
 - **Unread Indicator:** A pulsating 8px royal blue dot (`#063669`).
-- **Icon Squircles:** 36 × 36 px icon box with `border-radius: 10px`:
+- **Icon Squircles:** 36 × 36 px icon box with `border-radius: var(--radius)`:
   - *Lead assigned:* Ice blue `#E0ECF8` with `#063669` icon
   - *Payment received / Won:* Green `#ECFDF5` with `#059669` icon
   - *Urgent task / Overdue:* Red `#FEF2F2` with `#DC2626` icon
@@ -474,7 +473,7 @@ TechGy CRM includes a built-in virtual call assistant with real-time audio visua
 #### B. Floating Minimized Call Bar
 When the agent navigates through other screens during an ongoing call, the call minimizes into a persistent floating island:
 - **Position:** Docked 16px above bottom navigation bar or screen bottom.
-- **Geometry:** Height 58px, padding `8px 16px`, border-radius `16px`, background `rgba(255, 255, 255, 0.96)`, backdrop blur `12px`.
+- **Geometry:** Height 58px, padding `8px 16px`, border-radius `var(--radius)`, background `rgba(255, 255, 255, 0.96)`, backdrop blur `12px`.
 - **Shadow:** `0 16px 40px rgba(6, 54, 105, 0.20)`.
 - **Components:** Mini avatar with live green status dot (`#10B981` with `@keyframes pulseGreenDot`), contact name, active timer ("03:12"), mini equalizer, and tap-to-maximize target.
 
@@ -541,6 +540,18 @@ All animations must maintain high frame rates (60fps to 120fps) and use hardware
 --ease-pop-in:       cubic-bezier(0.34, 1.56, 0.64, 1);
 --ease-standard:     cubic-bezier(0.4, 0.0, 0.2, 1);
 ```
+
+In code these live on `:root` in `src/index.css` as `--ease-out`, `--ease-spring`, `--dur-fast` (120ms), `--dur-base` (180ms) and `--dur-slow` (260ms).
+
+#### Micro-interactions (implemented)
+- **Buttons:** lift `-1px` on hover, press to `scale(0.97)`, leading icon springs to `scale(1.12)`.
+- **Cards:** clickable cards lift `2–3px`; KPI cards deepen their shadow; dashboard KPI numbers count up (`AnimatedNumber`).
+- **Popovers & menus:** drop in with a 4px slide + fade (`.ui-popover`); notification items stagger in.
+- **Header:** bell rings once on hover; the unread badge pops whenever its count changes.
+- **Sidebar:** menu icons nudge toward their label on hover.
+- **Forms & tables:** inputs animate their focus ring, checkboxes tick with a spring, table row hover fades in.
+- **Keyboard focus:** a 2px `--primary` outline appears for keyboard focus only (`:focus-visible`).
+- **Reduced motion:** `prefers-reduced-motion: reduce` disables all CSS motion, Framer Motion (`MotionConfig reducedMotion="user"`) and the GSAP helpers.
 
 ### 6.2 Keyframe Specifications
 

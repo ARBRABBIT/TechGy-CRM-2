@@ -38,3 +38,26 @@ npm run start
 ```bash
 npm run lint
 ```
+
+### Testing
+```bash
+npm test            # run once
+npm run test:watch  # re-run on change
+```
+Vitest + Testing Library (jsdom). Unit tests cover roles, permissions, validation and session storage; `src/App.test.jsx` drives the real app through login, logout, lead editing, assignment and deletion for each role.
+
+## Roles & Permissions
+
+Rules live in `src/utils/permissions.js` and are checked twice: the UI hides controls a role can't use, and every App handler re-checks before changing data.
+
+| | Sales Admin | Sales Head | Sales Executive |
+|---|---|---|---|
+| Leads visible | All | Own + team's | Assigned to them |
+| Create / edit leads | ✓ | ✓ | — |
+| Change status, notes, follow-ups, calls, email | ✓ | ✓ | ✓ |
+| Assign executives | ✓ | Own team only | — |
+| Junk / restore | ✓ | ✓ | — |
+| Delete, bulk import, assign sales heads | ✓ | — | — |
+| Team registry, Master Data | ✓ | — | — |
+
+These checks run in the browser only. A production backend must enforce the same rules on the server.

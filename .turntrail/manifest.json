@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "createdAt": "2026-10-13T10:28:14.828Z",
+  "projectRoot": "/Users/talha/Desktop/TechGy-CRM-2",
+  "sessions": [
+    {
+      "id": "native-claude-0a38fb5f-cb57-48fd-933e-ce89e7d998fc",
+      "provider": "anthropic",
+      "surface": "cli",
+      "path": "sessions/native-claude-0a38fb5f-cb57-48fd-933e-ce89e7d998fc.jsonl",
+      "turnCount": 2218,
+      "importedAt": "2026-10-13T10:28:15.032Z",
+      "sourcePath": "/Users/talha/.claude/projects/-Users-talha-Desktop-TechGy-CRM-2/0a38fb5f-cb57-48fd-933e-ce89e7d998fc.jsonl",
+      "sourceSize": 15350649,
+      "sourceMtimeMs": 1791885501717.0408,
+      "nativeSessionId": "0a38fb5f-cb57-48fd-933e-ce89e7d998fc",
+      "title": "App.jsx popups and animations",
+      "named": true
+    }
+  ],
+  "snapshots": [],
+  "exports": [],
+  "updatedAt": "2026-10-13T10:28:15.034Z"
+}
